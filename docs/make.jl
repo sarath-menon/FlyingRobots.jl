@@ -2,11 +2,11 @@ using FlyingRobots
 using Documenter
 
 import Downloads
-Downloads.download(
-    "https://raw.githubusercontent.com/JuliaDynamics/doctheme/master/build_docs_with_style.jl",
-    joinpath(@__DIR__, "styling/build_docs_with_style.jl")
-)
-include("styling/build_docs_with_style.jl")
+# Downloads.download(
+#     "https://raw.githubusercontent.com/JuliaDynamics/doctheme/master/build_docs_with_style.jl",
+#     joinpath(@__DIR__, "styling/build_docs_with_style.jl")
+# )
+# include("styling/build_docs_with_style.jl")
 
 DocMeta.setdocmeta!(FlyingRobots, :DocTestSetup, :(using FlyingRobots); recursive=true)
 
