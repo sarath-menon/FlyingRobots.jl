@@ -1,6 +1,6 @@
 name = "FlyingRobots"
 uuid = "a5b8b868-cd75-458d-a255-2d6ea83dac6d"
-authors = ["sarath-suresh"]
+authors = ["sarath-menon"]
 version = "1.0.0-DEV"
 
 [deps]

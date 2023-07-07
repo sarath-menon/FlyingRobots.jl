@@ -4,7 +4,7 @@ CurrentModule = FlyingRobots
 
 # FlyingRobots
 
-Documentation for [FlyingRobots](https://github.com/Sarath Suresh/FlyingRobots.jl).
+Documentation for [FlyingRobots](https://github.com/sarath-menon/FlyingRobots.jl).
 
 ```@index
 ```
