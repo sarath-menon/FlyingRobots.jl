@@ -24,6 +24,7 @@ Revise.track("src/dynamics/utilities.jl")
 Revise.track("src/dynamics/types.jl")
 Revise.track("src/dynamics/linearize.jl")
 Revise.track("src/dynamics/sim.jl")
+Revise.track("src/dynamics/plotting.jl")
 Revise.track("src/dynamics/trajectory_generation.jl")
 
 ## Create objects 
@@ -51,21 +52,21 @@ sys_c, sys_d, AB_symbolic = linearize_system(frmodel_params.Ts, x₀, quad_obj, 
 
 ## Discrete time linear simulation
 
-let
+# let
 
-    x_final = SA_F64[1, 0, 0, 0, 0, 0]
+#     x_final = SA_F64[1, 0, 0, 0, 0, 0]
 
-    # Simulation
+#     # Simulation
 
-    u_l(x, t) = -dlqr_ctrl.K * (x - x_final)
-    t = 0:frmodel_params.Ts:5              # Time vector
-    x0 = SA_F64[2, 1, 0, 0, 0, 0]               # Initial condition
+#     u_l(x, t) = -dlqr_ctrl.K * (x - x_final)
+#     t = 0:frmodel_params.Ts:5              # Time vector
+#     x0 = SA_F64[2, 1, 0, 0, 0, 0]               # Initial condition
 
-    y_dl, t, x_dl, uout = lsim(sys_d, u_l, t, x0=x0)
+#     y_dl, t, x_dl, uout = lsim(sys_d, u_l, t, x0=x0)
 
-    quad_2d_plot_lsim(t, x_dl, uout)
+#     quad_2d_plot_lsim(t, x_dl, uout)
 
-end
+# end
 
 
 ## Non-linear Simulation with trajectory tracking using LQR
@@ -76,7 +77,7 @@ control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true) do integra
     (; m, l, I_xx, safety_box, K, df) = integrator.p
 
     # Extract the state 
-    X = integrator.u[1:frmodel_params.nx]
+    X::Vector{Float64} = integrator.u[1:frmodel_params.nx]
 
     X_req = generate_trajectory(circle_trajec, quad_params, integrator.t)
 
@@ -88,8 +89,8 @@ control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true) do integra
     #println("X_error: $(X_error)")
     #println("State: $(X)")
 
-    f_1 = f_1_equilibirum + U[1]
-    f_2 = f_2_equilibirum + U[2]
+    f_1::Float64 = f_1_equilibirum + U[1]
+    f_2::Float64 = f_2_equilibirum + U[2]
 
     # constrain the control input
     f_1 = clamp(f_1, quad_obj.motor_left.thrust_min, quad_obj.motor_left.thrust_max)
@@ -153,7 +154,7 @@ sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 # df = DataFrame(sol)
 CSV.write("logs/log1.csv", df)
 
-#quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
+quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
 ## benchmarking 
 

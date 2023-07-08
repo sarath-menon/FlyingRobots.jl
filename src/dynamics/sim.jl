@@ -55,12 +55,12 @@ function affect!(integrator)
     # Extract the state 
     X::Vector{Float64} = integrator.u[1:frmodel_params.nx]
 
-    y::Float64 = X[1]
-    z::Float64 = X[2]
-    θ::Float64 = X[3]
-    ẏ::Float64 = X[4]
-    ż::Float64 = X[5]
-    θ̇::Float64 = X[6]
+    y = X[1]
+    z = X[2]
+    θ = X[3]
+    ẏ = X[4]
+    ż = X[5]
+    θ̇ = X[6]
 
     # # Limit operating space 
     # if z > params.safety_box.z_max
