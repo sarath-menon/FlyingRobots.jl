@@ -85,4 +85,4 @@ function affect!(integrator)
 
 end
 
-cb = DiscreteCallback(condition, affect!)
+cb = DiscreteCallback(condition, affect!, save_positions=(false, true))

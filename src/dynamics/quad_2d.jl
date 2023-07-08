@@ -99,7 +99,7 @@ control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_posit
     #Update the control-signal
     integrator.u[frmodel_params.nx+1:end] .= SA_F64[f_1, f_2]
 
-    log_vars = hcat(integrator.t, X', X_req', f_1, f_2)
+    log_vars = reduce(hcat, [integrator.t, X', X_req', f_1, f_2])
 
     push!(df, log_vars)
 end
