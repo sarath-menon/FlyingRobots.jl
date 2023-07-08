@@ -160,3 +160,4 @@ quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
 @timev solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 
+@timev generate_trajectory(circle_trajec, quad_params, sol.t);

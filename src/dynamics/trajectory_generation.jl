@@ -26,7 +26,7 @@ function generate_trajectory(trajec_params::CircleTrajectory, quad_params::Named
     θ::Float64 = θ_func(t)
     θ̇::Float64 = ForwardDiff.derivative(θ_func, t) # constant value (precomputed)
 
-    return [y, z, θ, ẏ, ż, θ̇]
+    return SA_F64[y, z, θ, ẏ, ż, θ̇]
 end
 
 function generate_trajectory(trajec_params::CircleTrajectory, quad_params::NamedTuple, tspan::Tuple, dt::Float64)
