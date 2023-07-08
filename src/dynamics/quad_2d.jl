@@ -13,10 +13,10 @@ using CSV, DataFrames
 
 GLMakie.activate!(inline=false)
 
-const g::Float64 = 9.81;
+const g::Float64 = -9.81;
 
-include("utilities.jl")
 include("types.jl")
+include("utilities.jl")
 include("linearize.jl")
 include("plotting.jl")
 include("sim.jl")
@@ -78,16 +78,6 @@ end
 
 ## Trajectory generator test 
 
-abstract type Trajectory end
-
-struct CircleTrajectory1 <: Trajectory
-    r::Float64
-    ω::Float64
-    y₀::Float64
-    z₀::Float64
-end
-
-CircleTrajectory = CircleTrajectory1
 
 
 tspan = (0.0, 100.0)
@@ -180,7 +170,7 @@ df = DataFrame(logging_vars)
 circle_trajec = create_frobj(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z₀=2.0)
 
 # parameters
-quad_params = (; m=quad_obj.m, g=-9.81, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=K, df=df)
+quad_params = (; m=quad_obj.m, g=-9.81, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl.K, df=df)
 
 tspan = (0.0, 100.0);
 

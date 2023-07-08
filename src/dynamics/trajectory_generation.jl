@@ -20,7 +20,7 @@ function generate_trajectory(trajec_params::CircleTrajectory, quad_params::Named
     ÿ_func(r::Real, ω::Real, t::Real) = -r * cos(ω * t) * (ω^2)
     z̈_func(r::Real, ω::Real, t::Real) = -r * sin(ω * t) * (ω^2)
 
-    θ_func(t::Real) = atan(-m * ÿ_func(r, ω, t), m * (z̈_func(r, ω, t) + g))
+    θ_func(t::Real) = atan(-m * ÿ_func(r, ω, t), m * (z̈_func(r, ω, t) - g))
 
     # compute θ, θ̇ using differential flatness
     θ::Float64 = θ_func(t)

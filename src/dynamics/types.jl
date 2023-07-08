@@ -58,3 +58,19 @@ struct LQRController1
 end
 
 LQRController = LQRController1
+
+
+#------------------------------------------------------------------
+abstract type Trajectory end
+
+struct CircleTrajectory1 <: Trajectory
+    r::Float64
+    ω::Float64
+    y₀::Float64
+    z₀::Float64
+end
+
+CircleTrajectory = CircleTrajectory1
+
+
+#------------------------------------------------------------------

@@ -1,3 +1,6 @@
+# 2D rotation matrix
+R_2D(θ::Float64) = SA_F64[cos(θ) -sin(θ); sin(θ) cos(θ)];
+
 function create_frobj(type_; kwargs...)
     params_tuple = values(kwargs)
     structfromnt(type_, params_tuple)
