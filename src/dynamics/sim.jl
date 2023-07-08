@@ -1,7 +1,7 @@
 function quad_2d_dynamics(X::Vector{Float64}, U::Vector{Float64}, params::NamedTuple)
 
     # extract the parameters
-    m, g, l, I_xx = params
+    m, l, I_xx = params
 
     g_vec = SA_F64[0; g] # use static array
 

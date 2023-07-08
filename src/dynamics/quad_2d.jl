@@ -106,7 +106,7 @@ control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true) do integra
     nx = 6
 
     # Extract the parameters
-    (; m, g, l, I_xx, safety_box, K, df) = integrator.p
+    (; m, l, I_xx, safety_box, K, df) = integrator.p
 
     # Extract the state 
     X = integrator.u[1:frmodel_params.nx]
@@ -170,7 +170,7 @@ df = DataFrame(logging_vars)
 circle_trajec = create_frobj(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z₀=2.0)
 
 # parameters
-quad_params = (; m=quad_obj.m, g=-9.81, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl.K, df=df)
+quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl.K, df=df)
 
 tspan = (0.0, 100.0);
 
