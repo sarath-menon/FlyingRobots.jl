@@ -33,7 +33,7 @@ function quad_2d_dynamics(X::Vector{Float64}, U::Vector{Float64}, params::NamedT
 end
 
 #Define the problem
-function quad_2d(d_state, state, params, t)
+function quad_2d(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
 
     # extract the state
     X = state[1:frmodel_params.nx]
@@ -53,7 +53,7 @@ condition(u, t, integrator) = true
 function affect!(integrator)
 
     # Extract the state 
-    X = integrator.u[1:frmodel_params.nx]
+    X::Vector{Float64} = integrator.u[1:frmodel_params.nx]
 
     y::Float64 = X[1]
     z::Float64 = X[2]

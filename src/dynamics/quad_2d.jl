@@ -48,12 +48,6 @@ const f_2_equilibirum::Float64 = thrust_equilibirum / 2
 
 sys_c, sys_d, AB_symbolic = linearize_system(frmodel_params.Ts, x₀, quad_obj, [f_1_equilibirum, f_2_equilibirum]);
 
-##  Create LQR controller
-
-Q = Diagonal([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-R = Diagonal([1.0, 1.0])
-
-dlqr_ctrl = create_lqr_controller(Q, R; params=frmodel_params, sys=sys_d)
 
 ## Discrete time linear simulation
 
@@ -74,34 +68,9 @@ let
 end
 
 
-## Trajectory generator test 
-
-
-
-tspan = (0.0, 100.0)
-dt = frmodel_params.Ts
-
-circle_trajec = create_frobj(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z₀=2.0)
-quad_params = (; m=1.0)
-
-(y_vec, z_vec, θ_vec, ẏ_vec, ż_vec, θ̇_vec) = generate_trajectory(circle_trajec, quad_params, tspan, dt);
-
-# plot trajectory
-fig = Figure()
-ax = Axis(fig[1, 1],
-    aspect=1,
-    title="Circular trajecory in the Y-Z Plane",
-    xlabel="Y Axis",
-    ylabel="Z Axis"
-)
-lines!(ax, y_vec, z_vec)
-
-display(fig)
-
 ## Non-linear Simulation with trajectory tracking using LQR
 
 control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true) do integrator
-    nx = 6
 
     # Extract the parameters
     (; m, l, I_xx, safety_box, K, df) = integrator.p
@@ -126,13 +95,8 @@ control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true) do integra
     f_1 = clamp(f_1, quad_obj.motor_left.thrust_min, quad_obj.motor_left.thrust_max)
     f_2 = clamp(f_2, quad_obj.motor_right.thrust_min, quad_obj.motor_right.thrust_max)
 
-    #println("Control: $(U)")
-
     #Update the control-signal
     integrator.u[frmodel_params.nx+1:end] .= SA_F64[f_1, f_2]
-
-    # logging
-    # timestamp= Float64[], x = Float64[], y = Float64[], z = Float64[], x_dot = Float64[], y_dot = Float64[], z_dot = Float64[], f_1 = Float64[], f_2 = Float64[]
 
     log_vars = hcat(integrator.t, X', X_req', f_1, f_2)
 
@@ -142,11 +106,10 @@ end
 #Initial Conditions
 x₀ = Pose2D(3, 1, 0, 0, 0, 0)
 
-# #Initial Conditions
-# X_final = [0,0,0,0,0,0]
-
-# # compute LQR controller matrix K
-# K = get_dlqr_gain(; Q=[10.0, 10.0, 5.0, 1.0, 1.0, 1.0], R=[1.0, 1.0])
+##  Create LQR controller
+Q = Diagonal([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+R = Diagonal([1.0, 1.0])
+dlqr_ctrl = create_lqr_controller(Q, R; params=frmodel_params, sys=sys_d)
 
 # for logging
 state_vars = (y=Float64[], z=Float64[], θ=Float64[],
@@ -190,5 +153,9 @@ sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 # df = DataFrame(sol)
 CSV.write("logs/log1.csv", df)
 
-quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
+#quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
+
+## benchmarking 
+
+@timev solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 
