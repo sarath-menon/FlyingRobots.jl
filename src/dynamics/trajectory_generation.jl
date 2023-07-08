@@ -1,4 +1,4 @@
-function generate_circle_trajectory(trajec_params::NamedTuple, quad_params::NamedTuple, t::Float64)
+function generate_trajectory(trajec_params::NamedTuple, quad_params::NamedTuple, t::Float64)
     m::Float64 = quad_params.m
 
     r::Float64 = trajec_params.r
@@ -30,7 +30,7 @@ function generate_circle_trajectory(trajec_params::NamedTuple, quad_params::Name
     return [y, z, θ, ẏ, ż, θ̇]
 end
 
-function generate_circle_trajectory(trajec_params::NamedTuple, quad_params::NamedTuple, tspan::Tuple, dt::Float64)
+function generate_trajectory(trajec_params::NamedTuple, quad_params::NamedTuple, tspan::Tuple, dt::Float64)
     y_vec = Float64[]
     z_vec = Float64[]
     θ_vec = Float64[]
@@ -39,7 +39,7 @@ function generate_circle_trajectory(trajec_params::NamedTuple, quad_params::Name
     θ̇_vec = Float64[]
 
     for t in tspan[1]:dt:tspan[2]
-        (y, z, θ, ẏ, ż, θ̇) = generate_circle_trajectory(trajec_params, quad_params, t)
+        (y, z, θ, ẏ, ż, θ̇) = generate_trajectory(trajec_params, quad_params, t)
         push!(y_vec, y)
         push!(z_vec, z)
         push!(θ_vec, θ)
@@ -51,7 +51,7 @@ function generate_circle_trajectory(trajec_params::NamedTuple, quad_params::Name
     return [y_vec, z_vec, θ_vec, ẏ_vec, ż_vec, θ̇_vec]
 end
 
-function generate_circle_trajectory(trajec_params::NamedTuple, quad_params::NamedTuple, t_vec::Vector{Float64})
+function generate_trajectory(trajec_params::NamedTuple, quad_params::NamedTuple, t_vec::Vector{Float64})
     y_vec = Float64[]
     z_vec = Float64[]
     θ_vec = Float64[]
@@ -60,7 +60,7 @@ function generate_circle_trajectory(trajec_params::NamedTuple, quad_params::Name
     θ̇_vec = Float64[]
 
     for t in t_vec
-        (y, z, θ, ẏ, ż, θ̇) = generate_circle_trajectory(trajec_params, quad_params, t)
+        (y, z, θ, ẏ, ż, θ̇) = generate_trajectory(trajec_params, quad_params, t)
         push!(y_vec, y)
         push!(z_vec, z)
         push!(θ_vec, θ)

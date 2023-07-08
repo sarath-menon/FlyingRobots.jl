@@ -94,7 +94,7 @@ dt = frmodel_params.Ts
 circle_trajec = create_frobj(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z₀=2.0)
 quad_params = (; m=1.0)
 
-(y_vec, z_vec, θ_vec, ẏ_vec, ż_vec, θ̇_vec) = generate_circle_trajectory(circle_trajec, quad_params, tspan, dt);
+(y_vec, z_vec, θ_vec, ẏ_vec, ż_vec, θ̇_vec) = generate_trajectory(circle_trajec, quad_params, tspan, dt);
 
 # plot trajectory
 fig = Figure()
@@ -119,7 +119,7 @@ control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true) do integra
     # Extract the state 
     X = integrator.u[1:frmodel_params.nx]
 
-    X_req = generate_circle_trajectory(circle_trajec_params, quad_params, integrator.t)
+    X_req = generate_trajectory(circle_trajec, quad_params, integrator.t)
 
     # compute control input
     X_error = X - X_req
@@ -175,7 +175,7 @@ df = DataFrame(logging_vars)
 
 
 # params
-circle_trajec_params = (r=1, ω=0.2 * π, y₀=2, z₀=2, g=-9.81)
+circle_trajec = (r=1, ω=0.2 * π, y₀=2, z₀=2, g=-9.81)
 
 # parameters
 quad_params = (; m=quad_obj.m, g=-9.81, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=K, df=df)
@@ -194,7 +194,7 @@ prob = ODEProblem(quad_2d, initial_conditions, tspan, quad_params, callback=cb_s
 sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 
 # compute entire reference trajectory at sol.t timesteps
-(y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_circle_trajectory(circle_trajec_params, quad_params, sol.t)
+(y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_params, sol.t)
 
 # save solution to csv file
 # df = DataFrame(sol)
