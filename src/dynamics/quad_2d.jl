@@ -11,12 +11,20 @@ using ModelingToolkit
 
 using CSV, DataFrames
 
+const g::Float64 = 9.81;
+
 include("utilities.jl")
 include("types.jl")
 include("linearize.jl")
 include("plotting.jl")
 include("sim.jl")
 include("trajectory_generation.jl")
+
+Revise.track("src/dynamics/utilities.jl")
+Revise.track("src/dynamics/types.jl")
+Revise.track("src/dynamics/linearize.jl")
+Revise.track("src/dynamics/sim.jl")
+Revise.track("src/dynamics/trajectory_generation.jl")
 
 ## Create objects 
 
@@ -38,7 +46,7 @@ const thrust_equilibirum::Float64 = 9.81;
 const f_1_equilibirum::Float64 = thrust_equilibirum / 2
 const f_2_equilibirum::Float64 = thrust_equilibirum / 2
 
-sys_c, sys_d, AB_symbolic = linearize_system(sim_params.Ts, x₀, quad_obj, [f_1_equilibirum, f_2_equilibirum]);
+sys_c, sys_d, AB_symbolic = linearize_system(frmodel_params.Ts, x₀, quad_obj, [f_1_equilibirum, f_2_equilibirum]);
 
 ##  Create LQR controller
 
@@ -56,7 +64,7 @@ let
     # Simulation
 
     u_l(x, t) = -dlqr_ctrl.K * (x - x_final)
-    t = 0:sim_params.Ts:5              # Time vector
+    t = 0:frmodel_params.Ts:5              # Time vector
     x0 = SA_F64[2, 1, 0, 0, 0, 0]               # Initial condition
 
     y_dl, t, x_dl, uout = lsim(sys_d, u_l, t, x0=x0)
@@ -65,16 +73,51 @@ let
 
 end
 
+
+## Trajectory generator test 
+
+abstract type Trajectory end
+
+struct CircleTrajectory1 <: Trajectory
+    r::Float64
+    ω::Float64
+    y₀::Float64
+    z₀::Float64
+end
+
+CircleTrajectory = CircleTrajectory1
+
+
+tspan = (0.0, 100.0)
+dt = frmodel_params.Ts
+
+circle_trajec = create_frobj(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z₀=2.0)
+quad_params = (; m=1.0)
+
+(y_vec, z_vec, θ_vec, ẏ_vec, ż_vec, θ̇_vec) = generate_circle_trajectory(circle_trajec, quad_params, tspan, dt);
+
+# plot trajectory
+fig = Figure()
+ax = Axis(fig[1, 1],
+    aspect=1,
+    title="Circular trajecory in the Y-Z Plane",
+    xlabel="Y Axis",
+    ylabel="Z Axis"
+)
+lines!(ax, y_vec, z_vec)
+
+display(fig)
+
 ## Non-linear Simulation with trajectory tracking using LQR
 
-control_cb = PeriodicCallback(sim_params.Ts, initial_affect=true) do integrator
+control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true) do integrator
     nx = 6
 
     # Extract the parameters
     (; m, g, l, I_xx, safety_box, K, df) = integrator.p
 
     # Extract the state 
-    X = integrator.u[1:sim_params.nx]
+    X = integrator.u[1:frmodel_params.nx]
 
     X_req = generate_circle_trajectory(circle_trajec_params, quad_params, integrator.t)
 
@@ -96,7 +139,7 @@ control_cb = PeriodicCallback(sim_params.Ts, initial_affect=true) do integrator
     #println("Control: $(U)")
 
     #Update the control-signal
-    integrator.u[sim_params.nx+1:end] .= SA_F64[f_1, f_2]
+    integrator.u[frmodel_params.nx+1:end] .= SA_F64[f_1, f_2]
 
     # logging
     # timestamp= Float64[], x = Float64[], y = Float64[], z = Float64[], x_dot = Float64[], y_dot = Float64[], z_dot = Float64[], f_1 = Float64[], f_2 = Float64[]
