@@ -1,3 +1,5 @@
+include("constants.jl")
+
 struct BLDCMotor1
     thrust_min::Float64
     thrust_max::Float64

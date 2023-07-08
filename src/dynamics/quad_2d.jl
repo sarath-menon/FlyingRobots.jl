@@ -13,8 +13,6 @@ using CSV, DataFrames
 
 GLMakie.activate!(inline=false)
 
-const g::Float64 = -9.81;
-
 include("types.jl")
 include("utilities.jl")
 include("linearize.jl")
