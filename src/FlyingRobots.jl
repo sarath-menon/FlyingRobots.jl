@@ -1,8 +1,22 @@
 module FlyingRobots
 using Revise
 
-# Write your package code here.
+# Use the README as the module docs
+@doc let
+    path = joinpath(dirname(@__DIR__), "README.md")
+    include_dependency(path)
+    read(path, String)
+end FlyingRobots
 
+
+
+include("dynamics/quad_2d.jl")
+
+"""
+    greet()
+
+To greet new users
+"""
 greet() = "hello"
 
 export greet

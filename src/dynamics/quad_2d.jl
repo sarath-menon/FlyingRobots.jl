@@ -1,0 +1,169 @@
+using Revise
+using LinearAlgebra
+using GLMakie
+using ControlSystems
+using DifferentialEquations
+using StaticArrays
+using BenchmarkTools
+using ForwardDiff
+using NamedTupleTools
+using ModelingToolkit
+
+using CSV, DataFrames
+
+include("utilities.jl")
+include("types.jl")
+include("linearize.jl")
+include("plotting.jl")
+include("sim.jl")
+include("trajectory_generation.jl")
+
+## Create objects 
+
+motor_left = BLDCMotor(0, 12.5);
+motor_right = BLDCMotor(0, 12.5);
+
+quad_obj = Quad2d(1.0, 0.1, 0.003, motor_left, motor_right);
+sim_params = SimParams(6, 2, 3, 0.01);
+
+safety_box = create_safety_box(x_low=-10, x_high=10, y_low=-10, y_high=10, z_low=0, z_high=20);
+
+## Linearization 
+
+# equilibrium point
+x₀ = Pose2D(2, 1, 0, 0, 0, 0)
+
+const thrust_equilibirum::Float64 = 9.81;
+
+const f_1_equilibirum::Float64 = thrust_equilibirum / 2
+const f_2_equilibirum::Float64 = thrust_equilibirum / 2
+
+sys_c, sys_d, AB_symbolic = linearize_system(sim_params.Ts, x₀, quad_obj, [f_1_equilibirum, f_2_equilibirum]);
+
+##  Create LQR controller
+
+function get_dlqr_gain(; Q::Vector{Float64}, R::Vector{Float64})
+    Q = Diagonal(Q) # Weighting matrix for state
+    R = Diagonal(R) # Weighting matrix for input
+
+    # Compute LQR gain matrix
+    K = SMatrix{2,6}(lqr(sys_d, Q, R))
+
+    return K
+end
+
+
+const K = get_dlqr_gain(; Q=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0], R=[1.0, 1.0])
+
+## Discrete time linear simulation
+
+let
+
+    x_final = SA_F64[1, 0, 0, 0, 0, 0]
+
+    # Simulation
+
+    u_l(x, t) = -K * (x - x_final)
+    t = 0:sim_params.Ts:5              # Time vector
+    x0 = SA_F64[2, 1, 0, 0, 0, 0]               # Initial condition
+
+    y_dl, t, x_dl, uout = lsim(sys_d, u_l, t, x0=x0)
+
+    quad_2d_plot_lsim(t, x_dl, uout)
+
+end
+
+## Non-linear Simulation with trajectory tracking using LQR
+
+control_cb = PeriodicCallback(sim_params.Ts, initial_affect=true) do integrator
+    nx = 6
+
+    # Extract the parameters
+    (; m, g, l, I_xx, safety_box, K, df) = integrator.p
+
+    # Extract the state 
+    X = integrator.u[1:sim_params.nx]
+
+    X_req = generate_circle_trajectory(circle_trajec_params, quad_params, integrator.t)
+
+    # compute control input
+    X_error = X - X_req
+    U = -K * X_error
+
+    # println("X_req: $(X_req)")
+    #println("X_error: $(X_error)")
+    #println("State: $(X)")
+
+    f_1 = f_1_equilibirum + U[1]
+    f_2 = f_2_equilibirum + U[2]
+
+    # constrain the control input
+    f_1 = clamp(f_1, quad_obj.motor_left.thrust_min, quad_obj.motor_left.thrust_max)
+    f_2 = clamp(f_2, quad_obj.motor_right.thrust_min, quad_obj.motor_right.thrust_max)
+
+    #println("Control: $(U)")
+
+    #Update the control-signal
+    integrator.u[sim_params.nx+1:end] .= SA_F64[f_1, f_2]
+
+    # logging
+    # timestamp= Float64[], x = Float64[], y = Float64[], z = Float64[], x_dot = Float64[], y_dot = Float64[], z_dot = Float64[], f_1 = Float64[], f_2 = Float64[]
+
+    log_vars = hcat(integrator.t, X', X_req', f_1, f_2)
+
+    push!(df, log_vars)
+end
+
+#Initial Conditions
+x₀ = Pose2D(3, 1, 0, 0, 0, 0)
+
+# #Initial Conditions
+# X_final = [0,0,0,0,0,0]
+
+# # compute LQR controller matrix K
+# K = get_dlqr_gain(; Q=[10.0, 10.0, 5.0, 1.0, 1.0, 1.0], R=[1.0, 1.0])
+
+# for logging
+state_vars = (y=Float64[], z=Float64[], θ=Float64[],
+    y_dot=Float64[], z_dot=Float64[], θ_dot=Float64[])
+
+trajec_vars = (y_req=Float64[], z_req=Float64[], θ_req=Float64[],
+    y_dot_req=Float64[], z_dot_req=Float64[], θ_dot_req=Float64[])
+
+control_vars = (f_1=Float64[], f_2=Float64[])
+
+time_vars = (; timestamp=Float64[])
+
+logging_vars = merge(time_vars, state_vars, trajec_vars, control_vars)
+
+df = DataFrame(logging_vars)
+
+
+# params
+circle_trajec_params = (r=1, ω=0.2 * π, y₀=2, z₀=2, g=-9.81)
+
+# parameters
+quad_params = (; m=quad_obj.m, g=-9.81, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=K, df=df)
+
+tspan = (0.0, 100.0);
+
+initial_state = [x₀.y, x₀.z, x₀.θ, x₀.ẏ, x₀.ż, x₀.θ̇]; # state
+u₀ = [0, 0]; # control
+
+initial_conditions = vcat(initial_state, u₀)
+
+#Pass to solvers
+cb_set = CallbackSet(control_cb, cb)
+
+prob = ODEProblem(quad_2d, initial_conditions, tspan, quad_params, callback=cb_set);
+sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
+
+# compute entire reference trajectory at sol.t timesteps
+(y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_circle_trajectory(circle_trajec_params, quad_params, sol.t)
+
+# save solution to csv file
+# df = DataFrame(sol)
+CSV.write("logs/log1.csv", df)
+
+quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
+
