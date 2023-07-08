@@ -71,7 +71,7 @@ sys_c, sys_d, AB_symbolic = linearize_system(frmodel_params.Ts, x₀, quad_obj, 
 
 ## Non-linear Simulation with trajectory tracking using LQR
 
-control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true) do integrator
+control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_positions=(false, true)) do integrator
 
     # Extract the parameters
     (; m, l, I_xx, safety_box, K, df) = integrator.p
