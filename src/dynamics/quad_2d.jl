@@ -20,14 +20,14 @@ include("trajectory_generation.jl")
 
 ## Create objects 
 
-motor_left = BLDCMotor(0, 12.5);
-motor_right = BLDCMotor(0, 12.5);
+motor_left = create_frobj(BLDCMotor; thrust_min=0.0, thrust_max=12.5)
+motor_right = create_frobj(BLDCMotor; thrust_min=0.0, thrust_max=12.5)
 
-quad_obj = Quad2d(1.0, 0.1, 0.003, motor_left, motor_right);
-sim_params = SimParams(6, 2, 3, 0.01);
+quad_obj = create_frobj(Quad2d; m=1.0, L=0.1, I_xx=0.003, motor_left, motor_right);
 
-safety_box = create_safety_box(x_low=-10, x_high=10, y_low=-10, y_high=10, z_low=0, z_high=20);
+frmodel_params = create_frobj(FrModel; nx=6, nu=2, ny=3, Ts=0.01)
 
+safety_box = create_frobj(SafetyBox; x_low=-10.0, x_high=10.0, y_low=-10.0, y_high=10.0, z_low=0.0, z_high=20.0);
 ## Linearization 
 
 # equilibrium point
@@ -42,18 +42,10 @@ sys_c, sys_d, AB_symbolic = linearize_system(sim_params.Ts, x₀, quad_obj, [f_1
 
 ##  Create LQR controller
 
-function get_dlqr_gain(; Q::Vector{Float64}, R::Vector{Float64})
-    Q = Diagonal(Q) # Weighting matrix for state
-    R = Diagonal(R) # Weighting matrix for input
+Q = Diagonal([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+R = Diagonal([1.0, 1.0])
 
-    # Compute LQR gain matrix
-    K = SMatrix{2,6}(lqr(sys_d, Q, R))
-
-    return K
-end
-
-
-const K = get_dlqr_gain(; Q=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0], R=[1.0, 1.0])
+dlqr_ctrl = create_lqr_controller(Q, R; params=frmodel_params, sys=sys_d)
 
 ## Discrete time linear simulation
 
@@ -63,7 +55,7 @@ let
 
     # Simulation
 
-    u_l(x, t) = -K * (x - x_final)
+    u_l(x, t) = -dlqr_ctrl.K * (x - x_final)
     t = 0:sim_params.Ts:5              # Time vector
     x0 = SA_F64[2, 1, 0, 0, 0, 0]               # Initial condition
 

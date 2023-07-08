@@ -30,23 +30,31 @@ end
 
 Pose2D = Pose2D1
 #--------------------------------------------------------------------------
-struct SimParams2
-    nx::Int8
-    nu::Int8
-    ny::Int8
+struct FrModel2
+    nx::Int
+    nu::Int
+    ny::Int
     Ts::Float64
 
 end
-SimParams = SimParams2
+FrModel = FrModel2
 #--------------------------------------------------------------------------
-struct SafetyBox2
-    x_max::Float64
-    y_max::Float64
-    z_max::Float64
+struct SafetyBox5
+    x_low::Float64
+    x_high::Float64
 
-    x_min::Float64
-    y_min::Float64
-    z_min::Float64
+    y_low::Float64
+    y_high::Float64
 
+    z_low::Float64
+    z_high::Float64
 end
-SafetyBox = SafetyBox2
+SafetyBox = SafetyBox5
+
+#------------------------------------------------------------------
+
+struct LQRController1
+    K::SMatrix
+end
+
+LQRController = LQRController1
