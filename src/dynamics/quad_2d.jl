@@ -97,11 +97,10 @@ control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_posit
     f_2 = clamp(f_2, quad_obj.motor_right.thrust_min, quad_obj.motor_right.thrust_max)
 
     #Update the control-signal
+    U = [f_1, f_2]
     integrator.u[frmodel_params.nx+1:end] .= SA_F64[f_1, f_2]
 
-    log_vars = reduce(hcat, [integrator.t, X', X_req', f_1, f_2])
-
-    push!(df, log_vars)
+    push!(df, (integrator.t, X, X_req, U))
 end
 
 #Initial Conditions
@@ -112,18 +111,20 @@ Q = Diagonal([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
 R = Diagonal([1.0, 1.0])
 dlqr_ctrl = create_lqr_controller(Q, R; params=frmodel_params, sys=sys_d)
 
-# for logging
-state_vars = (y=Float64[], z=Float64[], θ=Float64[],
-    y_dot=Float64[], z_dot=Float64[], θ_dot=Float64[])
+# # for logging
+# state_vars = (y=Float64[], z=Float64[], θ=Float64[],
+#     y_dot=Float64[], z_dot=Float64[], θ_dot=Float64[])
 
-trajec_vars = (y_req=Float64[], z_req=Float64[], θ_req=Float64[],
-    y_dot_req=Float64[], z_dot_req=Float64[], θ_dot_req=Float64[])
+# trajec_vars = (y_req=Float64[], z_req=Float64[], θ_req=Float64[],
+#     y_dot_req=Float64[], z_dot_req=Float64[], θ_dot_req=Float64[])
 
-control_vars = (f_1=Float64[], f_2=Float64[])
+# control_vars = (f_1=Float64[], f_2=Float64[])
 
-time_vars = (; timestamp=Float64[])
+# time_vars = (; timestamp=Float64[])
 
-logging_vars = merge(time_vars, state_vars, trajec_vars, control_vars)
+# logging_vars = merge(time_vars, state_vars, trajec_vars, control_vars)
+
+logging_vars = DataFrame(timestep=Float64[], X=Vector{Float64}[], X_required=Vector{Float64}[], required=Vector{Float64}[])
 
 df = DataFrame(logging_vars)
 
