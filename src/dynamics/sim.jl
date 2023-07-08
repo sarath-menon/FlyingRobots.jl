@@ -29,7 +29,7 @@ function quad_2d_dynamics(X::Vector{Float64}, U::Vector{Float64}, params::NamedT
     # rotational E.O.M
     θ̈ = τ / I_xx
 
-    return (ẏ, ż, θ̇, ÿ, z̈, θ̈)
+    return SA_F64[ẏ, ż, θ̇, ÿ, z̈, θ̈]
 end
 
 #Define the problem
