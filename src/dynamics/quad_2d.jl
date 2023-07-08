@@ -11,6 +11,8 @@ using ModelingToolkit
 
 using CSV, DataFrames
 
+GLMakie.activate!(inline=false)
+
 const g::Float64 = 9.81;
 
 include("utilities.jl")
@@ -175,7 +177,7 @@ df = DataFrame(logging_vars)
 
 
 # params
-circle_trajec = (r=1, ω=0.2 * π, y₀=2, z₀=2, g=-9.81)
+circle_trajec = create_frobj(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z₀=2.0)
 
 # parameters
 quad_params = (; m=quad_obj.m, g=-9.81, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=K, df=df)
