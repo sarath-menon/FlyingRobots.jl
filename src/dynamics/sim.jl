@@ -36,10 +36,10 @@ end
 function quad_2d(d_state, state, params, t)
 
     # extract the state
-    X = state[1:sim_params.nx]
+    X = state[1:frmodel_params.nx]
 
     # extract the control input
-    U = state[sim_params.nx+1:end]
+    U = state[frmodel_params.nx+1:end]
 
     (ẏ, ż, θ̇, ÿ, z̈, θ̈) = quad_2d_dynamics(X, U, params)
 
@@ -53,7 +53,7 @@ condition(u, t, integrator) = true
 function affect!(integrator)
 
     # Extract the state 
-    X = integrator.u[1:sim_params.nx]
+    X = integrator.u[1:frmodel_params.nx]
 
     y::Float64 = X[1]
     z::Float64 = X[2]
