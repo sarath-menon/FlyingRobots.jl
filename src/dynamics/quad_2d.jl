@@ -51,6 +51,9 @@ sys_c, sys_d, AB_symbolic = linearize_system(frmodel_params.Ts, x₀, quad_obj, 
 
 ## Non-linear Simulation with trajectory tracking using LQR
 
+# initialize plot
+quad2d_plot = quad2d_plot_initialize();
+
 control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_positions=(false, true)) do integrator
 
     # Extract the parameters
@@ -125,10 +128,13 @@ sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 
 # save solution to csv file
 
-quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
+quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req);
 
 ## benchmarking 
 @time solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
+
+fig = Figure(resolution=(1200, 600))
+@time quad_2d_plot_normal(fig, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
 ## Trajectory generator benchmarking 
 
@@ -144,3 +150,8 @@ n_states = 6
 trajectory_matrix = zeros(n_timesteps, n_states)
 t_vec = rand(n_timesteps)
 @time generate_trajectory!(circle_trajec, quad_obj, trajectory_matrix, t_vec);
+
+
+
+
+@time quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req);
