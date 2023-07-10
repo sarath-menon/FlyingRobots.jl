@@ -54,7 +54,7 @@ sys_c, sys_d, AB_symbolic = linearize_system(frmodel_params.Ts, x₀, quad_obj, 
 control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_positions=(false, true)) do integrator
 
     # # Extract the parameters
-    # (; m, l, I_xx, safety_box, K, df) = integrator.p
+    # (; m, l, I_xx, safety_box, K) = integrator.p
 
     # # Extract the state 
     # X::Vector{Float64} = integrator.u[1:frmodel_params.nx]
@@ -80,7 +80,6 @@ control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_posit
     # U = [f_1, f_2]
     # integrator.u[frmodel_params.nx+1:end] .= SA_F64[f_1, f_2]
 
-    # push!(df, (integrator.t, X, X_req, U))
 end
 
 #Initial Conditions
@@ -96,9 +95,6 @@ n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
 n_cols = 3
 log_matrix = zeros(n_rows, n_cols)
 params = (; log_matrix=log_matrix)
-
-
-df = DataFrame(logging_vars)
 
 
 # params
@@ -128,8 +124,6 @@ sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 #(y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_params, sol.t)
 
 # save solution to csv file
-# df = DataFrame(sol)
-CSV.write("logs/log1.csv", df)
 
 #quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 

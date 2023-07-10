@@ -1,7 +1,7 @@
 function quad_2d_dynamics(X, U, params::NamedTuple)
 
     # extract the parameters
-    m, l, I_xx, safety_box, K, df = params.quad
+    m, l, I_xx, safety_box, K = params.quad
 
     g_vec = SA_F64[0; g] # use static array
 
@@ -36,7 +36,7 @@ end
 function quad_2d(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
 
     # Extract the parameters
-    m, l, I_xx, safety_box, K, df = params.quad
+    m, l, I_xx, safety_box, K = params.quad
     nx, nu, ny, Ts = params.frmodel
 
     # extract the state
