@@ -1,4 +1,7 @@
 using DifferentialEquations
+using BenchmarkTools
+using CSV, DataFrames
+using StaticArrays
 ##
 
 function lorenz!(du, u, p, t)
@@ -12,23 +15,41 @@ function lorenz!(du, u, p, t)
     du[3] = u1[] * u2[] - (8 / 3) * u3[]
 end
 
-function lorenz2!(du, u, p, t)
+# # run at every timestep
+# condition(u, t, integrator) = true
 
-    u1 = u[1]
-    u2 = u[2]
-    u3 = u[3]
+function affect!(integrator)
 
-    du[1] = 10.0 * (u2[] - u1[])
-    du[2] = u1[] * (28.0 - u3[]) - u2[]
-    du[3] = u1[] * u2[] - (8 / 3) * u3[]
+    # # Extract the state 
+    # X::Vector{Float64} = integrator.u[1:3]
+
+    # push!(logging_vars, (integrator.t, integrator.u))
 end
 
-sample_cb = PeriodicCallback(0.01, initial_affect=true) do integrator
-    u_modified!(integrator, false)
-end
+cb = DiscreteCallback(condition, affect!)
+
+# sample_cb = PeriodicCallback(0.01, initial_affect=true, save_positions=(false, true)) do integrator
+#     # u_modified!(integrator, false)
+# end
 
 ##
 u0 = [1.0; 0.0; 0.0]
-tspan = (0.0, 1000.0)
-prob = ODEProblem(lorenz2!, u0, tspan)
-@timev solve(prob, Tsit5(), save_everystep=false);
+tspan = (0.0, 60.0)
+
+## Logging variables
+#logging_vars = DataFrame(timestep=Float64[], X=Vector{Float64}[])
+
+prob = ODEProblem(lorenz!, u0, tspan)
+@timev sol = solve(prob, Tsit5(), dt=0.01, adaptive=false, dense=false);
+
+df = DataFrame(sol)
+CSV.write("logs/log_test.csv", df)
+## Benchmarking 
+
+# save every step disabled
+@btime sol = solve(prob, Tsit5(), save_everystep=false, adaptive=false, dense=false, dt=0.01);
+
+# save every step enbled
+@btime sol = solve(prob, Tsit5(), adaptive=false, dense=false, dt=0.01);
+
+#@profview solve(prob, Tsit5(), save_everystep=false);
