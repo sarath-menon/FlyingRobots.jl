@@ -90,23 +90,23 @@ Q = Diagonal([1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
 R = Diagonal([1.0, 1.0]);
 dlqr_ctrl = create_lqr_controller(Q, R; params=frmodel_params, sys=sys_d);
 
-# # for logging
-n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
-n_cols = 3
-log_matrix = zeros(n_rows, n_cols)
-params = (; log_matrix=log_matrix)
-
-
 # params
 circle_trajec = create_frobj(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z₀=2.0)
 
 # parameters
-quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl.K, log_matrix=log_matrix)
+quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl.K)
 
 # params = merge(quad_params, ntfromstruct(frmodel_params))
 params = (; quad=quad_params, frmodel=ntfromstruct(frmodel_params));
 
 tspan = (0.0, 60.0);
+
+# # for logging
+n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
+n_cols = 3
+log_matrix = zeros(n_rows, n_cols)
+log_params = (; log_matrix=log_matrix)
+
 
 initial_state = [x₀.y, x₀.z, x₀.θ, x₀.ẏ, x₀.ż, x₀.θ̇]; # state
 u₀ = [0, 0]; # control
@@ -130,4 +130,5 @@ sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 ## benchmarking 
 @time solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 
-#timev generate_trajectory(circle_trajec, quad_params, sol.t);
+@time generate_trajectory(circle_trajec, quad_obj, 0.2);
+
