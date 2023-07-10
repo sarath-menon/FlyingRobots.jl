@@ -107,7 +107,8 @@ circle_trajec = create_frobj(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z�
 # parameters
 quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl.K, log_matrix=log_matrix)
 
-params = merge(quad_params, ntfromstruct(frmodel_params))
+# params = merge(quad_params, ntfromstruct(frmodel_params))
+params = (; quad=quad_params, frmodel=ntfromstruct(frmodel_params));
 
 tspan = (0.0, 60.0);
 
