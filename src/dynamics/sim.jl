@@ -1,7 +1,7 @@
-function quad_2d_dynamics(X::Vector{Float64}, U::Vector{Float64}, params::NamedTuple)
+function quad_2d_dynamics(X, U, params::NamedTuple)
 
     # extract the parameters
-    m, l, I_xx = params
+    (; m, l, I_xx, safety_box, K) = params.quad
 
     g_vec = SA_F64[0; g] # use static array
 
@@ -35,54 +35,17 @@ end
 #Define the problem
 function quad_2d(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
 
+    # Extract the parameters
+    (; nx, nu, ny, Ts) = params.frmodel
+
     # extract the state
-    X = state[1:frmodel_params.nx]
+    X = @view state[1:nx]
 
     # extract the control input
-    U = state[frmodel_params.nx+1:end]
+    U = @view state[nx+1:end]
 
     (ẏ, ż, θ̇, ÿ, z̈, θ̈) = quad_2d_dynamics(X, U, params)
 
     d_state[1], d_state[2], d_state[3] = ẏ, ż, θ̇
     d_state[4], d_state[5], d_state[6] = ÿ, z̈, θ̈
 end
-
-# run at every timestep
-condition(u, t, integrator) = true
-
-function affect!(integrator)
-
-    # Extract the state 
-    X::Vector{Float64} = integrator.u[1:frmodel_params.nx]
-
-    y = X[1]
-    z = X[2]
-    θ = X[3]
-    ẏ = X[4]
-    ż = X[5]
-    θ̇ = X[6]
-
-    # # Limit operating space 
-    # if z > params.safety_box.z_max
-    #     z = clamp(z, params.safety_box.z_min, params.safety_box.z_max)
-    #     ż = 0
-    #     println("Z operational space constraint violated !")
-    #     terminate!(integrator)
-
-    # elseif z < params.safety_box.z_min
-    #     z = clamp(z, params.safety_box.z_min, params.safety_box.z_max)
-    #     ż = 0
-    #     println("Landed !")
-    #     terminate!(integrator)
-    # end
-
-    # if y < params.safety_box.y_min || y > params.safety_box.y_max
-    #     y = clamp(y, params.safety_box.y_min, params.safety_box.y_max)
-    #     ẏ = 0
-    #     println("Y operational space constraint violated !")
-    #     terminate!(integrator)
-    # end
-
-end
-
-cb = DiscreteCallback(condition, affect!, save_positions=(false, true))

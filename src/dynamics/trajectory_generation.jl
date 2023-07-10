@@ -1,32 +1,33 @@
-function generate_trajectory(trajec_params::CircleTrajectory, quad_params::NamedTuple, t::Float64)
-    m::Float64 = quad_params.m
+function generate_trajectory(trajec_params::CircleTrajectory, params::NamedTuple, t::Float64)
+    # Extract the parameters
+    m, l, I_xx, safety_box, K = params.quad
+    # m::Float64 = params.quad.m
 
-    r::Float64 = trajec_params.r
-    ω::Float64 = trajec_params.ω
+    # r::Float64 = trajec_params.r
+    # ω::Float64 = trajec_params.ω
 
-    y₀ = trajec_params.y₀
-    z₀ = trajec_params.z₀
+    # y₀ = trajec_params.y₀
+    # z₀ = trajec_params.z₀
 
-    y::Float64 = (r * cos(ω * t)) + y₀
-    z::Float64 = (r * sin(ω * t)) + z₀
+    # y::Float64 = (r * cos(ω * t)) + y₀
+    # z::Float64 = (r * sin(ω * t)) + z₀
 
-    ẏ::Float64 = (-r * sin(ω * t)) * ω
-    ż::Float64 = (r * cos(ω * t)) * ω
+    # ẏ::Float64 = (-r * sin(ω * t)) * ω
+    # ż::Float64 = (r * cos(ω * t)) * ω
 
-    ÿ::Float64 = -y * (ω^2)
-    z̈::Float64 = -z * (ω^2)
+    # ÿ::Float64 = -y * (ω^2)
+    # z̈::Float64 = -z * (ω^2)
 
 
-    ÿ_func(r::Real, ω::Real, t::Real) = -r * cos(ω * t) * (ω^2)
-    z̈_func(r::Real, ω::Real, t::Real) = -r * sin(ω * t) * (ω^2)
+    # ÿ_func(r::Real, ω::Real, t::Real) = -r * cos(ω * t) * (ω^2)
+    # z̈_func(r::Real, ω::Real, t::Real) = -r * sin(ω * t) * (ω^2)
+    # θ_func(t::Real) = atan(-m * ÿ_func(r, ω, t), m * (z̈_func(r, ω, t) - g))
 
-    θ_func(t::Real) = atan(-m * ÿ_func(r, ω, t), m * (z̈_func(r, ω, t) - g))
+    # # compute θ, θ̇ using differential flatness
+    # θ::Float64 = θ_func(t)
+    # θ̇::Float64 = ForwardDiff.derivative(θ_func, t) # constant value (precomputed)
 
-    # compute θ, θ̇ using differential flatness
-    θ::Float64 = θ_func(t)
-    θ̇::Float64 = ForwardDiff.derivative(θ_func, t) # constant value (precomputed)
-
-    return SA_F64[y, z, θ, ẏ, ż, θ̇]
+    # return @SVector [y, z, θ, ẏ, ż, θ̇]
 end
 
 function generate_trajectory(trajec_params::CircleTrajectory, quad_params::NamedTuple, tspan::Tuple, dt::Float64)
