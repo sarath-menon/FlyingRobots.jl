@@ -54,11 +54,10 @@ sys_c, sys_d, AB_symbolic = linearize_system(frmodel_params.Ts, x₀, quad_obj, 
 control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_positions=(false, true)) do integrator
 
     # # Extract the parameters
-    # (; m, l, I_xx, safety_box, K) = integrator.p.quad
-    # (; nx, nu, ny, Ts) = integrator.p.frmodel
+    # (; m, l, I_xx, safety_box, K, df) = integrator.p
 
     # # Extract the state 
-    # X = @view integrator.u[1:nx]
+    # X::Vector{Float64} = integrator.u[1:frmodel_params.nx]
 
     # X_req = generate_trajectory(circle_trajec, quad_params, integrator.t)
 
@@ -96,27 +95,29 @@ dlqr_ctrl = create_lqr_controller(Q, R; params=frmodel_params, sys=sys_d);
 n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
 n_cols = 3
 log_matrix = zeros(n_rows, n_cols)
-log_params = (; log_matrix=Ref(log_matrix))
+params = (; log_matrix=log_matrix)
+
+
+df = DataFrame(logging_vars)
 
 
 # params
 circle_trajec = create_frobj(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z₀=2.0)
 
 # parameters
-quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl.K);
+quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl.K, log_matrix=log_matrix)
 
+params = merge(quad_params, ntfromstruct(frmodel_params))
 
-params = (; quad=quad_params, frmodel=ntfromstruct(frmodel_params));
-
-tspan = (0.0, 100.0);
+tspan = (0.0, 60.0);
 
 initial_state = [x₀.y, x₀.z, x₀.θ, x₀.ẏ, x₀.ż, x₀.θ̇]; # state
 u₀ = [0, 0]; # control
 
-initial_conditions = vcat(initial_state, u₀);
+initial_conditions = vcat(initial_state, u₀)
 
 #Pass to solvers
-cb_set = CallbackSet(control_cb);
+cb_set = CallbackSet(control_cb)
 
 prob = ODEProblem(quad_2d, initial_conditions, tspan, params, callback=control_cb);
 #prob = ODEProblem(quad_2d, initial_conditions, tspan, params);
@@ -127,12 +128,11 @@ sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 
 # save solution to csv file
 # df = DataFrame(sol)
-# CSV.write("logs/log1.csv", df)
+CSV.write("logs/log1.csv", df)
 
 #quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
 ## benchmarking 
 @time solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 
-# @time generate_trajectory(circle_trajec, quad_params, sol.t);
-@time generate_trajectory(circle_trajec, params, 0.1);
+#timev generate_trajectory(circle_trajec, quad_params, sol.t);
