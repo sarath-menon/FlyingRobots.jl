@@ -53,32 +53,32 @@ sys_c, sys_d, AB_symbolic = linearize_system(frmodel_params.Ts, x₀, quad_obj, 
 
 control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_positions=(false, true)) do integrator
 
-    # # Extract the parameters
-    # (; m, l, I_xx, safety_box, K) = integrator.p
+    # Extract the parameters
+    (; m, l, I_xx, safety_box, K) = integrator.p.quad
+    nx, nu, ny, Ts = integrator.p.frmodel
 
-    # # Extract the state 
-    # X::Vector{Float64} = integrator.u[1:frmodel_params.nx]
+    # Extract the state 
+    X = @view integrator.u[1:nx]
 
-    # X_req = generate_trajectory(circle_trajec, quad_params, integrator.t)
+    X_req = generate_trajectory(circle_trajec, quad_obj, integrator.t)
 
-    # # compute control input
-    # X_error = X - X_req
-    # U = -K * X_error
+    # compute control input
+    X_error = X - X_req
+    U = -K * X_error
 
     # # println("X_req: $(X_req)")
     # #println("X_error: $(X_error)")
-    # #println("State: $(X)")
+    #println("State: $(X)")
 
-    # f_1::Float64 = f_1_equilibirum + U[1]
-    # f_2::Float64 = f_2_equilibirum + U[2]
+    f_1::Float64 = f_1_equilibirum + U[1]
+    f_2::Float64 = f_2_equilibirum + U[2]
 
-    # # constrain the control input
-    # f_1 = clamp(f_1, quad_obj.motor_left.thrust_min, quad_obj.motor_left.thrust_max)
-    # f_2 = clamp(f_2, quad_obj.motor_right.thrust_min, quad_obj.motor_right.thrust_max)
+    # constrain the control input
+    f_1 = clamp(f_1, 0.0, 12.5)
+    f_2 = clamp(f_2, 0.0, 12.5)
 
-    # #Update the control-signal
-    # U = [f_1, f_2]
-    # integrator.u[frmodel_params.nx+1:end] .= SA_F64[f_1, f_2]
+    #Update the control-signal
+    integrator.u[nx+1:end] = SA_F64[f_1, f_2]
 
 end
 
@@ -120,15 +120,27 @@ prob = ODEProblem(quad_2d, initial_conditions, tspan, params, callback=control_c
 #prob = ODEProblem(quad_2d, initial_conditions, tspan, params);
 sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 
-# compute entire reference trajectory at sol.t timesteps
-#(y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_params, sol.t)
+#compute entire reference trajectory at sol.t timesteps
+(y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_obj, sol.t)
 
 # save solution to csv file
 
-#quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
+quad_2d_plot_normal(sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
 ## benchmarking 
 @time solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 
+## Trajectory generator benchmarking 
+
 @time generate_trajectory(circle_trajec, quad_obj, 0.2);
 
+@time generate_trajectory(circle_trajec, quad_obj, tspan, 0.2);
+
+n_timesteps = 1000
+@time generate_trajectory(circle_trajec, quad_obj, t_vec);
+
+# preallocate trajectory matrix
+n_states = 6
+trajectory_matrix = zeros(n_timesteps, n_states)
+t_vec = rand(n_timesteps)
+@time generate_trajectory!(circle_trajec, quad_obj, trajectory_matrix, t_vec);
