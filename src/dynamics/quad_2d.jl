@@ -53,13 +53,14 @@ sys_c, sys_d, AB_symbolic = linearize_system(frmodel_params.Ts, x₀, quad_obj, 
 
 # initialize plot
 tspan = (0.0, 60.0);
-quad2d_plot = quad2d_plot_initialize(frmodel_params, tspan);
+# quad2d_plot = quad2d_plot_initialize(frmodel_params, tspan);
 
 control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_positions=(false, true)) do integrator
 
     # Extract the parameters
     (; m, l, I_xx, safety_box, K) = integrator.p.quad
     nx, nu, ny, Ts = integrator.p.frmodel
+    (; log_matrix) = integrator.p.logger
 
     # Extract the state 
     X = @view integrator.u[1:nx]
@@ -84,6 +85,9 @@ control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_posit
     #Update the control-signal
     integrator.u[nx+1:end] = SA_F64[f_1, f_2]
 
+    # logging
+    write_row_vector!(log_matrix, integrator.u, integrator.t, Ts)
+
 end
 
 #Initial Conditions
@@ -100,14 +104,14 @@ circle_trajec = create_frobj(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z�
 # parameters
 quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl.K)
 
-# params = merge(quad_params, ntfromstruct(frmodel_params))
-params = (; quad=quad_params, frmodel=ntfromstruct(frmodel_params));
-
 # # for logging
 n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
-n_cols = 3
-log_matrix = zeros(n_rows, n_cols)
+n_cols = 8
+log_matrix = zeros(n_rows, n_cols + 1)
 log_params = (; log_matrix=log_matrix)
+
+# params = merge(quad_params, ntfromstruct(frmodel_params))
+params = (; quad=quad_params, frmodel=ntfromstruct(frmodel_params), logger=log_params);
 
 
 initial_state = [x₀.y, x₀.z, x₀.θ, x₀.ẏ, x₀.ż, x₀.θ̇]; # state
@@ -126,11 +130,12 @@ sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 (y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_obj, sol.t)
 
 # save solution to csv file
+@time CSV.write("logs/log_no_alloc.csv", Tables.table(log_matrix), writeheader=false)
 
-quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req);
+#quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req);
 
 ## benchmarking 
-@time solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
+@btime solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false);
 @time quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req);
 
 ## Trajectory generator benchmarking 
