@@ -1,3 +1,8 @@
+using ForwardDiff
+using StaticArrays
+
+export generate_trajectory
+
 function generate_trajectory(trajec_params::CircleTrajectory, quad::Quad2d, t::Float64)
     # Extract the parameters
     m = quad.m

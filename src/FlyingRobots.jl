@@ -10,8 +10,9 @@ end FlyingRobots
 
 
 
-include("dynamics/quad_2d.jl")
-
+include("dynamics/types.jl")
+include("dynamics/utilities.jl")
+include("dynamics/trajectory_generation.jl")
 """
     greet()
 

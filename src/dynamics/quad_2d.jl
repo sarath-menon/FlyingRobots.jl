@@ -19,12 +19,14 @@ include("linearize.jl")
 include("plotting.jl")
 include("sim.jl")
 include("trajectory_generation.jl")
+include("math_helper.jl")
 
 Revise.track("src/dynamics/utilities.jl")
 Revise.track("src/dynamics/types.jl")
 Revise.track("src/dynamics/linearize.jl")
 Revise.track("src/dynamics/sim.jl")
 Revise.track("src/dynamics/plotting.jl")
+Revise.track("src/dynamics/math_helper.jl")
 Revise.track("src/dynamics/trajectory_generation.jl")
 
 ## Create objects 

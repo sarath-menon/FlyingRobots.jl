@@ -1,4 +1,7 @@
 include("constants.jl")
+using StaticArrays
+
+export BLDCMotor, Quad2d, FrModel, CircleTrajectory
 
 struct BLDCMotor1
     thrust_min::Float64
