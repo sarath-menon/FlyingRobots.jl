@@ -103,6 +103,9 @@ function quad_2d_plot_normal(plot::Quad2dPlot, sol::ODESolution; y_ref, z_ref, t
     plot.y_vec[] = sol[1, :]
     plot.z_vec[] = sol[2, :]
     plot.theta_vec[] = sol[3, :]
+
+    # plot.thrust_vec[] = thrust
+    # plot.torque_vec[] = torque
 end
 
 function quad_2d_plot_lsim(t, x, uout)

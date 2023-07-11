@@ -52,6 +52,7 @@ sys_c, sys_d, AB_symbolic = linearize_system(frmodel_params.Ts, x₀, quad_obj, 
 ## Non-linear Simulation with trajectory tracking using LQR
 
 # initialize plot
+tspan = (0.0, 60.0);
 quad2d_plot = quad2d_plot_initialize(frmodel_params, tspan);
 
 control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_positions=(false, true)) do integrator
@@ -102,8 +103,6 @@ quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, 
 # params = merge(quad_params, ntfromstruct(frmodel_params))
 params = (; quad=quad_params, frmodel=ntfromstruct(frmodel_params));
 
-tspan = (0.0, 60.0);
-
 # # for logging
 n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
 n_cols = 3
@@ -132,6 +131,7 @@ quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req
 
 ## benchmarking 
 @time solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
+@time quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req);
 
 ## Trajectory generator benchmarking 
 
@@ -148,4 +148,4 @@ trajectory_matrix = zeros(n_timesteps, n_states)
 t_vec = rand(n_timesteps)
 @time generate_trajectory!(circle_trajec, quad_obj, trajectory_matrix, t_vec);
 
-@time quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req);
+
