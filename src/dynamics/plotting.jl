@@ -1,5 +1,8 @@
 export quad_2d_plot_normal, quad_2d_plot_lsim
 
+using GLMakie
+using DifferentialEquations
+
 struct Quad2dPlot4
     fig::Figure
 
@@ -21,7 +24,8 @@ struct Quad2dPlot4
 end
 
 Quad2dPlot = Quad2dPlot4
-##
+
+#------------------------------------------------------------------
 
 function quad2d_plot_initialize(frmodel_params::FrModel, tspan::Tuple)
     fig = Figure(resolution=(1200, 600))

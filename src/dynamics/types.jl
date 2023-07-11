@@ -83,27 +83,3 @@ CircleTrajectory = CircleTrajectory1
 
 
 #------------------------------------------------------------------
-
-struct Quad2dPlot4
-    fig::Figure
-
-    y_ax::Axis
-    z_ax::Axis
-    theta_ax::Axis
-
-    thrust_ax::Axis
-    torque_ax::Axis
-
-    time_vec::Observable{Vector{Float64}}
-
-    y_vec::Observable{Vector{Float64}}
-    z_vec::Observable{Vector{Float64}}
-    theta_vec::Observable{Vector{Float64}}
-
-    thrust_vec::Observable{Vector{Float64}}
-    torque_vec::Observable{Vector{Float64}}
-end
-
-Quad2dPlot = Quad2dPlot4
-
-#------------------------------------------------------------------

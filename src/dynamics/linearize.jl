@@ -1,4 +1,6 @@
-include("types.jl")
+using ModelingToolkit
+using Symbolics
+
 
 function convert_to_numeric(A::Array{Num})
     A_num = [i.val for i in A]
