@@ -1,6 +1,6 @@
 export quad_2d_plot_normal, quad_2d_plot_lsim
 
-struct Quad2dPlot2
+struct Quad2dPlot4
     fig::Figure
 
     y_ax::Axis
@@ -10,13 +10,25 @@ struct Quad2dPlot2
     thrust_ax::Axis
     torque_ax::Axis
 
+    time_vec::Observable{Vector{Float64}}
+
+    y_vec::Observable{Vector{Float64}}
+    z_vec::Observable{Vector{Float64}}
+    theta_vec::Observable{Vector{Float64}}
+
+    thrust_vec::Observable{Vector{Float64}}
+    torque_vec::Observable{Vector{Float64}}
 end
 
-Quad2dPlot = Quad2dPlot2
+Quad2dPlot = Quad2dPlot4
 ##
 
-function quad2d_plot_initialize()
+function quad2d_plot_initialize(frmodel_params::FrModel, tspan::Tuple)
     fig = Figure(resolution=(1200, 600))
+    dt = frmodel_params.Ts
+
+    range = tspan[1]:dt:(tspan[2]+dt)
+    len::Integer = length(range)
 
     # state variables 
     y_ax = Axis(fig[1, 1], title="y")
@@ -37,30 +49,60 @@ function quad2d_plot_initialize()
     rowgap!(fig.layout, 1)
     display(fig)
 
-    return Quad2dPlot(fig, y_ax, z_ax, theta_ax, thrust_ax, torque_ax)
+    # Intial plot data 
+    y_vec = Observable{Vector{Float64}}(zeros(len))
+    z_vec = Observable{Vector{Float64}}(zeros(len))
+    theta_vec = Observable{Vector{Float64}}(zeros(len))
+
+    thrust_vec = Observable{Vector{Float64}}(zeros(len))
+    torque_vec = Observable{Vector{Float64}}(zeros(len))
+
+    time_vec = Observable{Vector{Float64}}(collect(range))
+
+    # Plot initial data (zeros)
+    lines!(y_ax, time_vec, y_vec)
+    # lines!(plot.z_ax, time_vec, z_ref, linestyle=:dash)
+
+    lines!(z_ax, time_vec, z_vec)
+    # lines!(plot.y_ax, time_vec, y_ref, linestyle=:dash)
+
+    lines!(theta_ax, time_vec, theta_vec)
+    # lines!(plot.theta_ax, time_vec, theta_ref, linestyle=:dash)
+
+    lines!(thrust_ax, time_vec, thrust_vec)
+    lines!(torque_ax, time_vec, torque_vec)
+
+    return Quad2dPlot(fig, y_ax, z_ax, theta_ax, thrust_ax, torque_ax,
+        time_vec, y_vec, z_vec, theta_vec, thrust_vec, torque_vec)
 end
 
 
 function quad_2d_plot_normal(plot::Quad2dPlot, sol::ODESolution; y_ref, z_ref, theta_ref)
-
-    lines!(plot.y_ax, sol.t, sol[1, :])
-    lines!(plot.z_ax, sol.t, z_ref, linestyle=:dash)
-
-    lines!(plot.z_ax, sol.t, sol[2, :])
-    lines!(plot.y_ax, sol.t, y_ref, linestyle=:dash)
-
-    lines!(plot.theta_ax, sol.t[:], sol[3, :])
-    lines!(plot.theta_ax, sol.t, theta_ref, linestyle=:dash)
-
-    f_1 = sol[7, :]
-    f_2 = sol[8, :]
+    f_1 = @view sol[7, :]
+    f_2 = @view sol[8, :]
 
     thrust = f_1 + f_2
     torque = (f_1 - f_2) * 0.1
 
-    lines!(plot.thrust_ax, sol.t, thrust)
-    lines!(plot.torque_ax, sol.t, torque)
+    # compute axis limits
+    t_axis_low = sol.t[1]
+    t_axis_high = sol.t[end]
 
+    (y_low, y_high) = extrema(sol[1, :])
+    (z_low, z_high) = extrema(sol[2, :])
+    (theta_low, theta_high) = extrema(sol[3, :])
+
+    # set axis limits 
+    plot.y_ax.limits = (t_axis_low, t_axis_high, y_low, y_high)
+    plot.z_ax.limits = (t_axis_low, t_axis_high, z_low, z_high)
+    plot.theta_ax.limits = (t_axis_low, t_axis_high, theta_low, theta_high)
+
+    # set axis data
+    plot.time_vec[] = sol.t
+
+    plot.y_vec[] = sol[1, :]
+    plot.z_vec[] = sol[2, :]
+    plot.theta_vec[] = sol[3, :]
 end
 
 function quad_2d_plot_lsim(t, x, uout)
