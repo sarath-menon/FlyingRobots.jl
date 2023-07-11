@@ -108,6 +108,37 @@ function quad_2d_plot_normal(plot::Quad2dPlot, sol::ODESolution; y_ref, z_ref, t
     # plot.torque_vec[] = torque
 end
 
+function quad_2d_plot_normal(plot::Quad2dPlot, log_matrix::Matrix{Float64}; y_ref, z_ref, theta_ref)
+    f_1 = @view sol[7, :]
+    f_2 = @view sol[8, :]
+
+    thrust = f_1 + f_2
+    torque = (f_1 - f_2) * 0.1
+
+    # compute axis limits
+    t_axis_low = sol.t[1]
+    t_axis_high = sol.t[end]
+
+    (y_low, y_high) = extrema(sol[1, :])
+    (z_low, z_high) = extrema(sol[2, :])
+    (theta_low, theta_high) = extrema(sol[3, :])
+
+    # set axis limits 
+    plot.y_ax.limits = (t_axis_low, t_axis_high, y_low, y_high)
+    plot.z_ax.limits = (t_axis_low, t_axis_high, z_low, z_high)
+    plot.theta_ax.limits = (t_axis_low, t_axis_high, theta_low, theta_high)
+
+    # set axis data
+    plot.time_vec[] = sol.t
+
+    plot.y_vec[] = sol[1, :]
+    plot.z_vec[] = sol[2, :]
+    plot.theta_vec[] = sol[3, :]
+
+    # plot.thrust_vec[] = thrust
+    # plot.torque_vec[] = torque
+end
+
 function quad_2d_plot_lsim(t, x, uout)
     fig = Figure(resolution=(1200, 500))
 

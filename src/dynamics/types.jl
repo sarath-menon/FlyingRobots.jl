@@ -1,7 +1,11 @@
 include("constants.jl")
 using StaticArrays
 
-export BLDCMotor, Quad2d, FrModel, CircleTrajectory
+export BLDCMotor, Quad2d, FrModel, SafetyBox
+export Pose2D
+export Trajectory, CircleTrajectory
+export LQRController
+export Quad2dPlot
 
 struct BLDCMotor1
     thrust_min::Float64
@@ -66,7 +70,7 @@ LQRController = LQRController1
 
 
 #------------------------------------------------------------------
-abstract type Trajectory end
+abstract type Trajectory end;
 
 struct CircleTrajectory1 <: Trajectory
     r::Float64
@@ -77,5 +81,29 @@ end
 
 CircleTrajectory = CircleTrajectory1
 
+
+#------------------------------------------------------------------
+
+struct Quad2dPlot4
+    fig::Figure
+
+    y_ax::Axis
+    z_ax::Axis
+    theta_ax::Axis
+
+    thrust_ax::Axis
+    torque_ax::Axis
+
+    time_vec::Observable{Vector{Float64}}
+
+    y_vec::Observable{Vector{Float64}}
+    z_vec::Observable{Vector{Float64}}
+    theta_vec::Observable{Vector{Float64}}
+
+    thrust_vec::Observable{Vector{Float64}}
+    torque_vec::Observable{Vector{Float64}}
+end
+
+Quad2dPlot = Quad2dPlot4
 
 #------------------------------------------------------------------

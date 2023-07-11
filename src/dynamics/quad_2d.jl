@@ -13,21 +13,21 @@ using CSV, DataFrames
 
 GLMakie.activate!(inline=false)
 
-include("types.jl")
-include("utilities.jl")
+# include("types.jl")
+# include("utilities.jl")
 include("linearize.jl")
 include("plotting.jl")
 include("sim.jl")
-include("trajectory_generation.jl")
+# include("trajectory_generation.jl")
 include("math_helper.jl")
 
-Revise.track("src/dynamics/utilities.jl")
-Revise.track("src/dynamics/types.jl")
+
+# 
 Revise.track("src/dynamics/linearize.jl")
 Revise.track("src/dynamics/sim.jl")
 Revise.track("src/dynamics/plotting.jl")
 Revise.track("src/dynamics/math_helper.jl")
-Revise.track("src/dynamics/trajectory_generation.jl")
+
 
 ## Create objects 
 
@@ -132,27 +132,27 @@ sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false);
 (y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_obj, sol.t)
 
 # save solution to csv file
-@time CSV.write("logs/log_no_alloc.csv", Tables.table(log_matrix), writeheader=false)
+CSV.write("logs/log_no_alloc.csv", Tables.table(log_matrix), writeheader=false)
 
 #quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req);
 
-## benchmarking 
-@btime solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false);
-@time quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req);
+# ## benchmarking 
+# @btime solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false);
+# @time quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req);
 
-## Trajectory generator benchmarking 
+# ## Trajectory generator benchmarking 
 
-@time generate_trajectory(circle_trajec, quad_obj, 0.2);
+# @time generate_trajectory(circle_trajec, quad_obj, 0.2);
 
-@time generate_trajectory(circle_trajec, quad_obj, tspan, 0.2);
+# @time generate_trajectory(circle_trajec, quad_obj, tspan, 0.2);
 
-n_timesteps = 1000
-@time generate_trajectory(circle_trajec, quad_obj, t_vec);
+# n_timesteps = 1000
+# @time generate_trajectory(circle_trajec, quad_obj, t_vec);
 
-# preallocate trajectory matrix
-n_states = 6
-trajectory_matrix = zeros(n_timesteps, n_states)
-t_vec = rand(n_timesteps)
-@time generate_trajectory!(circle_trajec, quad_obj, trajectory_matrix, t_vec);
+# # preallocate trajectory matrix
+# n_states = 6
+# trajectory_matrix = zeros(n_timesteps, n_states)
+# t_vec = rand(n_timesteps)
+# @time generate_trajectory!(circle_trajec, quad_obj, trajectory_matrix, t_vec);
 
 
