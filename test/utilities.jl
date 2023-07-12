@@ -1,21 +1,40 @@
-export check_if_struct_equals_vector
 
-function check_if_struct_equals_vector(struct_, vector_::Vector{Float64})
+module TypeUtilitiesTest
 
-    is_equal = true
+using FlyingRobots
+using Test
 
-    # iterate through struct elements 
-    for (i, element) in enumerate(fieldnames(typeof(struct_)))
-
-        val = getfield(struct_, element)
-
-        # check if struct element matches corresponding array valyes
-        if val != vector_[i]
-            is_equal = false
-            break
-        end
-    end
-
-    return is_equal
+struct SampleStruct
+    x::Float64
+    y::Float64
 end
 
+struct SampleStructNotFloat64
+    x::Float64
+    y::Float32
+end
+
+
+obj = SampleStruct(1.0, 2.0)
+
+# convrt struct to Float64 vector
+vec_ = struct_to_float64_vector(obj)
+
+
+
+function run_tests()
+
+    @testset "Type Utlities tests" begin
+        @test checkif_struct_has_only_Float64(SampleStruct) == true
+        @test get_struct_length(SampleStruct) == 2
+
+        # check if struct elements and vector values match 
+        @test [obj.x, obj.y] == vec_
+
+    end
+
+end
+
+run_tests()
+
+end
