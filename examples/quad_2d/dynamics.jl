@@ -1,7 +1,9 @@
 
 export dynamics!, dynamics_diffeq!, update_state!
 
-function dynamics!(quad_2d::Quad2D, control_cmd::Quad2DActuatorCmd)
+
+
+function dynamics!(quad_2d::Quad2D, control_cmd::Quad2DControlCmd)
 
     # extract the parameters
     m, L, I_xx = quad_2d.params
@@ -15,20 +17,11 @@ function dynamics!(quad_2d::Quad2D, control_cmd::Quad2DActuatorCmd)
     ż = X.ẏ
     θ̇ = X.ẏ
 
-    # extract the control commands
-    f_left = control_cmd.left_motor_thrust
-    f_right = control_cmd.right_motor_thrust
-
-    # compute body  thrust
-    f_thrust = f_left + f_right
-    a_thrust = (f_thrust / m) # mass normalized body  thrust 
-
-    # compute body thrust 
-    τ = (f_left - f_right) * L
+    a_thrust = (control_cmd.body_thrust / m) # mass normalized body thrust 
+    τ = control_cmd.body_torque
 
     # gravity vector 
     g_vec = SA_F64[0; g] # use static array
-
 
     # translation E.O.M
     f = SA_F64[0; a_thrust]
@@ -64,7 +57,7 @@ function dynamics_diffeq!(d_diffeq_state::Vector{Float64}, diffeq_state::Vector{
 
     update_state!(quad_2d, state_vec)
 
-    control_cmd = Quad2DActuatorCmd(control_vec[1], control_vec[2])
+    control_cmd = Quad2DControlCmd(control_vec[1], control_vec[2])
 
     (ẏ, ż, θ̇, ÿ, z̈, θ̈) = dynamics!(quad_2d, control_cmd)
 
