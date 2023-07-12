@@ -2,12 +2,15 @@ using FlyingRobots
 
 using Test
 
+include("trajectory_generation.jl")
+include("dynamics.jl")
+
+
 let
 
     @testset "FlyingRobots.jl" begin
-        # # Write your tests here.
-        include("trajectory_generation.jl")
-        include("dynamics.jl")
+        FlyingRobotsTest.run_tests()
+
 
     end
 end
