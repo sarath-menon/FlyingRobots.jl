@@ -1,3 +1,4 @@
+export check_if_struct_equals_vector
 
 function check_if_struct_equals_vector(struct_, vector_::Vector{Float64})
 

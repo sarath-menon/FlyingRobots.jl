@@ -1,11 +1,13 @@
 
-## Systems test
-module SystemsTest
+## Dynamics test
+module DynamicsTest
 
 using FlyingRobots
 using ControlSystems
 using StaticArrays
 using Test
+
+include("utilities.jl")
 
 mutable struct Quad2DState1 <: FrRobotState
     y::Float64
@@ -118,7 +120,7 @@ end
 dynamics(quad_2d)
 
 # testing
-let
+function run_tests()
     quad_2d_params = (; m=1.0, L=0.1, I_xx=0.003)
     intial_state = Quad2DState(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     intial_control_cmd = Quad2DControlCmd(0.0, 0.0)
