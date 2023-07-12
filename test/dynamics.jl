@@ -55,6 +55,24 @@ function run_tests()
 
     end
 
+    @testset "Dynamics: actuator_cmd_to_ctrl_cmd function " begin
+
+        initial_state = fr_create(Quad2DState; y=0.0, z=0.0, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
+        quad_2d = fr_create(Quad2D; nx=6, nu=2, state=initial_state, params=quad_2d_params)
+
+        # Test 1: 
+        # Vehicle state: At rest on the ground
+        # Control input: Thrust=0, Torque=0 
+        # Expected outcome: vehicle stays in place, all zeros in state vector except for the acc due to gravity along z 
+        actuator_cmd = fr_create(Quad2DActuatorCmd; left_motor_thrust=0.0, right_motor_thrust=0.0)
+        ctrl_cmd = actuator_cmd_to_ctrl_cmd(quad_2d, actuator_cmd)
+        ground_truth = [0.0, 0.0]
+        ctrl_cmd_vec = [ctrl_cmd.body_thrust, ctrl_cmd.body_torque]
+
+        @test isapprox(ctrl_cmd_vec, ground_truth)
+
+    end
+
 
 
 end

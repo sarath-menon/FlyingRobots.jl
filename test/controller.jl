@@ -10,6 +10,13 @@ using Test
 include("./../examples/quad_2d/quad_2d.jl")
 using .Quad2D_Demo
 
+# quad_2d_params = (; m=1.0, L=0.1, I_xx=0.003)
+# initial_state = fr_create(Quad2DState; y=0.0, z=0.0, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
+# quad_2d = fr_create(Quad2D; nx=6, nu=2, state=initial_state, params=quad_2d_params)
+# actuator_cmd = fr_create(Quad2DActuatorCmd; left_motor_thrust=0.0, right_motor_thrust=0.0)
+# ctrl_cmd = actuator_cmd_to_ctrl_cmd(quad_2d, actuator_cmd)
+# ctrl_cmd
+
 # testing
 function run_tests()
     quad_2d_params = (; m=1.0, L=0.1, I_xx=0.003)
@@ -57,6 +64,8 @@ function run_tests()
         @test isapprox(actuator_cmd.left_motor_thrust + actuator_cmd.right_motor_thrust, 0.0)
         @test isapprox((actuator_cmd.left_motor_thrust - actuator_cmd.right_motor_thrust) * L, 1.0)
     end
+
+
 end
 
 run_tests()
