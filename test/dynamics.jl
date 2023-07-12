@@ -5,25 +5,7 @@ module SystemsTest
 using FlyingRobots
 using ControlSystems
 using StaticArrays
-
-
-abstract type FrSys end
-
-abstract type FrContinuousSys <: FrSys end
-abstract type FrDiscreteSys <: FrSys end
-abstract type FrHybridSys <: FrSys end
-
-abstract type FrRobot <: FrHybridSys end
-
-abstract type FrDigitalCtrl <: FrDiscreteSys end
-
-abstract type FrRobotDynamics <: FrContinuousSys end
-
-abstract type FrState end
-abstract type FrRobotState <: FrState end
-
-abstract type FrCtrlCmd end
-abstract type FrRobotCtrlCmd <: FrCtrlCmd end
+using Test
 
 mutable struct Quad2DState1 <: FrRobotState
     y::Float64
@@ -43,29 +25,24 @@ Quad2DControlCmd = Quad2DControlCmd1
 
 Quad2DState = Quad2DState1
 
-# parameters
-# abstract type FrParams end
-# abstract type FrRobotParams<: FrParams end
-# abstract type FrControllerParams<: FrParams end
-
 # Create sample Robot 
-struct Quad2D2 <: FrRobot
+struct Quad2D3 <: FrRobot
+    nx::Int
+    nu::Int
+
     state::Quad2DState
     control_cmd::Quad2DControlCmd
-
     params::NamedTuple
-
 end
 
-Quad2D = Quad2D2
+Quad2D = Quad2D3
 
 quad_2d_params = (; m=1.0, L=0.1, I_xx=0.003)
-quad_2d_components = (;)
 
 intial_state = Quad2DState(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 intial_control_cmd = Quad2DControlCmd(0.0, 0.0)
 
-quad_2d = Quad2D(intial_state, intial_control_cmd, quad_2d_params)
+quad_2d = Quad2D(6, 2, intial_state, intial_control_cmd, quad_2d_params)
 
 
 function dynamics(quad_2d::Quad2D)
@@ -106,11 +83,62 @@ function dynamics(quad_2d::Quad2D)
     θ̈ = τ / I_xx
 
     return SA_F64[ẏ, ż, θ̇, ÿ, z̈, θ̈]
+end
+
+function update_state!(quad_2d::Quad2D, state)
+
+
+    quad_2d.state.y = state[1]
+    quad_2d.state.z = state[2]
+    quad_2d.state.θ = state[3]
+    quad_2d.state.ẏ = state[4]
+    quad_2d.state.ż = state[5]
+    quad_2d.state.θ̇ = state[6]
+end
+
+
+function dynamics(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
+
+    # Extract the parameters
+    quad_2d = params.FrRobot
+
+    # extract the state
+    X = @view state[1:quad_2d.nx]
+
+    # extract the control input
+    U = @view state[quad_2d.nx+1:end]
+
+    update_state!(quad_2d, X)
+
+    # dynamics(quad_2d)
 
 end
 
 
 dynamics(quad_2d)
+
+# testing
+let
+    quad_2d_params = (; m=1.0, L=0.1, I_xx=0.003)
+    intial_state = Quad2DState(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    intial_control_cmd = Quad2DControlCmd(0.0, 0.0)
+    quad_2d = Quad2D(6, 2, intial_state, intial_control_cmd, quad_2d_params)
+
+    new_state = rand(quad_2d.nx)
+
+    # test update state_func
+    update_state!(quad_2d, new_state)
+    @test check_if_struct_equals_vector(quad_2d.state, new_state)
+end
+
+
+# state = rand(quad_2d.nx)
+# t::Float64 = rand()
+# params = (; FrRobot=quad_2d)
+# dynamics(d_state, state, params, t)
+
+
+
 
 
 
