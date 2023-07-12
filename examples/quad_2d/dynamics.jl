@@ -1,6 +1,6 @@
 
 export dynamics!, dynamics_diffeq!, update_state!
-
+export actuator_cmd_to_ctrl_cmd
 
 function dynamics!(quad_2d::Quad2D, control_cmd::Quad2DControlCmd)
 
