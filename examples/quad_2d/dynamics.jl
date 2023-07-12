@@ -1,7 +1,7 @@
 
 export dynamics!, dynamics_diffeq!, update_state!
 
-function dynamics!(quad_2d::Quad2D, control_cmd::Quad2DControlCmd)
+function dynamics!(quad_2d::Quad2D, control_cmd::Quad2DActuatorCmd)
 
     # extract the parameters
     m, L, I_xx = quad_2d.params
@@ -64,7 +64,7 @@ function dynamics_diffeq!(d_diffeq_state::Vector{Float64}, diffeq_state::Vector{
 
     update_state!(quad_2d, state_vec)
 
-    control_cmd = Quad2DControlCmd(control_vec[1], control_vec[2])
+    control_cmd = Quad2DActuatorCmd(control_vec[1], control_vec[2])
 
     (ẏ, ż, θ̇, ÿ, z̈, θ̈) = dynamics!(quad_2d, control_cmd)
 

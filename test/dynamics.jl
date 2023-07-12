@@ -29,14 +29,24 @@ function run_tests()
     initial_state = Quad2DState(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     quad_2d = Quad2D(6, 2, initial_state, quad_2d_params)
 
-    ctrl_cmd = Quad2DControlCmd(0.0, 0.0)
+    ctrl_cmd = Quad2DActuatorCmd(0.0, 0.0)
     state_vec = dynamics!(quad_2d, ctrl_cmd)
     ground_truth = [0.0, 0.0, 0.0, 0.0, -9.81, 0.0,]
 
     @testset "Type Utities: High level functions tests" begin
 
-        # Test 1: When the vehicle is initially at rest and control control cmd is zero, only force acting on the vehicle should be acc due to gravity 
+        # Test 1: 
+        # Vehicle state: At rest on the ground
+        # Control input: Thrust=0, Torque=0 
+        # Expected state: all zeros except for the acc due to gravity 
         @test isapprox(state_vec, ground_truth)
+
+        # Test 2: 
+        # Vehicle state: Hovering at altitude of 1 m
+        # Control input: Thrust
+        # Expected state: all zeros except for the acc due to gravity 
+        @test isapprox(state_vec, ground_truth)
+
     end
 
 end

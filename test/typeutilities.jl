@@ -31,7 +31,7 @@ function run_tests()
     end
 
     # state = Quad2DState(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
-    # control_cmd = Quad2DControlCmd(7.0, 8.0)
+    # control_cmd = Quad2DActuatorCmd(7.0, 8.0)
     # diffeq_state = convert_Fr_types_to_diffeq_state(state, control_cmd)
 
 
