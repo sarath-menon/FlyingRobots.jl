@@ -10,8 +10,6 @@ using Test
 include("./../examples/quad_2d/quad_2d.jl")
 using .Quad2D_Demo
 
-
-
 # testing
 function run_tests()
     quad_2d_params = (; m=1.0, L=0.1, I_xx=0.003)
@@ -22,7 +20,9 @@ function run_tests()
     allocation_matrix = get_control_allocation_matrix(quad_2d)
     quad_2d_controller = Quad2DController(allocation_matrix)
 
-    @testset "Type Control Allocator" begin
+
+
+    @testset "Test Control Allocator" begin
         # Test 1: 
         # Control cmd: Thrust=0, Torque=0 
         # Expected actuator cmd: left_motor_thrust=0, right_motor_thrust=0
