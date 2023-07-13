@@ -1,13 +1,3 @@
-export create_frobj
-
-using NamedTupleTools
-
-function create_frobj(type_; kwargs...)
-    params_tuple = values(kwargs)
-    structfromnt(type_, params_tuple)
-end
-
-
 
 function write_row_vector!(A, i, row)
     # log timestep

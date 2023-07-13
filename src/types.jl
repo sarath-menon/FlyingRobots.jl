@@ -1,4 +1,3 @@
-include("constants.jl")
 using StaticArrays
 
 export BLDCMotor, Quad2d, FrModel, SafetyBox
@@ -6,6 +5,32 @@ export Pose2D
 export Trajectory, CircleTrajectory
 export LQRController
 export Quad2dPlot
+
+export FrRobotState, FrCtrlCmd, FrRobotDynamics, FrRobot
+export FrCtrlCmd, FrActuatorCmd
+export FrDigitalController
+
+abstract type FrSys end
+
+abstract type FrContinuousSys <: FrSys end
+abstract type FrDiscreteSys <: FrSys end
+abstract type FrHybridSys <: FrSys end
+
+abstract type FrRobot <: FrHybridSys end
+
+abstract type FrDigitalController <: FrDiscreteSys end
+
+abstract type FrRobotDynamics <: FrContinuousSys end
+
+abstract type FrState end
+abstract type FrRobotState <: FrState end
+
+abstract type FrCtrlCmd end
+abstract type FrActuatorCmd end
+
+
+
+#--------------------------------------------------------------------------
 
 struct BLDCMotor1
     thrust_min::Float64
@@ -59,15 +84,6 @@ struct SafetyBox5
     z_high::Float64
 end
 SafetyBox = SafetyBox5
-
-#------------------------------------------------------------------
-
-struct LQRController1
-    K::SMatrix
-end
-
-LQRController = LQRController1
-
 
 #------------------------------------------------------------------
 abstract type Trajectory end;
