@@ -34,4 +34,6 @@ function run_tests()
     @test isapprox(state_intial, state_one_rev)
 end
 
+run_tests()
+
 end
