@@ -1,5 +1,18 @@
+import Base.==
 
+
+# High level functions
+export convert_Fr_types_to_diffeq_state, struct_to_float64_vector
+
+# Low level functions 
 export check_if_struct_equals_vector, checkif_struct_has_only_Float64, get_struct_length, struct_to_float64_vector
+export fr_create
+
+function fr_create(type_; kwargs...)
+    params_tuple = values(kwargs)
+    structfromnt(type_, params_tuple)
+end
+
 
 function check_if_struct_equals_vector(struct_, vector_::Vector{Float64})
 
@@ -22,8 +35,6 @@ end
 
 function checkif_struct_has_only_Float64(struct_type)
     for type in struct_type.types
-        @show type
-
         if type == Float64
             continue
         else
@@ -59,4 +70,21 @@ function struct_to_float64_vector(struct_)
     end
 
     return vec
+end
+
+function convert_Fr_types_to_diffeq_state(state::FrState, ctrl_cmd::FrCtrlCmd)
+
+    state_vec = struct_to_float64_vector(state)
+    control_vec = struct_to_float64_vector(ctrl_cmd)
+
+    diffeq_state = vcat(state_vec, control_vec)
+end
+
+# convert Vector{float64} ro array 
+fr(vec::Float64, type) = type(vec...)
+
+
+function ==(a::T, b::T) where {T<:FrState}
+    f = fieldnames(T)
+    getfield.(Ref(a), f) == getfield.(Ref(b), f)
 end
