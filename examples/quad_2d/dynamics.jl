@@ -37,7 +37,7 @@ end
 function dynamics!(quad_2d::Quad2D, X, U)
 
     update_state!(quad_2d, X)
-    control_cmd = fr_comm(U, Quad2DState)
+    control_cmd = get_fr_type(U, Quad2DState)
 
     dynamics!(quad_2d, control_cmd)
 end
