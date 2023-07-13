@@ -8,7 +8,7 @@ using StaticArrays
 using Test
 
 include("./../examples/quad_2d/quad_2d.jl")
-using .Quad2D_Demo
+
 
 # testing
 function run_tests()
@@ -23,6 +23,12 @@ function run_tests()
         # test update state_func
         update_state!(quad_2d, new_state)
         @test check_if_struct_equals_vector(quad_2d.state, new_state)
+
+        # test update state_func
+        new_state_2 = fr_create(Quad2DState; y=1.0, z=2.0, θ=3.0, ẏ=0.0, ż=0.0, θ̇=0.0)
+        update_state!(quad_2d, new_state_2)
+        @test quad_2d.state == new_state_2
+
     end
 
     initial_state = fr_create(Quad2DState; y=0.0, z=0.0, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
@@ -35,6 +41,7 @@ function run_tests()
     @testset "Dynamics: dynamics function " begin
 
         # Test 1: 
+
         # Vehicle state: At rest on the ground
         # Control input: Thrust=0, Torque=0 
         # Expected outcome: vehicle stays in place, all zeros in state vector except for the acc due to gravity along z 
@@ -45,6 +52,7 @@ function run_tests()
         @test isapprox(state_vec, ground_truth)
 
         # Test 2: 
+
         # Vehicle state: Hovering at altitude of 1 m
         # Control input: thrust=-g, torque=0
         # Expected state: vehicle stays in place, all zeros in state vector
@@ -66,7 +74,7 @@ function run_tests()
 
         # Actuator command: left_motor_thrust=0, right_motor_thrust=0 
         # Control command: Thrust=0, Torque=0 
-        # Expected outcome: vehicle stays in place, all zeros in state vector except for the acc due to gravity along z 
+        # Expected outcome: zero body thrust, zero body torque
         actuator_cmd = fr_create(Quad2DActuatorCmd; left_motor_thrust=0.0, right_motor_thrust=0.0)
         ctrl_cmd = actuator_cmd_to_ctrl_cmd(quad_2d, actuator_cmd)
         ground_truth = [0.0, 0.0]
@@ -84,7 +92,8 @@ function run_tests()
 
         @test isapprox(ctrl_cmd_vec, ground_truth)
 
-        # Test 2: 
+        # Test 3: 
+
         # Actuator command: left_motor_thrust=2.5, right_motor_thrust=-2.5
         # Control command: Thrust= 0 , Torque=(left_motor_thrust +right_motor_thrust)*L
         # Expected outcome: zero body thrust, positive body torque
