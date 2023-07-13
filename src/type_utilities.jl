@@ -8,12 +8,14 @@ export convert_Fr_types_to_diffeq_state, struct_to_float64_vector
 export check_if_struct_equals_vector, checkif_struct_has_only_Float64, get_struct_length, struct_to_float64_vector
 export fr_create
 
+#= Convenience function for creating types from FlyingRobots.jl. Creates structs using
+an API like that of namedtuples to avoid mixing up fields  =#
 function fr_create(type_; kwargs...)
     params_tuple = values(kwargs)
     structfromnt(type_, params_tuple)
 end
 
-
+#= Check if the elements of a struct equal the elements of a vector of ony Float64 elements  =#
 function check_if_struct_equals_vector(struct_, vector_::Vector{Float64})
 
     is_equal = true
@@ -33,6 +35,7 @@ function check_if_struct_equals_vector(struct_, vector_::Vector{Float64})
     return is_equal
 end
 
+#= Check if a struct contaons onlu Float64 elements =#
 function checkif_struct_has_only_Float64(struct_type)
     for type in struct_type.types
         if type == Float64
@@ -45,8 +48,11 @@ function checkif_struct_has_only_Float64(struct_type)
     return true
 end
 
+#= get the number of elements in a struct =#
 get_struct_length(struct_type) = length(struct_type.types)
 
+#= get a vector of Float64 elements containing that same values as an input struct 
+    of only Float64 elements  =#
 function struct_to_float64_vector(struct_)
 
     #  get type of struct 
@@ -60,7 +66,7 @@ function struct_to_float64_vector(struct_)
     # get number of elements
     len = get_struct_length(struct_type)
 
-    # preallocate vector
+    # allocate vector
     vec = Array{Float64}(undef, len)
 
     # iterate through struct elements 
@@ -80,10 +86,10 @@ function convert_Fr_types_to_diffeq_state(state::FrState, ctrl_cmd::FrCtrlCmd)
     diffeq_state = vcat(state_vec, control_vec)
 end
 
-# convert Vector{float64} ro array 
+#= convert a vector  of Float64} to a type from FlyingRobots.jl =#
 fr(vec::Float64, type) = type(vec...)
 
-
+#= Overlead == function to check whether the values of two structs of the same type are equal=#
 function ==(a::T, b::T) where {T<:FrState}
     f = fieldnames(T)
     getfield.(Ref(a), f) == getfield.(Ref(b), f)
