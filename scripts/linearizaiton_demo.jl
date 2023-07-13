@@ -12,10 +12,15 @@ using .Quad2D_Demo
 vec(X::Quad2DState) = @SVector [X.y, X.z, X.θ, X.ẏ, X.ż, X.θ̇]
 vec(X::Quad2DControlCmd) = @SVector [X.body_thrust, X.body_torque]
 
-function dynamics(X, U, params::NamedTuple)
+fr(vec, type) = type(vec...)
+
+fr([1, 1], Quad2DControlCmd)
+
+
+function dynamics(quad_2d::Quad2D, X, U)
 
     # extract the parameters
-    m, L, I_xx = params
+    m, L, I_xx = quad_2d.params
 
     y = X[1]
     z = X[2]
@@ -55,8 +60,8 @@ function linearize_model(dynamics, robot::FrRobot, state::FrRobotState, control_
     x0 = vec(state)
     u0 = vec(control_cmd)
 
-    A = ForwardDiff.jacobian(x -> dynamics(x, u0, params), x0)
-    B = ForwardDiff.jacobian(u -> dynamics(x0, u, params), u0)
+    A = ForwardDiff.jacobian(x -> dynamics(robot, x, u0), x0)
+    B = ForwardDiff.jacobian(u -> dynamics(robot, x0, u), u0)
 
     nx = robot.nx
     nu = robot.nu

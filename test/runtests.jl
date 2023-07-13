@@ -6,6 +6,7 @@ include("trajectory_generation.jl")
 include("dynamics.jl")
 include("controller.jl")
 include("typeutilities.jl")
+include("linearize.jl")
 
 let
     @testset "FlyingRobots.jl" begin

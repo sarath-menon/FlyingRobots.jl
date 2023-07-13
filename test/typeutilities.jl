@@ -34,8 +34,8 @@ function run_tests()
         @test [obj.x, obj.y] == vec_
 
         # Test4 : test function check whether two structs are equal 
-        state_1 = fr_create(Quad2DState; y=0.0, z=0.0, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
-        state_2 = fr_create(Quad2DState; y=0.0, z=0.0, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
+        state_1 = fr_create(Quad2DState; y=1.0, z=0.5, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
+        state_2 = fr_create(Quad2DState; y=1.0, z=0.5, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
 
         @test state_1 == state_2
 

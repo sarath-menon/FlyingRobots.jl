@@ -1,5 +1,8 @@
 module FlyingRobots
 
+using Revise
+using NamedTupleTools
+
 
 # Use the README as the module docs
 @doc let
@@ -9,9 +12,12 @@ module FlyingRobots
 end FlyingRobots
 
 
+include("constants.jl")
+include("types.jl")
+include("type_utilities.jl")
 
-include("dynamics/types.jl")
-include("dynamics/utilities.jl")
+include("logger_utilities.jl")
+
 include("dynamics/math_helper.jl")
 
 include("dynamics/trajectory_generation.jl")
@@ -21,7 +27,7 @@ include("dynamics/sim.jl")
 
 include("control/lqr.jl")
 
-include("dynamics/quad_2d.jl")
+
 
 
 # Revise.track("src/dynamics/types.jl")

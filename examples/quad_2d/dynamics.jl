@@ -1,6 +1,8 @@
 
 export dynamics!, dynamics_diffeq!, update_state!
 export actuator_cmd_to_ctrl_cmd
+export translational_dynamics
+
 
 function dynamics!(quad_2d::Quad2D, control_cmd::Quad2DControlCmd)
 
@@ -32,8 +34,16 @@ function dynamics!(quad_2d::Quad2D, control_cmd::Quad2DControlCmd)
     return SA_F64[ẏ, ż, θ̇, ÿ, z̈, θ̈]
 end
 
+function dynamics!(quad_2d::Quad2D, X, U)
 
-function update_state!(quad_2d::Quad2D, state)
+    update_state!(quad_2d, X)
+    control_cmd = fr_comm(U, Quad2DState)
+
+    dynamics!(quad_2d, control_cmd)
+end
+
+
+function update_state!(quad_2d::Quad2D, state::Vector{Float64})
     quad_2d.state.y = state[1]
     quad_2d.state.z = state[2]
     quad_2d.state.θ = state[3]
@@ -42,8 +52,17 @@ function update_state!(quad_2d::Quad2D, state)
     quad_2d.state.θ̇ = state[6]
 end
 
+function update_state!(quad_2d::Quad2D, state::Quad2DState)
+    quad_2d.state.y = state.y
+    quad_2d.state.z = state.z
+    quad_2d.state.θ = state.θ
+    quad_2d.state.ẏ = state.ẏ
+    quad_2d.state.ż = state.ż
+    quad_2d.state.θ̇ = state.θ̇
+end
 
-function dynamics_diffeq!(d_diffeq_state::Vector{Float64}, diffeq_state::Vector{Float64}, params::NamedTuple, t)
+
+function dynamics_diffeq!(d_diffeq_state, diffeq_state, params::NamedTuple, t)
 
     # Extract the parameters
     quad_2d = params.FrRobot
@@ -62,6 +81,8 @@ function dynamics_diffeq!(d_diffeq_state::Vector{Float64}, diffeq_state::Vector{
 
     d_diffeq_state[1], d_diffeq_state[2], d_diffeq_state[3] = ẏ, ż, θ̇
     d_diffeq_state[4], d_diffeq_state[5], d_diffeq_state[6] = ÿ, z̈, θ̈
+
+    return nothing
 
 end
 

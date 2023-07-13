@@ -9,7 +9,6 @@ using Test
 
 include("./../examples/quad_2d/quad_2d.jl")
 
-
 # testing
 function run_tests()
     quad_2d_params = (; m=1.0, L=0.1, I_xx=0.003)
