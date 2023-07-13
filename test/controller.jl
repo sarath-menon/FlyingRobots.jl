@@ -8,7 +8,6 @@ using StaticArrays
 using Test
 
 include("./../examples/quad_2d/quad_2d.jl")
-using .Quad2D_Demo
 
 # quad_2d_params = (; m=1.0, L=0.1, I_xx=0.003)
 # initial_state = fr_create(Quad2DState; y=0.0, z=0.0, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
