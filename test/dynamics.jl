@@ -64,6 +64,30 @@ function run_tests()
 
     end
 
+    @testset "Dynamics: dynamics function accepting vector input " begin
+
+        #= Test 1: Check it it returns the same output as the core dynamics function
+        for a set of random inputs =#
+        ctrl_cmd = fr_create(Quad2DControlCmd; body_thrust=0.0, body_torque=0.0)
+        state_vec = dynamics!(quad_2d, ctrl_cmd)
+        ground_truth = [0.0, 0.0, 0.0, 0.0, g, 0.0,]
+
+        @test isapprox(state_vec, ground_truth)
+
+        # Test 2: 
+
+        # Vehicle state: Hovering at altitude of 1 m
+        # Control input: thrust=-g, torque=0
+        # Expected state: vehicle stays in place, all zeros in state vector
+
+        ctrl_cmd = fr_create(Quad2DControlCmd; body_thrust=-g, body_torque=0.0)
+        state_vec = dynamics!(quad_2d, ctrl_cmd)
+        ground_truth = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+        @test isapprox(state_vec, ground_truth)
+
+    end
+
     @testset "Dynamics: actuator_cmd_to_ctrl_cmd function " begin
 
         initial_state = fr_create(Quad2DState; y=0.0, z=0.0, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
