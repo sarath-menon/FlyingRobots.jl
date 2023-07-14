@@ -13,15 +13,18 @@ quad_2d_params = (; m=1.0, L=0.1, I_xx=0.003)
 # initial_state = fr_create(Quad2DState; y=0.0, z=0.0, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
 quad_2d = fr_create(Quad2D; nx=6, nu=2, state=initial_state, params=quad_2d_params)
 
+# setup callback
+control_cb = PeriodicCallback(0.01, initial_affect=true, save_positions=(false, true)) do integrator
+end
+
 # setup ODE
-tspan = (0.0, 1.0)
+tspan = (0.0, 10.0)
 state = zeros(8)
-prob = ODEProblem(dynamics4_diffeq, state, tspan, quad_2d_params)
+prob = ODEProblem(dynamics4_diffeq, state, tspan, quad_2d_params, callback=control_cb)
 
 # solve ODE
-# sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false);
-sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
-
+@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
+@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
 sol.t
 
@@ -42,6 +45,6 @@ d_state = zeros(8)
 @btime dynamics4_diffeq(d_state, state, quad_2d_params, 0.01)
 
 ##= DifferentialEquations.jl solver =#
+@btime sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
 @btime sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
-
 end
