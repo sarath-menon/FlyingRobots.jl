@@ -1,6 +1,6 @@
 
 
-export dynamics_diffeq
+export dynamics_diffeq, dynamics
 
 function dynamics(X, U, params::NamedTuple)
 
@@ -37,7 +37,7 @@ function dynamics(X, U, params::NamedTuple)
 end
 
 #Define the problem
-function dynamics_diffeq(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
+function dynamics_diffeq(d_state, state, params::NamedTuple, t)
 
     # Extract the parameters
     m, l, I_xx, safety_box, K = params.quad
