@@ -49,12 +49,18 @@ params = (; quad=quad_params, trajectory=circle_trajec, frmodel=ntfromstruct(frm
 quad2d_plot = quad2d_plot_initialize(frmodel_params, tspan)
 
 #Initial Conditions
-x₀ = Pose2D(3, 1, 0, 0, 0, 0)
-initial_state = [x₀.y, x₀.z, x₀.θ, x₀.ẏ, x₀.ż, x₀.θ̇]
-u₀ = [0, 0]
+# x₀ = Pose2D(3, 1, 0, 0, 0, 0)
+# initial_state = [x₀.y, x₀.z, x₀.θ, x₀.ẏ, x₀.ż, x₀.θ̇]
+# u₀ = [0, 0]
 
 # initial_conditions : (initial state + intial contorl action)
-initial_conditions = vcat(initial_state, u₀)
+# initial_conditions = vcat(initial_state, u₀)
+
+X₀ = Quad2DState(3, 1, 0, 0, 0, 0)
+U₀ = Quad2DActuatorCmd(0, 0)
+
+# initial_conditions : (initial state + intial contorl action)
+initial_conditions = Vector(vcat(X₀, U₀))
 
 # setup ODE
 prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
@@ -67,9 +73,6 @@ prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=c
 CSV.write("logs/log_no_alloc.csv", Tables.table(log_matrix), writeheader=false)
 
 quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
-
-
-@allocations solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
 
 
 @testset "Core dynamics function: IO tests" begin
@@ -106,7 +109,7 @@ end
 
     push!(input_vec, vec_inp)
     push!(input_vec, struct_inp)
-
+ 
     for (X,U) in input_vec
 
         # Test 1: Check if output of dynamics function has same length as the state
@@ -121,17 +124,20 @@ end
     
 end
 
-@testset "Dynamics: Wrapper around core dynamics function " begin
 
-    state = rand(params.frmodel.nx + params.frmodel.nu)
-    d_state = similar(state)
-    t = rand()
-    dynamics_diffeq(d_state, state, params, t)
-
-end
 
 @testset "Sim: performance tests" begin
-    
+
+    #Initial Conditions
+    X₀ = Quad2DState(3, 1, 0, 0, 0, 0)
+    U₀ = Quad2DActuatorCmd(0, 0)
+
+    # initial_conditions : (initial state + intial contorl action)
+    initial_conditions = Vector(vcat(X₀, U₀))
+
+    # setup ODE
+    prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
+        
     # Test 1: Check if core dynamics funcs has zero allocations is zero 
 
     # Pre-run to compile 
