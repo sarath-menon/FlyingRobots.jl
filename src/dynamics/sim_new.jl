@@ -1,20 +1,18 @@
-export quad_2d_dynamics_diffeq_new2
+export quad_2d_dynamics_diffeq_new
 
-function quad_2d_dynamics_new(state::Quad2DState, actuator_cmd::Quad2DActuatorCmd, params::NamedTuple)
+function quad_2d_dynamics_new(X, actuator_cmd::Quad2DActuatorCmd, params::NamedTuple)
 
     # extract the parameters
     m, l, I_xx, safety_box, K = params.quad
 
     g_vec = @SVector [0; g] # use static array
 
-    #extract the state
-    X = state
-    y = X.y
-    z = X.z
-    θ = X.θ
-    ẏ = X.ẏ
-    ż = X.ż
-    θ̇ = X.θ̇
+    y = X[1]
+    z = X[2]
+    θ = X[3]
+    ẏ = X[4]
+    ż = X[5]
+    θ̇ = X[6]
 
     # get the control input
     f_1 = actuator_cmd.left_motor_thrust
@@ -37,7 +35,7 @@ function quad_2d_dynamics_new(state::Quad2DState, actuator_cmd::Quad2DActuatorCm
 end
 
 #Define the problem
-function quad_2d_dynamics_diffeq_new2(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
+function quad_2d_dynamics_diffeq_new(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
 
     # Extract the parameters
     m, l, I_xx, safety_box, K = params.quad
@@ -48,14 +46,14 @@ function quad_2d_dynamics_diffeq_new2(d_state::Vector{Float64}, state::Vector{Fl
 
     # extract the control input
     U = @view state[nx+1:end]
+    # actuator_cmd = Quad2DActuatorCmd(U[1], U[2])
+    actuator_cmd = convert(Quad2DControlCmd, U)
 
-    state_ = convert(Quad2DState, X)
-    ctrl_cmd = convert(Quad2DActuatorCmd, U)
-
-    (ẏ, ż, θ̇, ÿ, z̈, θ̈) = quad_2d_dynamics_new(state_, ctrl_cmd, params)
-
-    # @show d_state
+    (ẏ, ż, θ̇, ÿ, z̈, θ̈) = quad_2d_dynamics(X, actuator_cmd, params)
 
     d_state[1], d_state[2], d_state[3] = ẏ, ż, θ̇
     d_state[4], d_state[5], d_state[6] = ÿ, z̈, θ̈
+
+
+    return nothing
 end
