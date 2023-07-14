@@ -3,6 +3,10 @@ module FlyingRobots
 using Revise
 using NamedTupleTools
 
+export FrRobotState, FrCtrlCmd, FrRobotDynamics, FrRobot
+export FrCtrlCmd, FrActuatorCmd
+export FrDigitalController
+
 
 # Use the README as the module docs
 @doc let
@@ -14,7 +18,6 @@ end FlyingRobots
 
 include("constants.jl")
 include("types.jl")
-include("type_utilities.jl")
 
 include("logger_utilities.jl")
 
@@ -25,9 +28,12 @@ include("dynamics/plotting.jl")
 include("dynamics/linearize.jl")
 include("dynamics/sim.jl")
 
+
 include("control/lqr.jl")
 
+include("./../examples/quad_2d/types.jl")
 
+include("dynamics/sim_new.jl")
 
 
 # Revise.track("src/dynamics/types.jl")
