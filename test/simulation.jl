@@ -89,45 +89,20 @@ quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req
     @test length(result) == params.frmodel.nx
 end
 
-@testset "Core dynamics function: Performance tests" begin
 
-    X = rand(params.frmodel.nx)
-    U = rand( params.frmodel.nu)
-
-    # Test 1: Check if output of dynamics function has same length as the state
-    result = dynamics(X, U, params::NamedTuple)
-    @test length(result) == params.frmodel.nx
-
-    # Test 2: Check if function makes only 1 allocation 
-    allocations = @allocations dynamics(X, U, params::NamedTuple)
-    @test allocations == 1
-end
 
 @testset "Core dynamics function: Performance tests" begin
 
-    X = Quad2DState(0.0,0.0,0.0,0.0,0.0,0.0, )
-    U = Quad2DActuatorCmd(0.0, 0.0)
 
-    # Test 1: Check if output of dynamics function has same length as the state
-    result = dynamics(X, U, params::NamedTuple)
-    @test length(result) == params.frmodel.nx
-
-    # Test 2: Check if function makes only 1 allocation 
-    allocations = @allocations dynamics(X, U, params::NamedTuple)
-    @test allocations == 1
-end
-
-@testset "Core dynamics function: Performance tests" begin
-
-    X_vec = zeros(params.frmodel.nx)
-    U_vec = zeros(params.frmodel.nu)
-
-    vec_inp = (X_vec, U_vec)
-
-    X_struct = Quad2DState(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    X_struct = Quad2DState(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
     U_struct = Quad2DActuatorCmd(0.0, 0.0)
 
     struct_inp = (X_struct, U_struct)
+
+    X_vec = Vector(X_struct)
+    U_vec = Vector(U_struct)
+
+    vec_inp = (X_vec, U_vec)
 
     input_vec = Tuple[]
 
