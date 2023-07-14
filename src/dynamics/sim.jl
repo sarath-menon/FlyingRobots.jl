@@ -51,4 +51,6 @@ function quad_2d_dynamics_diffeq(d_state::Vector{Float64}, state::Vector{Float64
 
     d_state[1], d_state[2], d_state[3] = ẏ, ż, θ̇
     d_state[4], d_state[5], d_state[6] = ÿ, z̈, θ̈
+
+    return nothing
 end
