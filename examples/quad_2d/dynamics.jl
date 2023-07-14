@@ -34,13 +34,66 @@ function dynamics!(quad_2d::Quad2D, control_cmd::Quad2DControlCmd)
     return @SVector [ẏ, ż, θ̇, ÿ, z̈, θ̈]
 end
 
-function dynamics!(quad_2d::Quad2D, X, U)
+function dynamics2!(state::Quad2DState, control_cmd::Quad2DControlCmd, params)
 
-    update_state!(quad_2d, X)
-    control_cmd = get_fr_type(U, Quad2DState)
+    # extract the parameters
+    m, L, I_xx = params
 
-    dynamics!(quad_2d, control_cmd)
+    #extract the state
+    X = state
+    y = X.y
+    z = X.z
+    θ = X.θ
+    ẏ = X.ẏ
+    ż = X.ẏ
+    θ̇ = X.ẏ
+
+    a_thrust = (control_cmd.body_thrust / m) # mass normalized body thrust 
+    f = @SVector [0; a_thrust]
+    τ = control_cmd.body_torque
+
+    # gravity vector 
+    g_vec = @SVector [0; g] # use static array
+
+    # translation E.O.M
+    (ÿ, z̈) = R_2D(θ) * f + g_vec
+
+    # rotational E.O.M
+    θ̈ = τ / I_xx
+
+    return @SVector [ẏ, ż, θ̇, ÿ, z̈, θ̈]
+
 end
+
+#Define the problem
+function dynamics4_diffeq(d_state, state, params::NamedTuple, t)
+
+    nx = 6
+
+    # extract the state
+    X = @view state[1:nx]
+
+    # extract the control input
+    U = @view state[nx+1:end]
+
+    state_ = convert(Quad2DState, X)
+    ctrl_cmd = convert(Quad2DControlCmd, U)
+
+
+    (ẏ, ż, θ̇, ÿ, z̈, θ̈) = dynamics2!(state_, ctrl_cmd, params)
+
+    d_state[1], d_state[2], d_state[3] = ẏ, ż, θ̇
+    d_state[4], d_state[5], d_state[6] = ÿ, z̈, θ̈
+    return nothing
+end
+
+# function dynamics!(quad_2d::Quad2D, X, U)
+
+#     update_state!(quad_2d, X)
+#     control_cmd = get_fr_type(U, Quad2DState)
+
+#     dynamics!(quad_2d, control_cmd)
+# end
 
 
 function update_state!(quad_2d::Quad2D, state::Vector{Float64})
