@@ -57,10 +57,8 @@ u₀ = [0, 0]
 # initial_conditions : (initial state + intial contorl action)
 initial_conditions = vcat(initial_state, u₀)
 
-control_cb 
-
 # setup ODE
-prob = ODEProblem(quad_2d_dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
+prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
 
 # solve ODE
 #sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
@@ -71,18 +69,29 @@ CSV.write("logs/log_no_alloc.csv", Tables.table(log_matrix), writeheader=false)
 
 quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
-# benchmarking 
-time_taken = @elapsed solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
 
+@allocations solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
 
 
 @testset "Type Utities: Low level tests" begin
     
-    # Test 1: Check if no. of allocations is zero 
-    allocations = @allocated quad_2d_dynamics_diffeq(d_state, state, params, 0.1)
-    @test allocations==0
+    # Test 1: Check if core dynamics funcs has zero allocations is zero 
 
-    # Test 2: Check whetther the solve time is less than  50ms
+    # Pre-run to compile 
+    dynamics_diffeq(d_state, state, params, 0.1)
+    
+    allocations = @allocations dynamics_diffeq(d_state, state, params, 0.1)
+    @test allocations ==0
+
+    # Test 2: Check if simulation makes <100 allocations 
+
+    # Pre-run to compile 
+    solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
+    
+    allocations = @allocations solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
+    @test allocations < 100
+
+    # Test 3: Check whether the solve time is less than  50ms
     time_taken= @elapsed solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
-    @test time_taken<= 0.050
+    @test time_taken <= 0.050
 end
