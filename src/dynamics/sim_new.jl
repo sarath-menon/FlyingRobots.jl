@@ -1,4 +1,4 @@
-export quad_2d_dynamics_diffeq_new
+export quad_2d_dynamics_diffeq_new2
 
 function quad_2d_dynamics_new(state::Quad2DState, actuator_cmd::Quad2DActuatorCmd, params::NamedTuple)
 
@@ -37,7 +37,7 @@ function quad_2d_dynamics_new(state::Quad2DState, actuator_cmd::Quad2DActuatorCm
 end
 
 #Define the problem
-function quad_2d_dynamics_diffeq_new(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
+function quad_2d_dynamics_diffeq_new2(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
 
     # Extract the parameters
     m, l, I_xx, safety_box, K = params.quad
@@ -52,12 +52,10 @@ function quad_2d_dynamics_diffeq_new(d_state::Vector{Float64}, state::Vector{Flo
     state_ = convert(Quad2DState, X)
     ctrl_cmd = convert(Quad2DActuatorCmd, U)
 
-    # @show state
-
     (ẏ, ż, θ̇, ÿ, z̈, θ̈) = quad_2d_dynamics_new(state_, ctrl_cmd, params)
+
+    # @show d_state
 
     d_state[1], d_state[2], d_state[3] = ẏ, ż, θ̇
     d_state[4], d_state[5], d_state[6] = ÿ, z̈, θ̈
-
-    return nothing
 end

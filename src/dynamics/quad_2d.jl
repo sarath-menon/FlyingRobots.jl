@@ -14,6 +14,8 @@ GLMakie.activate!(inline=false)
 # include("types.jl")
 # include("utilities.jl")
 
+export setup_control_cb
+
 function setup_control_cb(frmodel::FrModel, quad_obj::Quad2d)
     # Period callback that applies discrete controller 
     control_cb = PeriodicCallback(0.01, initial_affect=true, save_positions=(false, true)) do integrator
