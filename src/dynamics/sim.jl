@@ -5,7 +5,7 @@ function quad_2d_dynamics(X, U, params::NamedTuple)
     # extract the parameters
     m, l, I_xx, safety_box, K = params.quad
 
-    g_vec = SA_F64[0; g] # use static array
+    g_vec = @SVector [0; g] # use static array
 
     y = X[1]
     z = X[2]
@@ -25,13 +25,13 @@ function quad_2d_dynamics(X, U, params::NamedTuple)
     τ = (f_1 - f_2) * l
 
     # translation E.O.M
-    f = SA_F64[0; a_thrust]
+    f = @SVector [0; a_thrust]
     (ÿ, z̈) = R_2D(θ) * f + g_vec
 
     # rotational E.O.M
     θ̈ = τ / I_xx
 
-    return SA_F64[ẏ, ż, θ̇, ÿ, z̈, θ̈]
+    return @SVector [ẏ, ż, θ̇, ÿ, z̈, θ̈]
 end
 
 #Define the problem
