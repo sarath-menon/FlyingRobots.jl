@@ -32,9 +32,6 @@ include("dynamics/sim.jl")
 
 include("control/lqr.jl")
 
-include("./../examples/quad_2d/types.jl")
-
-include("dynamics/sim_new.jl")
 
 
 # Revise.track("src/dynamics/types.jl")
