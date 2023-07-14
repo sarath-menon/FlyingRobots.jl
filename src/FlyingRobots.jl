@@ -18,6 +18,7 @@ end FlyingRobots
 
 include("constants.jl")
 include("types.jl")
+include("type_utilities.jl")
 
 include("logger_utilities.jl")
 
