@@ -1,43 +1,58 @@
 
-export control_cb
 
-control_cb = PeriodicCallback(0.01, initial_affect=true, save_positions=(false, true)) do integrator
+export dynamics_diffeq
 
-    # Extract the parameters
-    (; m, l, I_xx, safety_box, K) = integrator.p.quad
-    nx, nu, ny, Ts = integrator.p.frmodel
-    (; log_matrix) = integrator.p.logger
+function dynamics(X, U, params::NamedTuple)
 
-    # Extract the state 
-    X = @view integrator.u[1:nx]
+    # extract the parameters
+    m, l, I_xx, safety_box, K = params.quad
 
-    X_req = generate_trajectory(circle_trajec, quad_obj, integrator.t)
+    g_vec = @SVector [0; g] # use static array
 
-    # compute control input
-    X_error = X - X_req
-    U = -K * X_error
+    y = X[1]
+    z = X[2]
+    θ = X[3]
+    ẏ = X[4]
+    ż = X[5]
+    θ̇ = X[6]
 
-    # # println("X_req: $(X_req)")
-    # #println("X_error: $(X_error)")
-    #println("State: $(X)")
+    # get the control input
+    f_1 = U[1]
+    f_2 = U[2]
 
-    f_1_equilibirum = f_2_equilibirum = -g / 2
+    # compute thrust, torque
+    f_thrust = f_1 + f_2
+    a_thrust = (f_thrust / m) # mass normalized thrust 
 
-    f_1::Float64 = f_1_equilibirum + U[1]
-    f_2::Float64 = f_2_equilibirum + U[2]
+    τ = (f_1 - f_2) * l
 
-    # constrain the control input
-    f_1 = clamp(f_1, 0.0, 12.5)
-    f_2 = clamp(f_2, 0.0, 12.5)
+    # translation E.O.M
+    f = @SVector [0; a_thrust]
+    (ÿ, z̈) = R_2D(θ) * f + g_vec
 
-    #Update the control-signal
-    integrator.u[nx+1:end] = @SVector [f_1, f_2]
+    # rotational E.O.M
+    θ̈ = τ / I_xx
 
-    # # logging
-    # write_row_vector!(log_matrix, integrator.u, integrator.t, Ts)
-
+    return @SVector [ẏ, ż, θ̇, ÿ, z̈, θ̈]
 end
 
+#Define the problem
+function dynamics_diffeq(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
 
+    # Extract the parameters
+    m, l, I_xx, safety_box, K = params.quad
+    nx, nu, ny, Ts = params.frmodel
 
+    # extract the state
+    X = @view state[1:nx]
 
+    # extract the control input
+    U = @view state[nx+1:end]
+
+    (ẏ, ż, θ̇, ÿ, z̈, θ̈) = dynamics(X, U, params)
+
+    d_state[1], d_state[2], d_state[3] = ẏ, ż, θ̇
+    d_state[4], d_state[5], d_state[6] = ÿ, z̈, θ̈
+
+    return nothing
+end
