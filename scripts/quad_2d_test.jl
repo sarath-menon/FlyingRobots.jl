@@ -5,6 +5,8 @@ using FlyingRobots
 using LinearAlgebra
 using NamedTupleTools
 using DifferentialEquations
+using Tables, CSV
+GLMakie.activate!(inline=false)
 
 ## Create objects 
 motor_left = fr_create(BLDCMotor; thrust_min=0.0, thrust_max=12.5)
@@ -20,7 +22,7 @@ safety_box = fr_create(SafetyBox; x_low=-10.0, x_high=10.0, y_low=-10.0, y_high=
 x₀ = Pose2D(2, 1, 0, 0, 0, 0)
 
 
-sys_c, sys_d, AB_symbolic = FlyingRobots.linearize_system(frmodel_params.Ts, x₀, quad_obj, [f_1_equilibirum, f_2_equilibirum])
+sys_c, sys_d, AB_symbolic = FlyingRobots.linearize_system(frmodel_params.Ts, x₀, quad_obj, [-g / 2, -g / 2])
 
 ## initialize simulation
 tspan = (0.0, 60.0)
@@ -38,7 +40,7 @@ dlqr_ctrl = FlyingRobots.create_lqr_controller(Q, R; params=frmodel_params, sys=
 circle_trajec = fr_create(CircleTrajectory; r=1.0, ω=0.1 * π, y₀=2.0, z₀=2.0)
 
 # vehicle parameters
-quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl)
+quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, K=dlqr_ctrl.K)
 
 # logging parameters
 n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
@@ -57,51 +59,52 @@ u₀ = [0, 0]
 initial_conditions = vcat(initial_state, u₀)
 
 # Period callback that applies discrete controller 
-# control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_positions=(false, true)) do integrator
+control_cb = PeriodicCallback(frmodel_params.Ts, initial_affect=true, save_positions=(false, true)) do integrator
 
-#     # Extract the parameters
-#     (; m, l, I_xx, safety_box, K) = integrator.p.quad
-#     nx, nu, ny, Ts = integrator.p.frmodel
-#     (; log_matrix) = integrator.p.logger
+    # Extract the parameters
+    (; m, l, I_xx, safety_box, K) = integrator.p.quad
+    nx, nu, ny, Ts = integrator.p.frmodel
+    (; log_matrix) = integrator.p.logger
 
-#     # Extract the state 
-#     X = @view integrator.u[1:nx]
+    # Extract the state 
+    X = @view integrator.u[1:nx]
 
-#     X_req = generate_trajectory(circle_trajec, quad_obj, integrator.t)
+    X_req = generate_trajectory(circle_trajec, quad_obj, integrator.t)
 
-#     # compute control input
-#     X_error = X - X_req
-#     U = -K * X_error
+    # compute control input
+    X_error = X - X_req
+    U = -K * X_error
 
-#     # # println("X_req: $(X_req)")
-#     # #println("X_error: $(X_error)")
-#     #println("State: $(X)")
+    # # println("X_req: $(X_req)")
+    # #println("X_error: $(X_error)")
+    #println("State: $(X)")
 
-#     f_1::Float64 = f_1_equilibirum + U[1]
-#     f_2::Float64 = f_2_equilibirum + U[2]
+    f_1_equilibirum = f_2_equilibirum = -g / 2
 
-#     # constrain the control input
-#     f_1 = clamp(f_1, 0.0, 12.5)
-#     f_2 = clamp(f_2, 0.0, 12.5)
+    f_1::Float64 = f_1_equilibirum + U[1]
+    f_2::Float64 = f_2_equilibirum + U[2]
 
-#     #Update the control-signal
-#     integrator.u[nx+1:end] = SA_F64[f_1, f_2]
+    # constrain the control input
+    f_1 = clamp(f_1, 0.0, 12.5)
+    f_2 = clamp(f_2, 0.0, 12.5)
 
-#     # logging
-#     write_row_vector!(log_matrix, integrator.u, integrator.t, Ts)
+    #Update the control-signal
+    integrator.u[nx+1:end] = SA_F64[f_1, f_2]
 
-# end
+    # logging
+    write_row_vector!(log_matrix, integrator.u, integrator.t, Ts)
 
-control_cb = FlyingRobots.setup_control_cb(frmodel_params, quad_obj)
+end
 
-# # setup ODE
-# prob = ODEProblem(quad_2d, initial_conditions, tspan, params, callback=control_cb)
+#control_cb = FlyingRobots.setup_control_cb(frmodel_params, quad_obj)
 
-# # solve ODE
-# # sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false);
-# sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
+# setup ODE
+prob = ODEProblem(quad_2d_dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
 
-FlyingRobots.simulate(; X_0=initial_conditions, tspan=tspan, params=params, control_cb=control_cb)
+# solve ODE
+#sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
+sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
+#FlyingRobots.simulate(; X_0=initial_conditions, tspan=tspan, params=params, control_cb=control_cb)
 
 #compute reference trajectory for entire duration of the simulation
 (y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_obj, sol.t)
@@ -109,19 +112,12 @@ FlyingRobots.simulate(; X_0=initial_conditions, tspan=tspan, params=params, cont
 # save solution to csv file
 CSV.write("logs/log_no_alloc.csv", Tables.table(log_matrix), writeheader=false)
 
-#quad2d_plot = quad2d_plot_initialize(frmodel_params, tspan);
+quad2d_plot = quad2d_plot_initialize(frmodel_params, tspan)
 quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
-end
-let 
-a::Vec = [1.,2.]
 
-b = [0., 0.]
-
-@time a + b
-
-end
-
-
+# benchmarking 
+@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
+@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
 end

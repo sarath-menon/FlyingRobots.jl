@@ -1,4 +1,4 @@
-export quad_2d_plot_normal, quad_2d_plot_lsim
+export quad_2d_plot_normal, quad_2d_plot_lsim, quad2d_plot_initialize
 
 using GLMakie
 using DifferentialEquations
@@ -113,11 +113,11 @@ function quad_2d_plot_normal(plot::Quad2dPlot, sol::ODESolution; y_ref, z_ref, t
 end
 
 function quad_2d_plot_normal(plot::Quad2dPlot, log_matrix::Matrix{Float64}; y_ref, z_ref, theta_ref)
-    f_1 = @view sol[7, :]
-    f_2 = @view sol[8, :]
+    # f_1 = @view sol[7, :]
+    # f_2 = @view sol[8, :]
 
-    thrust = f_1 + f_2
-    torque = (f_1 - f_2) * 0.1
+    # thrust = f_1 + f_2
+    # torque = (f_1 - f_2) * 0.1
 
     # compute axis limits
     t_axis_low = sol.t[1]

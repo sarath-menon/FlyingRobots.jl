@@ -1,3 +1,5 @@
+export quad_2d_dynamics_diffeq
+
 function quad_2d_dynamics(X, U, params::NamedTuple)
 
     # extract the parameters
@@ -33,7 +35,7 @@ function quad_2d_dynamics(X, U, params::NamedTuple)
 end
 
 #Define the problem
-function quad_2d(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
+function quad_2d_dynamics_diffeq(d_state::Vector{Float64}, state::Vector{Float64}, params::NamedTuple, t)
 
     # Extract the parameters
     m, l, I_xx, safety_box, K = params.quad
