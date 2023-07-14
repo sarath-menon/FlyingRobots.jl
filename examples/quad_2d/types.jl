@@ -1,7 +1,7 @@
 export Quad2D, Quad2DState, Quad2DActuatorCmd
 export Quad2DController, Quad2DControlCmd
 
-mutable struct Quad2DState1 <: FrRobotState
+mutable struct Quad2DState2 <: FieldVector{6,Float64}
     y::Float64
     z::Float64
     θ::Float64
@@ -9,28 +9,28 @@ mutable struct Quad2DState1 <: FrRobotState
     ż::Float64
     θ̇::Float64
 end
-Quad2DState = Quad2DState1
+Quad2DState = Quad2DState2
 
 # ------------------------------------------------
 
-mutable struct Quad2DActuatorCmd1 <: FrActuatorCmd
+mutable struct Quad2DActuatorCmd2 <: FieldVector{2,Float64}
     left_motor_thrust::Float64
     right_motor_thrust::Float64
 end
 
-Quad2DActuatorCmd = Quad2DActuatorCmd1
+Quad2DActuatorCmd = Quad2DActuatorCmd2
 
 # ------------------------------------------------
 
-mutable struct Quad2DControlCmd3 <: FrCtrlCmd
+mutable struct Quad2DControlCmd4 <: FieldVector{2,Float64}
     body_thrust::Float64
     body_torque::Float64
 end
 
-Quad2DControlCmd = Quad2DControlCmd3
+Quad2DControlCmd = Quad2DControlCmd4
 
 # ------------------------------------------------
-struct Quad2D1 <: FrRobot
+struct Quad2D2 <: FrRobot
     nx::Int
     nu::Int
 
@@ -38,7 +38,7 @@ struct Quad2D1 <: FrRobot
     params::NamedTuple
 end
 
-Quad2D = Quad2D1
+Quad2D = Quad2D2
 
 # ------------------------------------------------
 struct Quad2DController1 <: FrDigitalController
