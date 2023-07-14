@@ -44,7 +44,6 @@ n_cols = 8
 log_matrix = zeros(n_rows, n_cols + 1)
 log_params = (; log_matrix=log_matrix)
 
-
 # merged params 
 params = (; quad=quad_params, trajectory=circle_trajec, frmodel=ntfromstruct(frmodel_params), logger=log_params)
 quad2d_plot = quad2d_plot_initialize(frmodel_params, tspan)
@@ -73,7 +72,27 @@ quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req
 @allocations solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
 
 
-@testset "Type Utities: Low level tests" begin
+@testset "Dynamics: Core dynamics function " begin
+
+    X = rand(params.frmodel.nx)
+    U = rand( params.frmodel.nu)
+
+    result =  dynamics(X, U, params::NamedTuple)
+
+    # Test 1: Check if output of dynamics function has same length as the state
+    @test length(result) == params.frmodel.nx
+end
+
+@testset "Dynamics: Wrapper around core dynamics function " begin
+
+    state = rand(params.frmodel.nx + params.frmodel.nu)
+    d_state = similar(state)
+    t = rand()
+    dynamics_diffeq(d_state, state, params, t)
+
+end
+
+@testset "Sim: performance tests" begin
     
     # Test 1: Check if core dynamics funcs has zero allocations is zero 
 
@@ -84,7 +103,6 @@ quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req
     @test allocations ==0
 
     # Test 2: Check if simulation makes <100 allocations 
-
     # Pre-run to compile 
     solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
     
