@@ -9,6 +9,7 @@ export Quad2dPlot
 export FrRobotState, FrCtrlCmd, FrRobotDynamics, FrRobot
 export FrCtrlCmd, FrActuatorCmd
 export FrDigitalController
+export RigidBody2D, RigidBody3D
 
 abstract type FrSys end
 
@@ -28,7 +29,8 @@ abstract type FrRobotState <: FrState end
 abstract type FrCtrlCmd end
 abstract type FrActuatorCmd end
 
-
+abstract type RigidBody2D <: FieldVector{6,Float64} end
+abstract type RigidBody3D <: FieldVector{12,Float64} end
 
 #--------------------------------------------------------------------------
 
