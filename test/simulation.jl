@@ -74,25 +74,23 @@ quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req
 
 @testset "Core dynamics function: IO tests" begin
     
-    # Test 1: Check if it accepts Vector{Float64} input
-    X = rand(params.frmodel.nx)
-    U = rand( params.frmodel.nu)
+    # Test 1: check if both struct and vector inputs give same results
+    X_struct = Quad2DState(1.0,2.0,3.0,4.0,5.0,6.0)
+    U_struct = Quad2DActuatorCmd(7.0, 8.0)
 
-    result = dynamics(X, U, params::NamedTuple)
-    @test length(result) == params.frmodel.nx
+    X_vec = [1.0,2.0,3.0,4.0,5.0,6.0]
+    U_vec =[7.0, 8.0]
 
-    # Test 1: Check if it accepts struct input
-    X = Quad2DState(0.0,0.0,0.0,0.0,0.0,0.0, )
-    U = Quad2DActuatorCmd(0.0, 0.0)
+    result_vec = dynamics(X_vec, U_vec, params::NamedTuple)
+    result_struct = dynamics(X_struct, U_struct, params::NamedTuple)
 
-    result = dynamics(X, U, params::NamedTuple)
-    @test length(result) == params.frmodel.nx
+    @test result_vec == result_struct
 end
-
 
 
 @testset "Core dynamics function: Performance tests" begin
 
+    # checks for both struct and vector type inputs
 
     X_struct = Quad2DState(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
     U_struct = Quad2DActuatorCmd(0.0, 0.0)
@@ -120,12 +118,6 @@ end
         @test allocations == 1
 
     end
-
-    # check if both struct and vector inputs give same results
-    vec_result = dynamics(X_vec, U_vec, params::NamedTuple)
-    struct_result = dynamics(X_struct, U_struct, params::NamedTuple)
-
-    @test vec_result == struct_result
     
 end
 
