@@ -61,16 +61,24 @@ U₀ = Quad2DActuatorCmd(0, 0)
 # initial_conditions : (initial state + intial contorl action)
 initial_conditions = Vector(vcat(X₀, U₀))
 
+# log initial condition
+write_row_vector!(log_matrix, initial_conditions, 0.0, 0.01)
+
+
 # setup ODE
 prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
 
 # solve ODE
 @time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
-#@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
+#@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_end=false)
 
 #compute reference trajectory for entire duration of the simulation
 t_vec = @view log_matrix[:,1]
-#(y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_obj, t_vec)
+(y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_obj, t_vec)
+
+# plotting
+#quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
+quad_2d_plot_normal(quad2d_plot, log_matrix; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
 # save solution to csv file
 csv_header = vcat(:timestep,  collect(fieldnames(Quad2DState)),
@@ -79,14 +87,9 @@ collect(fieldnames(Quad2DActuatorCmd)))
 @time log_table = Tables.table(log_matrix, header=csv_header)
 CSV.write("logs/log_no_alloc.csv", log_table, writeheader=false)
 
-quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
-
 columns = Tables.columns(log_table)
 Tables.getcolumn(columns, :y)
 
-log_matrix[:,1]
-
-@time quad_2d_plot_normal(quad2d_plot, log_matrix; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
 @testset "Core dynamics function: IO tests" begin
     
@@ -147,13 +150,10 @@ end
 
     # initial_conditions : (initial state + intial contorl action)
     initial_conditions = Vector(vcat(X₀, U₀))
-
-    # setup ODE
-    prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
         
     # Test 1: Check if core dynamics funcs has zero allocations is zero 
 
-    state = rand(quad_params.nx + quad_params.nx )
+    state = rand(params.frmodel.nx + params.frmodel.nu )
     d_state = similar(state)
 
     # Pre-run to compile 
@@ -163,6 +163,9 @@ end
     @test allocations ==0
 
     # Test 2: Check if simulation makes <100 allocations 
+     # setup ODE
+     prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
+     
     # Pre-run to compile 
     solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
     
