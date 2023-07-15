@@ -34,13 +34,10 @@ control_cb = PeriodicCallback(0.01, initial_affect=true, save_positions=(false, 
     #Update the control-signal
     integrator.u[nx+1:end] = @SVector [f_1, f_2]
 
-    # # logging
-    # write_row_vector!(log_matrix, integrator.u, integrator.t, Ts)
+    # logging
+    write_row_vector!(log_matrix, integrator.u, integrator.t, Ts)
 
 end
-
-
-
 
 function get_control_allocation_matrix(quad_2d::Quad2D)
     L = quad_2d.params.L
