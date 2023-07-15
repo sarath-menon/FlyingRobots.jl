@@ -1,3 +1,4 @@
+export write_row_vector!
 
 function write_row_vector!(A, i, row)
     # log timestep
@@ -9,16 +10,16 @@ function write_row_vector!(A, i, row)
     end
 end
 
-function write_row_vector!(A, row::Vector{Float64}, timestep::Float64, Ts::Float64)
-
+function write_row_vector!(A, row::Vector{Float64}, timestep::Float64, Ts::Float64; start_index=0)
     # find logging index
     n_timestep = convert(Int, round(timestep / Ts) + 1)
+    index = n_timestep + start_index
 
-    # log timestep
-    A[n_timestep, 1] = timestep
+    # fill 1st column with the timestep
+    A[index, 1] = timestep
 
-    # log dat
+    # next rows - state vector
     for j in 1:8
-        A[n_timestep+1, j] = row[j]
+        A[index, j+1] = row[j]
     end
 end
