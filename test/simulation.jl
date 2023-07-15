@@ -6,6 +6,12 @@ using StaticArrays
 using Test
 using BenchmarkTools
 using DifferentialEquations
+using Distances
+using LinearAlgebra
+using NamedTupleTools
+using Tables, CSV
+
+GLMakie.activate!(inline=false)
 
 include("./../examples/quad_2d/quad_2d.jl")
 
@@ -49,13 +55,6 @@ params = (; quad=quad_params, trajectory=circle_trajec, frmodel=ntfromstruct(frm
 quad2d_plot = quad2d_plot_initialize(frmodel_params, tspan)
 
 #Initial Conditions
-# x₀ = Pose2D(3, 1, 0, 0, 0, 0)
-# initial_state = [x₀.y, x₀.z, x₀.θ, x₀.ẏ, x₀.ż, x₀.θ̇]
-# u₀ = [0, 0]
-
-# initial_conditions : (initial state + intial contorl action)
-# initial_conditions = vcat(initial_state, u₀)
-
 X₀ = Quad2DState(3, 1, 0, 0, 0, 0)
 U₀ = Quad2DActuatorCmd(0, 0)
 
@@ -66,14 +65,28 @@ initial_conditions = Vector(vcat(X₀, U₀))
 prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
 
 # solve ODE
-#sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
-@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
+@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
+#@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
+
+#compute reference trajectory for entire duration of the simulation
+t_vec = @view log_matrix[:,1]
+#(y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_obj, t_vec)
 
 # save solution to csv file
-CSV.write("logs/log_no_alloc.csv", Tables.table(log_matrix), writeheader=false)
+csv_header = vcat(:timestep,  collect(fieldnames(Quad2DState)),
+collect(fieldnames(Quad2DActuatorCmd)))
+
+@time log_table = Tables.table(log_matrix, header=csv_header)
+CSV.write("logs/log_no_alloc.csv", log_table, writeheader=false)
 
 quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
+columns = Tables.columns(log_table)
+Tables.getcolumn(columns, :y)
+
+log_matrix[:,1]
+
+@time quad_2d_plot_normal(quad2d_plot, log_matrix; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
 @testset "Core dynamics function: IO tests" begin
     
@@ -139,6 +152,9 @@ end
     prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
         
     # Test 1: Check if core dynamics funcs has zero allocations is zero 
+
+    state = rand(quad_params.nx + quad_params.nx )
+    d_state = similar(state)
 
     # Pre-run to compile 
     dynamics_diffeq(d_state, state, params, 0.1)
