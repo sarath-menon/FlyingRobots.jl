@@ -55,7 +55,7 @@ function generate_trajectory(trajec_params::CircleTrajectory, quad::Quad2d, tspa
     return [y_vec, z_vec, θ_vec, ẏ_vec, ż_vec, θ̇_vec]
 end
 
-function generate_trajectory(trajec_params::CircleTrajectory, quad::Quad2d, t_vec::Vector{Float64})
+function generate_trajectory(trajec_params::CircleTrajectory, quad::Quad2d, t_vec)
     y_vec = Float64[]
     z_vec = Float64[]
     θ_vec = Float64[]
@@ -75,17 +75,3 @@ function generate_trajectory(trajec_params::CircleTrajectory, quad::Quad2d, t_ve
 
     return [y_vec, z_vec, θ_vec, ẏ_vec, ż_vec, θ̇_vec]
 end
-
-function generate_trajectory!(trajec_params::CircleTrajectory, quad::Quad2d, log_matrix::Matrix{Float64}, t_vec::Vector{Float64})
-
-    for (i, t) in enumerate(t_vec)
-        (y, z, θ, ẏ, ż, θ̇) = generate_trajectory(trajec_params, quad, t)
-        log_matrix[i, 1] = y
-        log_matrix[i, 2] = z
-        log_matrix[i, 3] = θ
-        log_matrix[i, 4] = ẏ
-        log_matrix[i, 5] = ż
-        log_matrix[i, 6] = θ̇
-    end
-end
-
