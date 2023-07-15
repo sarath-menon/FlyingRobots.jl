@@ -35,7 +35,7 @@ control_cb = PeriodicCallback(0.01, initial_affect=true, save_positions=(false, 
     integrator.u[nx+1:end] = @SVector [f_1, f_2]
 
     # logging
-    write_row_vector!(log_matrix, integrator.u, integrator.t, Ts; start_index=1)
+    write!(log_matrix, integrator.u, integrator.t, Ts; start_index=1)
 
 end
 
