@@ -45,10 +45,15 @@ quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, 
 tspan = (0.0, 60.0)
 
 # logging parameters
-n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
-n_cols = 8
-log_matrix = zeros(n_rows, n_cols + 1)
-log_params = (; log_matrix=log_matrix)
+# n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
+# n_cols = 8
+# log_matrix = zeros(n_rows, n_cols + 1)
+
+# new logger
+logger = Logger(n_fields=8, n_timesteps=length(tspan[1]:frmodel_params.Ts:tspan[2]))
+logger.log_matrix
+
+log_params = (; log_matrix=logger)
 
 # merged params 
 params = (; quad=quad_params, trajectory=circle_trajec, frmodel=ntfromstruct(frmodel_params), logger=log_params)
@@ -62,8 +67,7 @@ U₀ = Quad2DActuatorCmd(0, 0)
 initial_conditions = Vector(vcat(X₀, U₀))
 
 # log initial condition
-write_row_vector!(log_matrix, initial_conditions, 0.0, 0.01)
-
+write!(logger, initial_conditions; initial_condition=true)
 
 # setup ODE
 prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
