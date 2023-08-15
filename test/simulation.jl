@@ -45,18 +45,18 @@ quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, 
 tspan = (0.0, 60.0)
 
 # logging parameters
-# n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
-# n_cols = 8
-# log_matrix = zeros(n_rows, n_cols + 1)
+n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
+n_cols = 8
+log_matrix = zeros(n_rows, n_cols + 1)
 
 # new logger
 logger = Logger(n_fields=8, n_timesteps=length(tspan[1]:frmodel_params.Ts:tspan[2]))
 logger.log_matrix
 
-log_params = (; log_matrix=logger)
+# log_params = (; log_matrix=logger)
 
 # merged params 
-params = (; quad=quad_params, trajectory=circle_trajec, frmodel=ntfromstruct(frmodel_params), logger=log_params)
+params = (; quad=quad_params, trajectory=circle_trajec, frmodel=ntfromstruct(frmodel_params), logger=logger)
 quad2d_plot = quad2d_plot_initialize(frmodel_params, tspan)
 
 #Initial Conditions
@@ -70,7 +70,7 @@ initial_conditions = Vector(vcat(X₀, U₀))
 write!(logger, initial_conditions; initial_condition=true)
 
 # setup ODE
-prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
+prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb);
 
 # solve ODE
 @time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)

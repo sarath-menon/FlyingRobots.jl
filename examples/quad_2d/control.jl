@@ -2,12 +2,15 @@ export control_allocator, get_control_allocation_matrix
 export actuator_cmd_to_ctrl_cmd
 export control_cb
 
+using DifferentialEquations
+
 control_cb = PeriodicCallback(0.01, initial_affect=true, save_positions=(false, true)) do integrator
 
     # Extract the parameters
     (; m, l, I_xx, safety_box, K) = integrator.p.quad
     nx, nu, ny, Ts = integrator.p.frmodel
-    (; log_matrix) = integrator.p.logger
+    # (; log_matrix) = integrator.p.logger
+    logger = integrator.p.logger
 
     # Extract the state 
     X = @view integrator.u[1:nx]
@@ -35,7 +38,7 @@ control_cb = PeriodicCallback(0.01, initial_affect=true, save_positions=(false, 
     integrator.u[nx+1:end] = @SVector [f_1, f_2]
 
     # logging
-    write!(log_matrix, integrator.u, integrator.t, Ts; start_index=1)
+    write!(logger, integrator.u, integrator.t, Ts; start_index=1)
 
 end
 
