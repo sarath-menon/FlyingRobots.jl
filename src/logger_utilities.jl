@@ -40,7 +40,7 @@ function write!(logger::Logger, row::Vector{Float64}, timestep::Float64)
     logger.log_matrix[i, 1] = timestep
 
     # next rows - state vector
-    for j in 1:logger.n_fields
+    for j in 1:8
         logger.log_matrix[i, j+1] = row[j]
     end
 
