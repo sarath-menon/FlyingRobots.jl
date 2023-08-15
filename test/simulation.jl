@@ -44,16 +44,9 @@ quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, 
 ## setup simulation
 tspan = (0.0, 60.0)
 
-# logging parameters
-# n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
-# n_cols = 8
-# log_matrix = zeros(n_rows, n_cols + 1)
-
-# new logger
+# logger
 logger = Logger(n_fields=8, n_timesteps=length(tspan[1]:frmodel_params.Ts:tspan[2]))
 logger.log_matrix
-
-# log_params = (; log_matrix=logger)
 
 # merged params 
 params = (; quad=quad_params, trajectory=circle_trajec, frmodel=ntfromstruct(frmodel_params), logger=logger)
@@ -66,24 +59,10 @@ U₀ = Quad2DActuatorCmd(0, 0)
 # initial_conditions : (initial state + intial contorl action)
 initial_conditions = Vector(vcat(X₀, U₀))
 
-# log initial condition
-# write!(logger, initial_conditions; initial_condition=true)
-
-# setup ODE
-prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb);
-
-# solve ODE
-# logger.current_index = 1
-logger.params[:current_index] = 1
-# write!(logger, initial_conditions, 0.0)
-#@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
-@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_end=false)
-
-
+# run the simulation
 @time run_sim!(dynamics_diffeq, logger, tspan, initial_conditions, params, control_cb)
 
 #compute reference trajectory for entire duration of the simulation
-t_vec = @view log_matrix[:,1]
 (y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_obj, t_vec)
 
 # plotting
@@ -172,17 +151,11 @@ end
     allocations = @allocations dynamics_diffeq(d_state, state, params, 0.1)
     @test allocations ==0
 
-    # Test 2: Check if simulation makes <100 allocations 
-     # setup ODE
-     prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
-     
-    # Pre-run to compile 
-    solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
-    
-    allocations = @allocations solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
-    @test allocations < 100
+    # Test 2: Check if simulation makes <300 allocations 
+    allocations = @allocations run_sim!(dynamics_diffeq, logger, tspan, initial_conditions, params, control_cb)
+    @test allocations < 300
 
     # Test 3: Check whether the solve time is less than  50ms
-    time_taken= @elapsed solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
+    time_taken= @elapsed run_sim!(dynamics_diffeq, logger, tspan, initial_conditions, params, control_cb)
     @test time_taken <= 0.050
 end
