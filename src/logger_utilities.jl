@@ -22,7 +22,12 @@ end
 Logger = Logger13
 
 function reset!(logger::Logger)
+
+    # reset logger head
     logger.params[:current_index] = 1
+
+    # set values to zero 
+    fill!(logger.log_matrix, 0)
 end
 
 
