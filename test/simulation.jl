@@ -73,10 +73,14 @@ initial_conditions = Vector(vcat(X₀, U₀))
 prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb);
 
 # solve ODE
-logger.current_index = 1
+# logger.current_index = 1
+logger.params[:current_index] = 1
 # write!(logger, initial_conditions, 0.0)
 #@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
 @time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_end=false)
+
+
+@time run_sim!(dynamics_diffeq, logger, tspan, initial_conditions, params, control_cb)
 
 #compute reference trajectory for entire duration of the simulation
 t_vec = @view log_matrix[:,1]
