@@ -1,25 +1,23 @@
 export write!, reset!
 export Logger
 
-struct Logger14
-    n_fields::Integer
-    n_timesteps::Integer
+struct Logger2
     log_matrix::Matrix{Float64}
 
     params::Dict{Symbol,Int64}
 
-    function Logger14(; n_fields=n_fields, n_timesteps=n_timesteps)
+    function Logger2(; n_fields=n_fields, n_timesteps=n_timesteps)
         # extra column for timestep data
         log_matrix = zeros(n_timesteps, n_fields + 1)
 
         # parameters
-        params = Dict(:current_index => 1)
+        params = Dict(:current_index => 1, :n_fields => n_fields, :n_timesteps => n_timesteps)
 
-        new(n_fields, n_timesteps, log_matrix, params)
+        new(log_matrix, params)
     end
 end
 
-Logger = Logger14
+Logger = Logger2
 
 function reset!(logger::Logger)
 
@@ -35,12 +33,14 @@ end
 function write!(logger::Logger, row::Vector{Float64}, timestep::Float64)
 
     i = logger.params[:current_index]
+    n_fields = logger.params[:n_fields]
+
 
     # fill 1st column with the timestep
     logger.log_matrix[i, 1] = timestep
 
     # next rows - state vector
-    for j in 1:8
+    for j in 1:n_fields
         logger.log_matrix[i, j+1] = row[j]
     end
 
@@ -50,5 +50,7 @@ function write!(logger::Logger, row::Vector{Float64}, timestep::Float64)
 end
 
 function Base.read(logger::Logger, index::Integer)
-    return logger.log_matrix[index, 2:logger.n_fields+1]
+    n_fields = logger.params[:n_fields]
+
+    return logger.log_matrix[index, 2:n_fields+1]
 end
