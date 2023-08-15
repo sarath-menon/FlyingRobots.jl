@@ -59,11 +59,11 @@ U₀ = Quad2DActuatorCmd(0, 0)
 # initial_conditions : (initial state + intial contorl action)
 initial_conditions = Vector(vcat(X₀, U₀))
 
-
 # run the simulation
 @time run_sim!(dynamics_diffeq, logger, tspan, initial_conditions, params, control_cb)
 
 #compute reference trajectory for entire duration of the simulation
+t_vec = @view logger.log_matrix[:,1]
 (y_req, z_req, θ_req, ẏ_req, ż_req, θ̇_req) = generate_trajectory(circle_trajec, quad_obj, t_vec)
 
 # plotting
