@@ -4,7 +4,7 @@ export control_cb
 
 using DifferentialEquations
 
-control_cb = PeriodicCallback(0.01, initial_affect=true, final_affect=true, save_positions=(false, true)) do integrator
+control_cb = PeriodicCallback(0.01, initial_affect=true, final_affect=true, save_positions=(false, false)) do integrator
 
     # Extract the parameters
     (; m, l, I_xx, safety_box, K) = integrator.p.quad

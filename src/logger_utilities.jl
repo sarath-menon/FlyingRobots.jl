@@ -1,4 +1,4 @@
-export write!
+export write!, reset!
 export Logger
 
 mutable struct Logger1
@@ -20,6 +20,10 @@ mutable struct Logger1
 end
 
 Logger = Logger1
+
+function reset!(logger::Logger)
+    logger.current_index = 1
+end
 
 
 function write!(logger::Logger, row::Vector{Float64}, timestep::Float64, Ts::Float64; start_index=0)
@@ -59,7 +63,6 @@ function write!(logger::Logger, row::Vector{Float64}, timestep::Float64)
 
     return nothing
 end
-
 
 
 function write!(logger::Logger, row::Vector{Float64}; Ts::Float64=0.01, timestep::Float64=0.0, initial_condition::Bool=false, offset::Int=0)
