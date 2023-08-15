@@ -45,9 +45,9 @@ quad_params = (; m=quad_obj.m, l=quad_obj.L, I_xx=0.003, safety_box=safety_box, 
 tspan = (0.0, 60.0)
 
 # logging parameters
-n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
-n_cols = 8
-log_matrix = zeros(n_rows, n_cols + 1)
+# n_rows::Int = length(tspan[1]:frmodel_params.Ts:tspan[2])
+# n_cols = 8
+# log_matrix = zeros(n_rows, n_cols + 1)
 
 # new logger
 logger = Logger(n_fields=8, n_timesteps=length(tspan[1]:frmodel_params.Ts:tspan[2]))
@@ -67,14 +67,16 @@ U₀ = Quad2DActuatorCmd(0, 0)
 initial_conditions = Vector(vcat(X₀, U₀))
 
 # log initial condition
-write!(logger, initial_conditions; initial_condition=true)
+# write!(logger, initial_conditions; initial_condition=true)
 
 # setup ODE
 prob = ODEProblem(dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb);
 
 # solve ODE
-@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
-#@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_end=false)
+logger.current_index = 1
+# write!(logger, initial_conditions, 0.0)
+#@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
+@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_end=false)
 
 #compute reference trajectory for entire duration of the simulation
 t_vec = @view log_matrix[:,1]
@@ -82,7 +84,7 @@ t_vec = @view log_matrix[:,1]
 
 # plotting
 #quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
-quad_2d_plot_normal(quad2d_plot, log_matrix; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
+quad_2d_plot_normal(quad2d_plot, logger; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
 # save solution to csv file
 csv_header = vcat(:timestep,  collect(fieldnames(Quad2DState)),
