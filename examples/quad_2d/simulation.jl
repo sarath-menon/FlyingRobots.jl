@@ -1,4 +1,4 @@
-export_run_sim
+export run_sim
 
 using DifferentialEquations
 
