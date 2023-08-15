@@ -59,6 +59,7 @@ U₀ = Quad2DActuatorCmd(0, 0)
 # initial_conditions : (initial state + intial contorl action)
 initial_conditions = Vector(vcat(X₀, U₀))
 
+
 # run the simulation
 @time run_sim!(dynamics_diffeq, logger, tspan, initial_conditions, params, control_cb)
 
