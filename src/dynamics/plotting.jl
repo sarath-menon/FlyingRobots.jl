@@ -112,12 +112,14 @@ function quad_2d_plot_normal(plot::Quad2dPlot, sol::ODESolution; y_ref, z_ref, t
     # plot.torque_vec[] = torque
 end
 
-function quad_2d_plot_normal(plot::Quad2dPlot, log_matrix::Matrix{Float64}; y_ref, z_ref, theta_ref)
+function quad_2d_plot_normal(plot::Quad2dPlot, logger::Logger; y_ref, z_ref, theta_ref)
     # f_1 = @view sol[7, :]
     # f_2 = @view sol[8, :]
 
     # thrust = f_1 + f_2
     # torque = (f_1 - f_2) * 0.1
+
+    log_matrix = logger.log_matrix
 
     # compute axis limits
     t_axis_low = log_matrix[1, 1]
@@ -154,33 +156,3 @@ function quad_2d_plot_normal(plot::Quad2dPlot, log_matrix::Matrix{Float64}; y_re
     # plot.torque_vec[] = torque
 end
 
-function quad_2d_plot_lsim(t, x, uout)
-    fig = Figure(resolution=(1200, 500))
-
-    x_ax = Axis(fig[1, 1], title="x")
-    z_ax = Axis(fig[2, 1], title="z")
-    theta_ax = Axis(fig[3, 1], title="theta")
-
-    # control input 
-    thrust_ax = Axis(fig[1, 2], title="Thrust")
-    torque_ax = Axis(fig[2, 2], title="Torque")
-
-    lines!(x_ax, t, x[1, :])
-    lines!(z_ax, t, x[2, :])
-    lines!(theta_ax, t[:], x[3, :])
-
-
-    thrust = uout[1, :] + uout[2, :]
-    torque = (uout[1, :] - uout[2, :]) * 0.1
-
-    lines!(thrust_ax, t, thrust)
-    lines!(torque_ax, t, torque)
-
-    x_ax.ylabel = "x [m]"
-    z_ax.ylabel = "z [m]"
-    theta_ax.ylabel = "θ [rad]"
-
-    rowgap!(fig.layout, 1)
-
-    fig
-end
