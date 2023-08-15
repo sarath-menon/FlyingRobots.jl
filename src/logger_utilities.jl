@@ -22,7 +22,7 @@ end
 Logger = Logger13
 
 function reset!(logger::Logger)
-    logger.current_index = 1
+    logger.params[:current_index] = 1
 end
 
 
