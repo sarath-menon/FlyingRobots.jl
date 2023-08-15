@@ -1,7 +1,7 @@
 export write!, reset!
 export Logger
 
-mutable struct Logger13
+struct Logger14
     n_fields::Integer
     n_timesteps::Integer
     log_matrix::Matrix{Float64}
@@ -19,7 +19,7 @@ mutable struct Logger13
     end
 end
 
-Logger = Logger13
+Logger = Logger14
 
 function reset!(logger::Logger)
 
