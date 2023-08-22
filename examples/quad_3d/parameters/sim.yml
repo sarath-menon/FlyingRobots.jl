@@ -1,0 +1,32 @@
+vehicle:
+  type: quadcopter
+  name: crazyflie
+  properties:
+    mass: 1 #[kg]
+    I_matrix: [[5., 0., 0.], [0., 5., 0.], [0., 0., 5.]] # inertia matrix about CG [kg m^2]
+  initial_state:
+    pos: [0., 0., 0.] #(x,y,z) position [m]
+    vel: [0., 0., 0.] #(x,y,z) velocity [m/s]
+    q_BI: # orientation as quaternion
+      q_w: 1.
+      q_x: 0.
+      q_y: 0.
+      q_z: 0.
+    ω_BI: [0., 0., 0.] #(x,y,z) angular velocity [deg/s]
+
+  sensors:
+    - type: gyroscope
+      name: gyro
+      constants:
+        angular_random_walk: 0. # 0.000001
+        initial_bias_magnitude: 0. #0.00001
+        bias_random_walk: 0. #0.000001
+      sampling_rate: 1000 #[Hz]
+
+    - type: accelerometer
+      name: accel
+      constants:
+      sampling_rate: 500 #[Hz]
+
+  computers: # These are more sophisticated and can run multiple processes at various rates.
+    - model: microcontroller # Generic flight computer; just runs its softwares

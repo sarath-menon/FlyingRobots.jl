@@ -8,16 +8,31 @@ using Rotations
 
 using GLMakie
 using BenchmarkTools
+using GeometryBasics
+using FileIO
+using YAML
+
 GLMakie.activate!(inline=false)
 
 using FlyingRobots
 
 include("dynamics_utilities.jl")
 include("controller_utilities.jl")
+include("gui_helper.jl")
 
 include("dynamics.jl")
 include("controller.jl")
 include("plotting.jl")
+include("gui.jl")
+
+
+# read settings file 
+folder_path = pwd() * "/examples/quad_3d"
+plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
+sim_yaml = YAML.load_file(folder_path * "/parameters/sim.yml"; dicttype=Dict{Symbol,Any})
+
+plot_params = recursive_dict_to_namedtuple(plot_yaml)
+sim_params = recursive_dict_to_namedtuple(sim_yaml)
 
 # initialize subsystems
 @named plant = Quadcopter(; name=:quad1, l=0.7, k_τ=0.0035, m=1.0, I_xx=0.003, I_yy=0.003, I_zz=0.02)

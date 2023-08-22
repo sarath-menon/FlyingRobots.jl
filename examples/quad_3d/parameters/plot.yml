@@ -1,0 +1,42 @@
+title:
+  name: Jarvis
+
+visualizer:
+  title: Crazyflie
+  axis:
+    low: -0.5
+    high: 0.5
+    aspect_x: 1
+    aspect_y: 1
+    aspect_z: 1
+    label_size: 40
+    labels:
+      x: X Axis
+      y: Y Axis
+      z: Z Axis
+    spine_width: 2
+    label_offset: 60
+    grid_width: 1.5
+  mesh:
+    scale: 1.0
+    initial_translation: [0.0, 0.0, 0.0]
+
+graph:
+  n_state: 3
+  n_control: 2
+  ylabels:
+    [
+      "y pos [m]",
+      "z pos[m]",
+      "θ [°]",
+      "y velocity [m/s]",
+      "z velocity [m/s]",
+      "θ̇ [°/s]",
+    ]
+  titlesize: 25
+  axis:
+    configs:
+      - name: yzθ
+        y_axis_names: ["y", "z", "θ"]
+      - name: ẏżθ̇
+        y_axis_names: ["y_dot", "z_dot", "θ_dot"]
