@@ -3,14 +3,15 @@
 module LoggerTest
 
 using FlyingRobots
-using ControlSystems
 using StaticArrays
 using Test
+
 
 # logger
 n_fields = 4
 n_timesteps = 3
 
+# 
 logger = Logger(n_fields=n_fields, n_timesteps=n_timesteps)
 
 # data = [1., 2., 3., 4.]

@@ -19,10 +19,8 @@ frmodel_params = fr_create(FrModel; nx=6, nu=2, ny=3, Ts=0.01)
 
 safety_box = fr_create(SafetyBox; x_low=-10.0, x_high=10.0, y_low=-10.0, y_high=10.0, z_low=0.0, z_high=20.0)
 
-
 ## Linearization
 x₀ = Pose2D(2, 1, 0, 0, 0, 0)
-
 
 sys_c, sys_d, AB_symbolic = FlyingRobots.linearize_system(frmodel_params.Ts, x₀, quad_obj, [-g / 2, -g / 2])
 
@@ -93,7 +91,7 @@ control_cb = PeriodicCallback(0.01, initial_affect=true, save_positions=(false, 
     integrator.u[nx+1:end] = @SVector [f_1, f_2]
 
     # # logging
-    # write_row_vector!(log_matrix, integrator.u, integrator.t, Ts)
+    # write!(log_matrix, integrator.u, integrator.t, Ts)
 
 end
 
@@ -101,8 +99,8 @@ end
 # control_cb = setup_control_cb(frmodel_params, quad_obj)
 
 # setup ODE
-#prob = ODEProblem(quad_2d_dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
-prob = ODEProblem(quad_2d_dynamics_diffeq_new2, initial_conditions, tspan, params, callback=control_cb)
+prob = ODEProblem(quad_2d_dynamics_diffeq, initial_conditions, tspan, params, callback=control_cb)
+#prob = ODEProblem(quad_2d_dynamics_diffeq_new, initial_conditions, tspan, params, callback=control_cb)
 #prob = ODEProblem(quad_2d_dynamics_diffeq_new2, initial_conditions, tspan, params)
 #prob = ODEProblem(quad_2d_dynamics_diffeq, initial_conditions, tspan, params)
 
@@ -118,30 +116,14 @@ CSV.write("logs/log_no_alloc.csv", Tables.table(log_matrix), writeheader=false)
 
 quad_2d_plot_normal(quad2d_plot, sol; y_ref=y_req, z_ref=z_req, theta_ref=θ_req)
 
-
 # benchmarking 
 @time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false, save_on=false)
 #@time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
-
-
 
 # testing old functions 
 # test 1: Wrapper around  Core dynamics func for DifferentialEquations.jl
 state = zeros(8)
 d_state = zeros(8)
 @time quad_2d_dynamics_diffeq(d_state, state, params, 0.1)
-
-
-# testing new functions 
-state = fr_create(Quad2DState; y=0.0, z=0.0, θ=0.0, ẏ=0.0, ż=0.0, θ̇=0.0)
-actuator_cmd = fr_create(Quad2DActuatorCmd; left_motor_thrust=0.0, right_motor_thrust=0.0)
-
-# test 1: Core dynamics func
-@time quad_2d_dynamics_new(state, actuator_cmd, params)
-
-# test 2: Wrapper around  Core dynamics func for DifferentialEquations.jl
-state = zeros(8)
-d_state = zeros(8)
-@time quad_2d_dynamics_diffeq_new2(d_state, state, params, 0.1)
 
 end

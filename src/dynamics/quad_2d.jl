@@ -51,7 +51,7 @@ function setup_control_cb(frmodel::FrModel, quad_obj::Quad2d)
         integrator.u[nx+1:end] = SA_F64[f_1, f_2]
 
         # logging
-        write_row_vector!(log_matrix, integrator.u, integrator.t, Ts)
+        write!(log_matrix, integrator.u, integrator.t, Ts)
 
     end
 
