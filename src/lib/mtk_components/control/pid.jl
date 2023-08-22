@@ -1,3 +1,5 @@
+export pid_controller
+export PID
 
 mutable struct PID2
     kp::Float64 # proportional gain

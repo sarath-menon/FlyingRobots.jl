@@ -3,11 +3,14 @@ module quad_3d
 using ModelingToolkit
 using DiffEqCallbacks
 using LinearAlgebra
+using OrdinaryDiffEq
 using Rotations
 
 using GLMakie
 using BenchmarkTools
 GLMakie.activate!(inline=false)
+
+using FlyingRobots
 
 include("dynamics_utilities.jl")
 include("controller_utilities.jl")
