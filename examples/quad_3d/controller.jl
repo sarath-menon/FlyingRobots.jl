@@ -1,5 +1,25 @@
 
 
+function reference_generator(t)
+
+    r = 0.5    # circle radius 
+    ω = 0.2    # angular velocity
+
+    z_0 = 1
+
+    # circular trajectory 
+    x_ref = r * sin(ω * t)
+    y_ref = r * sin(ω * t)
+    z_ref = 1.0
+
+    # x_ref = 1
+    # y_ref = 2.
+    # z_ref = 1.0
+
+    return [x_ref, y_ref, z_ref]
+end
+
+
 
 callback_params = (; allocation_matrix=body_thrust_to_motor_thrust(0.7, 0.0035),
     reference_generator=reference_generator)
@@ -76,24 +96,5 @@ function digital_controller(int; params=callback_params)
     # @show  τ_x, τ_y
     # @show motor_thrusts 
     # println("")    
-end
-
-function reference_generator(t)
-
-    r = 0.5    # circle radius 
-    ω = 0.2    # angular velocity
-
-    z_0 = 1
-
-    # circular trajectory 
-    x_ref = r * sin(ω * t)
-    y_ref = r * sin(ω * t)
-    z_ref = 1.0
-
-    # x_ref = 1
-    # y_ref = 2.
-    # z_ref = 1.0
-
-    return [x_ref, y_ref, z_ref]
 end
 
