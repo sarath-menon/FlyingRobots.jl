@@ -1,5 +1,5 @@
 
-function Quadcopter(; name, l, k_τ, m, I_xx, I_yy, I_zz)
+function Quadcopter(; name)
 
     # translation
     @variables t (r(t))[1:3] = 0 (ṙ(t))[1:3] = 0
@@ -11,7 +11,7 @@ function Quadcopter(; name, l, k_τ, m, I_xx, I_yy, I_zz)
     @variables t (f(t))[1:4] = 0
 
     # params = @parameters l = l k_τ = k_τ g = 9.81
-    params = @parameters l k_τ g = 9.81
+    params = @parameters l m k_τ I_xx I_yy I_zz g = 9.81
 
     @named rb = RigidBody(; name=:rb, m=m, I_xx=I_xx, I_yy=I_yy, I_zz=I_yy)
 

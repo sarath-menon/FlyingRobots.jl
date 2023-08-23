@@ -31,7 +31,8 @@ vehicle_yaml = YAML.load_file(folder_path * "/parameters/vehicle.yml"; dicttype=
 vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
 
 ## initialize subsystems
-@named plant = Quadcopter(; name=:quad1, l=0.7, k_τ=0.0035, m=1.0, I_xx=0.003, I_yy=0.003, I_zz=0.02)
+# @named plant = Quadcopter(; name=:quad1, l=0.7, k_τ=0.0035, m=1.0, I_xx=0.003, I_yy=0.003, I_zz=0.02)
+@named plant = Quadcopter(; name=:quad1)
 @named controller = Controller_Zero_Order_Hold()
 
 # motor thrusts
@@ -71,7 +72,17 @@ X₀ = [collect(plant.rb.r .=> r₀)
     collect(plant.rb.q .=> [q₀.q.s, q₀.q.v1, q₀.q.v2, q₀.q.v3])
     collect(plant.rb.ω .=> ω₀)]
 
-prob = ODEProblem(sys, X₀, tspan, callback=control_callback)
+parameters = [
+    plant.rb.m => vehicle_params.mass,
+    plant.l => vehicle_params.arm_length,
+    plant.k_τ => vehicle_params.actuators.constants.k_τ,
+    plant.rb.I_xx => vehicle_params.I_xx,
+    plant.rb.I_yy => vehicle_params.I_yy,
+    plant.rb.I_zz => vehicle_params.I_zz,
+]
+
+
+prob = ODEProblem(sys, X₀, tspan, parameters, callback=control_callback)
 @time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
 
