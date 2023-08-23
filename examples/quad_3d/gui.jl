@@ -156,7 +156,7 @@ g_planner_widgets[2, :] = timeline_btn
 
 
 # how much to shrink control plots grid
-rowsize!(g_controller_plots, 2, Auto(0.2))
+rowsize!(g_controller_plots, 2, Auto(0.6))
 
 # shrink right widgets grid to make space for plots
 # rowsize!(g_controller, 2,  Auto(0.2))
@@ -236,31 +236,39 @@ time_marker = lift(sim_time_obs) do time_val
     time_val
 end
 
-struct PlotData4
+struct PlotData5
     time_vec::Observable{Vector{Float64}}
 
     axis_1::Observable{Vector{Float64}}
     axis_2::Observable{Vector{Float64}}
     axis_3::Observable{Vector{Float64}}
+
+    axis_4::Observable{Vector{Float64}}
+    axis_5::Observable{Vector{Float64}}
 end
 
-PlotData = PlotData4
+PlotData = PlotData5
 
 
 function plot_initialize(state_plots)
     data_1 = Observable{Vector{Float64}}(zeros(1))
     data_2 = Observable{Vector{Float64}}(zeros(1))
     data_3 = Observable{Vector{Float64}}(zeros(1))
+    data_4 = Observable{Vector{Float64}}(zeros(1))
+    data_5 = Observable{Vector{Float64}}(zeros(1))
 
     time_vec = Observable{Vector{Float64}}(zeros(1))
 
     # Intial plot data 
     # Plot initial data (zeros)
-    lines!(state_plots[1], time_vec, data_1)
-    lines!(state_plots[2], time_vec, data_2)
-    lines!(state_plots[3], time_vec, data_3)
+    lines!(state_plots[1], time_vec, data_1, color=:black)
+    lines!(state_plots[2], time_vec, data_2, color=:black)
+    lines!(state_plots[3], time_vec, data_3, color=:black)
 
-    plot_data = PlotData(time_vec, data_1, data_2, data_3)
+    lines!(control_plots[1], time_vec, data_4, color=:black)
+    lines!(control_plots[2], time_vec, data_5, color=:black)
+
+    plot_data = PlotData(time_vec, data_1, data_2, data_3, data_4, data_5)
 
     return plot_data
 end
@@ -274,6 +282,9 @@ function plot_reset()
     plot_data.axis_1[] = [0]
     plot_data.axis_2[] = [0]
     plot_data.axis_3[] = [0]
+
+    plot_data.axis_4[] = [0]
+    plot_data.axis_5[] = [0]
 
     plot_data.time_vec[] = [0]
 end
