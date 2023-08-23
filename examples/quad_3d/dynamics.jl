@@ -26,7 +26,8 @@ function Quadcopter(; name, l, k_τ, m, I_xx, I_yy, I_zz)
 
     # transform from body to intertial frame
     R_IB = QuatRotation(q[1], q[2], q[3], q[4], false)
-    f_net = R_IB * [f_x; f_y; f_z] - [0; 0; g]
+
+    f_net = R_IB * [f_x; f_y; f_z] - [0; 0; g] - 0.1 .* [ṙ[1]; ṙ[2]; ṙ[3]]
 
     thrust_eqn = rb.f .~ f_net
     torque_eqn = rb.τ .~ [τ_x; τ_y; τ_z]
