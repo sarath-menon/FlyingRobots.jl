@@ -26,9 +26,9 @@ include("gui_utilities.jl")
 
 # read settings file 
 folder_path = pwd() * "/examples/quad_3d"
-sim_yaml = YAML.load_file(folder_path * "/parameters/sim.yml"; dicttype=Dict{Symbol,Any})
+vehicle_yaml = YAML.load_file(folder_path * "/parameters/vehicle.yml"; dicttype=Dict{Symbol,Any})
 
-sim_params = recursive_dict_to_namedtuple(sim_yaml)
+vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
 
 ## initialize subsystems
 @named plant = Quadcopter(; name=:quad1, l=0.7, k_τ=0.0035, m=1.0, I_xx=0.003, I_yy=0.003, I_zz=0.02)
@@ -79,11 +79,11 @@ prob = ODEProblem(sys, X₀, tspan, callback=control_callback)
 # plot_position_attitude(sol)
 state_indices = (position=(1, 3), orientation=(7, 10), motor_thrusts=(14, 15))
 
-@time Gui.plot_reset()
+Gui.plot_reset(Gui.plot_data)
 
-@time plot_position(Gui.state_plots, Gui.plot_data, sol, state_indices)
+plot_position(Gui.state_plots, Gui.plot_data, sol, state_indices)
 # @time plot_orientation(Gui.state_plots, Gui.plot_data, sol, state_indices)
 
-@time plot_control_input(Gui.control_plots, Gui.plot_data, sol, state_indices)
+plot_control_input(Gui.control_plots, Gui.plot_data, sol, state_indices)
 
 end

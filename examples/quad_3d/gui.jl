@@ -19,9 +19,9 @@ set_theme!(
 folder_path = pwd() * "/examples/quad_3d"
 
 plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
-sim_yaml = YAML.load_file(folder_path * "/parameters/sim.yml"; dicttype=Dict{Symbol,Any})
+vehicle_yaml = YAML.load_file(folder_path * "/parameters/vehicle.yml"; dicttype=Dict{Symbol,Any})
 
-sim_params = recursive_dict_to_namedtuple(sim_yaml)
+vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
 plot_params = recursive_dict_to_namedtuple(plot_yaml)
 
 # load mesh 
@@ -110,7 +110,7 @@ scale!(m, vis_params.mesh.scale, vis_params.mesh.scale, vis_params.mesh.scale)
 translate!(m, Vec3f(vis_params.mesh.initial_translation[1], vis_params.mesh.initial_translation[2], vis_params.mesh.initial_translation[3]))
 
 # apply initial orientation
-rotate_mesh(m, to_std_quaternion(sim_params.vehicle.initial_state.q_BI))
+rotate_mesh(m, to_std_quaternion(vehicle_params.initial_state.q_BI))
 
 # Axes for 2D plots ------------------------------------------------
 
@@ -278,7 +278,7 @@ end
 plot_data = plot_initialize(state_plots)
 
 
-function plot_reset()
+function plot_reset(plot_data)
     plot_data.axis_1[] = [0]
     plot_data.axis_2[] = [0]
     plot_data.axis_3[] = [0]
