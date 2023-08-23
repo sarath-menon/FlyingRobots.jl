@@ -236,7 +236,7 @@ time_marker = lift(sim_time_obs) do time_val
     time_val
 end
 
-mutable struct PlotData3
+struct PlotData4
     time_vec::Observable{Vector{Float64}}
 
     axis_1::Observable{Vector{Float64}}
@@ -244,7 +244,7 @@ mutable struct PlotData3
     axis_3::Observable{Vector{Float64}}
 end
 
-PlotData = PlotData3
+PlotData = PlotData4
 
 
 function plot_initialize(state_plots)
