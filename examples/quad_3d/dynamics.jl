@@ -10,7 +10,8 @@ function Quadcopter(; name, l, k_τ, m, I_xx, I_yy, I_zz)
     # motor thrusts
     @variables t (f(t))[1:4] = 0
 
-    params = @parameters l = l k_τ = k_τ g = 9.81
+    # params = @parameters l = l k_τ = k_τ g = 9.81
+    params = @parameters l k_τ g = 9.81
 
     @named rb = RigidBody(; name=:rb, m=m, I_xx=I_xx, I_yy=I_yy, I_zz=I_yy)
 
