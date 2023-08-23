@@ -30,7 +30,7 @@ sim_yaml = YAML.load_file(folder_path * "/parameters/sim.yml"; dicttype=Dict{Sym
 
 sim_params = recursive_dict_to_namedtuple(sim_yaml)
 
-# initialize subsystems
+## initialize subsystems
 @named plant = Quadcopter(; name=:quad1, l=0.7, k_τ=0.0035, m=1.0, I_xx=0.003, I_yy=0.003, I_zz=0.02)
 @named controller = Controller_Zero_Order_Hold()
 
@@ -45,10 +45,10 @@ eqns = vcat(eqn1)
 sys = structural_simplify(model)
 
 
-# controllers
+## controllers
 x_pos_pid = PID(; kp=3.5, ki=0.00, kd=7, k_aw=0.0, Ts=0.01)
 y_pos_pid = PID(; kp=3.5, ki=0.00, kd=7, k_aw=0.0, Ts=0.01)
-z_pos_pid = PID(; kp=1.7, ki=0.1, kd=2.0, k_aw=0.0, Ts=0.01)
+z_pos_pid = PID(; kp=1.2, ki=0.1, kd=2.0, k_aw=0.0, Ts=0.01)
 
 roll_pid = PID(; kp=0.05, ki=0.00, kd=0.07, k_aw=0.0, Ts=0.01)
 pitch_pid = PID(; kp=0.05, ki=0.00, kd=0.07, k_aw=0.0, Ts=0.01)
@@ -61,7 +61,7 @@ control_callback = PeriodicCallback(digital_controller, 0.01, initial_affect=tru
 tspan = (0.0, 60.0)
 
 # initial conditions
-r₀ = [0.0, 0.0, 0.0] # position
+r₀ = [0.0, 0.0, 1.0] # position
 ṙ₀ = [0.0, 0.0, 0.0] # velocity
 q₀ = QuatRotation(RotZYX(0.0, 0.0, 0.0)) # (Orientation - yaw, pitch, roll)
 ω₀ = [0.0, 0.0, 0.0] # angular velocity
@@ -77,9 +77,13 @@ prob = ODEProblem(sys, X₀, tspan, callback=control_callback)
 
 # plotting
 # plot_position_attitude(sol)
+state_indices = (position=(1, 3), orientation=(7, 10), motor_thrusts=(14, 15))
 
-Gui.plot_reset()
+@time Gui.plot_reset()
 
-plot_position(Gui.state_plots, Gui.plot_data, sol)
+@time plot_position(Gui.state_plots, Gui.plot_data, sol, state_indices)
+# @time plot_orientation(Gui.state_plots, Gui.plot_data, sol, state_indices)
+
+@time plot_control_input(Gui.control_plots, Gui.plot_data, sol, state_indices)
 
 end
