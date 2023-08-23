@@ -8,8 +8,6 @@ using Rotations
 
 using GLMakie
 using BenchmarkTools
-using GeometryBasics
-using FileIO
 using YAML
 
 GLMakie.activate!(inline=false)
@@ -18,20 +16,18 @@ using FlyingRobots
 
 include("dynamics_utilities.jl")
 include("controller_utilities.jl")
-include("gui_helper.jl")
 
 include("dynamics.jl")
 include("controller.jl")
 include("plotting.jl")
 include("gui.jl")
+include("gui_utilities.jl")
 
 
 # read settings file 
 folder_path = pwd() * "/examples/quad_3d"
-plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
 sim_yaml = YAML.load_file(folder_path * "/parameters/sim.yml"; dicttype=Dict{Symbol,Any})
 
-plot_params = recursive_dict_to_namedtuple(plot_yaml)
 sim_params = recursive_dict_to_namedtuple(sim_yaml)
 
 # initialize subsystems
@@ -80,6 +76,16 @@ prob = ODEProblem(sys, X₀, tspan, callback=control_callback)
 
 
 # plotting
-plot_position_attitude(sol)
+# plot_position_attitude(sol)
+
+plot_data = Gui.plot_initialize(Gui.state_plots)
+
+
+plot_position(Gui.state_plots, plot_data, sol)
+
+
+
+
+
 
 end
