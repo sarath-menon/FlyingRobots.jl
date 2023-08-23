@@ -19,6 +19,7 @@ initial_state:
 
 actuators:
   constants:
+    τ: 0.02
     k_τ: 0.0035
 
 sensors:
