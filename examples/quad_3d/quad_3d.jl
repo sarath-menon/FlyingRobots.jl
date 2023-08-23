@@ -78,14 +78,8 @@ prob = ODEProblem(sys, X₀, tspan, callback=control_callback)
 # plotting
 # plot_position_attitude(sol)
 
-plot_data = Gui.plot_initialize(Gui.state_plots)
+Gui.plot_reset()
 
-
-plot_position(Gui.state_plots, plot_data, sol)
-
-
-
-
-
+plot_position(Gui.state_plots, Gui.plot_data, sol)
 
 end
