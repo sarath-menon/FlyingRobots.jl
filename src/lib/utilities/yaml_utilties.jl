@@ -1,3 +1,5 @@
+export recursive_dict_to_namedtuple, get_configs_vec
+
 # recursive function to converted nested dict to nested NamedTuple
 function recursive_dict_to_namedtuple(val)
     if typeof(val) == Dict{Symbol,Any}

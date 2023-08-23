@@ -13,6 +13,7 @@ using YAML
 GLMakie.activate!(inline=false)
 
 using FlyingRobots
+using MtkLibrary
 
 include("dynamics_utilities.jl")
 include("controller_utilities.jl")
