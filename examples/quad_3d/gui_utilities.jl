@@ -63,7 +63,7 @@ function plot_orientation(plots, plot_data, sol, state_indices)
 end
 
 
-function plot_control_input(plots, plot_data, sol, state_indices)
+function plot_control_input(plots, plot_data, sol, state_indices, vehicle_params)
 
     id = state_indices.motor_thrusts[1]
     plot_data.time_vec[] = sol.t
@@ -74,7 +74,7 @@ function plot_control_input(plots, plot_data, sol, state_indices)
     τ_y_vec = Float64[]
     τ_z_vec = Float64[]
 
-    M = motor_thrust_to_body_thrust(l=0.7, k_τ=0.0035)
+    M = motor_thrust_to_body_thrust(l=vehicle_params.arm_length, k_τ=vehicle_params.actuators.constants.k_τ)
 
     for i in 1:length(sol.t)
 

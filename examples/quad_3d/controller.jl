@@ -21,7 +21,7 @@ end
 
 
 
-callback_params = (; allocation_matrix=body_thrust_to_motor_thrust(0.7, 0.0035),
+callback_params = (; allocation_matrix=body_thrust_to_motor_thrust(vehicle_params.arm_length, vehicle_params.actuators.constants.k_τ),
     reference_generator=reference_generator)
 
 function digital_controller(int; params=callback_params)
