@@ -36,7 +36,11 @@ graph:
   titlesize: 25
   axis:
     configs:
-      - name: yzθ
+      - name: positions
+        y_axis_names: ["x", "y", "z"]
+      - name: velocities
         y_axis_names: ["y", "z", "θ"]
-      - name: ẏżθ̇
+      - name: orientations
+        y_axis_names: ["y", "z", "θ"]
+      - name: angular velocities
         y_axis_names: ["y_dot", "z_dot", "θ_dot"]
