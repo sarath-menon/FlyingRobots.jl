@@ -11,15 +11,15 @@ function Quadcopter(; name)
     @variables t (f_cmd(t))[1:4] = 0 [input = true] (f(t))[1:4] = 0
 
     # params = @parameters l = l k_τ = k_τ g = 9.81
-    params = @parameters l g = 9.81
+    params = @parameters l k_τ g = 9.81
 
-    @named rb = RigidBody(; name=:rb, m=m, I_xx=I_xx, I_yy=I_yy, I_zz=I_yy)
+    @named rb = RigidBody(; name=:rb)
 
     # motors
-    @named motor_1 = BldcMotorPropellerPair(; name=:motor_1, τ=τ)
-    @named motor_2 = BldcMotorPropellerPair(; name=:motor_2, τ=τ)
-    @named motor_3 = BldcMotorPropellerPair(; name=:motor_3, τ=τ)
-    @named motor_4 = BldcMotorPropellerPair(; name=:motor_4, τ=τ)
+    @named motor_1 = BldcMotorPropellerPair(; name=:motor_1)
+    @named motor_2 = BldcMotorPropellerPair(; name=:motor_2)
+    @named motor_3 = BldcMotorPropellerPair(; name=:motor_3)
+    @named motor_4 = BldcMotorPropellerPair(; name=:motor_4)
 
 
     # forces
