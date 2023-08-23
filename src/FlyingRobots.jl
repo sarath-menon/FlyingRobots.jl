@@ -6,6 +6,7 @@ using NamedTupleTools
 export FrRobotState, FrCtrlCmd, FrRobotDynamics, FrRobot
 export FrCtrlCmd, FrActuatorCmd
 export FrDigitalController
+using MtkLibrary
 
 
 # Use the README as the module docs
@@ -16,7 +17,7 @@ export FrDigitalController
 end FlyingRobots
 
 
-include("lib/mtk_components/mtk_components.jl")
+include("lib/control/control.jl")
 include("lib/utilities/utilities.jl")
 
 end
