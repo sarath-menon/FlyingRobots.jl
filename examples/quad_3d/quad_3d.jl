@@ -36,7 +36,7 @@ vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
 @named controller = Controller_Zero_Order_Hold()
 
 # motor thrusts
-eqn1 = controller.U .~ plant.f
+eqn1 = controller.U .~ plant.f_cmd
 
 # connect the subsystems
 eqns = vcat(eqn1)
@@ -45,11 +45,14 @@ eqns = vcat(eqn1)
 
 sys = structural_simplify(model)
 
+# get system properties
+states(sys)
+ModelingToolkit.get_ps(sys)
 
 ## controllers
 x_pos_pid = PID(; kp=3.5, ki=0.00, kd=7, k_aw=0.0, Ts=0.01)
 y_pos_pid = PID(; kp=3.5, ki=0.00, kd=7, k_aw=0.0, Ts=0.01)
-z_pos_pid = PID(; kp=1.2, ki=0.1, kd=2.0, k_aw=0.0, Ts=0.01)
+z_pos_pid = PID(; kp=30, ki=12, kd=6.5, k_aw=0.0, Ts=0.01)
 
 roll_pid = PID(; kp=0.05, ki=0.00, kd=0.07, k_aw=0.0, Ts=0.01)
 pitch_pid = PID(; kp=0.05, ki=0.00, kd=0.07, k_aw=0.0, Ts=0.01)
@@ -79,6 +82,10 @@ parameters = [
     plant.rb.I_xx => vehicle_params.I_xx,
     plant.rb.I_yy => vehicle_params.I_yy,
     plant.rb.I_zz => vehicle_params.I_zz,
+    plant.motor_1.first_order_system.T => vehicle_params.actuators.constants.τ,
+    plant.motor_2.first_order_system.T => vehicle_params.actuators.constants.τ,
+    plant.motor_3.first_order_system.T => vehicle_params.actuators.constants.τ,
+    plant.motor_4.first_order_system.T => vehicle_params.actuators.constants.τ,
 ]
 
 
