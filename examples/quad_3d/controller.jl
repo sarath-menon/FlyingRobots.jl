@@ -12,8 +12,8 @@ function reference_generator(t)
     y_ref = r * sin(ω * t)
     z_ref = 1.0
 
-    # x_ref = 1
-    # y_ref = 2.
+    # x_ref = 0.0
+    # y_ref = 0.0
     # z_ref = 1.0
 
     return [x_ref, y_ref, z_ref]
@@ -63,7 +63,7 @@ function digital_controller(int; params=callback_params)
     p_ref = -pid_controller(y_pos_pid; e=e_y, umin=-0.5, umax=0.5) / g
 
     # z position controller
-    f_net = m * (g + pid_controller(z_pos_pid; e=e_z, umin=-100, umax=100))
+    f_net = m * (g + pid_controller(z_pos_pid; e=e_z, umin=-4.5, umax=40.0))
 
     # attitude controller
 
