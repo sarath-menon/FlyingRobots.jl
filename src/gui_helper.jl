@@ -118,6 +118,17 @@ function plot_3d_trajectory(; sim_time_obs::Observable, sim_state_obs::Observabl
 
         end
     end
-
-
 end
+
+struct PlotData5
+    time_vec::Observable{Vector{Float64}}
+
+    axis_1::Observable{Vector{Float64}}
+    axis_2::Observable{Vector{Float64}}
+    axis_3::Observable{Vector{Float64}}
+
+    axis_4::Observable{Vector{Float64}}
+    axis_5::Observable{Vector{Float64}}
+end
+
+PlotData = PlotData5
