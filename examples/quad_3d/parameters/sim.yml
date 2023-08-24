@@ -1,2 +1,4 @@
 sim:
   name: sample_simulation
+
+duration: 60 #seconds

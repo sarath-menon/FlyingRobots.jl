@@ -10,6 +10,11 @@ pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch])
 
 function load_controller_params(path::String)
     ctrl_yaml = YAML.load_file(folder_path * path; dicttype=Dict{Symbol,Any})
+
+    # set controller params 
+    allocation_matrix = body_thrust_to_motor_thrust(vehicle_params.arm_length, vehicle_params.actuators.constants.k_τ)
+    ctrl_yaml[:allocation_matrix] = allocation_matrix
+
     return ctrl_yaml
 end
 
