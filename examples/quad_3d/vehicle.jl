@@ -14,7 +14,7 @@ function load_vehicle_params(path::String)
     return vehicle_params
 end
 
-function get_initial_conditions(vehicle_params)
+function get_initial_conditions(plant, vehicle_params)
 
     initial_state = vehicle_params.initial_state
 
@@ -32,7 +32,7 @@ function get_initial_conditions(vehicle_params)
     return X₀
 end
 
-function get_parameters(vehicle_params)
+function get_parameters(plant, vehicle_params)
     parameters = [
         plant.rb.m => vehicle_params.mass,
         plant.l => vehicle_params.arm_length,

@@ -11,10 +11,15 @@ function build_system_model()
 
     # connect the subsystems
     eqns = vcat(eqn1)
-    @named model = ODESystem(eqns,
+    @named sys_unsimplified = ODESystem(eqns,
         systems=[plant, controller])
 
-    sys = structural_simplify(model)
+    sys = structural_simplify(sys_unsimplified)
 
-    return sys
+    subsystems = Dict()
+
+    subsystems[:plant] = plant
+    subsystems[:controller] = controller
+
+    return sys, subsystems
 end
