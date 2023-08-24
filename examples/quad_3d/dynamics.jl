@@ -65,7 +65,3 @@ function Quadcopter(; name)
 
 end
 
-module Waste
-
-
-end

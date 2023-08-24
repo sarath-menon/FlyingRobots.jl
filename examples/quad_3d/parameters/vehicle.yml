@@ -10,12 +10,11 @@ arm_length: 0.7
 initial_state:
   pos: [0., 0., 0.] #(x,y,z) position [m]
   vel: [0., 0., 0.] #(x,y,z) velocity [m/s]
-  q_BI: # orientation as quaternion
-    q_w: 1.
-    q_x: 0.
-    q_y: 0.
-    q_z: 0.
-  ω_BI: [0., 0., 0.] #(x,y,z) angular velocity [deg/s]
+  orientation: # orientation as Z-Y-X euler angle (degrees)
+    roll: 0.
+    pitch: 0.
+    yaw: 0.
+  angular_vel: [0., 0., 0.] #(x,y,z) angular velocity [deg/s]
 
 actuators:
   constants:

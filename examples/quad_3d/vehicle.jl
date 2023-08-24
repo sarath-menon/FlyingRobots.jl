@@ -14,23 +14,38 @@ function load_vehicle_params(path::String)
     return vehicle_params
 end
 
-function load_sim_params(path::String, vehicle_params)
-    sim_yaml = YAML.load_file(folder_path * "/parameters/sim.yml"; dicttype=Dict{Symbol,Any})
+function get_initial_conditions(vehicle_params)
 
-    # set integrator callback rate
-    sim_yaml[:callback_dt] = 1 / vehicle_params.computer.clock_speed
+    initial_state = vehicle_params.initial_state
 
-    sim_params = recursive_dict_to_namedtuple(sim_yaml)
+    # initial conditions
+    r₀ = initial_state.pos # position
+    ṙ₀ = initial_state.vel # velocity
+    q₀ = QuatRotation(RotZYX(initial_state.orientation.yaw, initial_state.orientation.pitch, initial_state.orientation.roll)) # (Orientation - yaw, pitch, roll)
+    ω₀ = initial_state.angular_vel # angular velocity
 
-    return sim_params
+    X₀ = [collect(plant.rb.r .=> r₀)
+        collect(plant.rb.ṙ .=> ṙ₀)
+        collect(plant.rb.q .=> [q₀.q.s, q₀.q.v1, q₀.q.v2, q₀.q.v3])
+        collect(plant.rb.ω .=> ω₀)]
+
+    return X₀
+end
+
+function get_parameters(vehicle_params)
+    parameters = [
+        plant.rb.m => vehicle_params.mass,
+        plant.l => vehicle_params.arm_length,
+        plant.k_τ => vehicle_params.actuators.constants.k_τ,
+        plant.rb.I_xx => vehicle_params.I_xx,
+        plant.rb.I_yy => vehicle_params.I_yy,
+        plant.rb.I_zz => vehicle_params.I_zz,
+        plant.motor_1.first_order_system.T => vehicle_params.actuators.constants.τ,
+        plant.motor_2.first_order_system.T => vehicle_params.actuators.constants.τ,
+        plant.motor_3.first_order_system.T => vehicle_params.actuators.constants.τ,
+        plant.motor_4.first_order_system.T => vehicle_params.actuators.constants.τ]
+
+    return parameters
 end
 
 
-function load_controller_params(path::String)
-    ctrl_yaml = YAML.load_file(folder_path * path; dicttype=Dict{Symbol,Any})
-    return ctrl_yaml
-end
-
-
-
-# "/parameters/vehicle.yml"

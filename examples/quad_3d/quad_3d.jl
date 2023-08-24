@@ -28,6 +28,8 @@ include("gui.jl")
 include("gui_utilities.jl")
 include("scheduler.jl")
 include("vehicle.jl")
+include("sim.jl")
+include("modelling.jl")
 
 # read settings file 
 folder_path = pwd() * "/examples/quad_3d"
@@ -38,67 +40,20 @@ sim_params = load_sim_params("/parameters/sim.yml", vehicle_params)
 
 include("integrator_callback.jl")
 
-## initialize subsystems
-@named plant = Quadcopter(; name=:quad1)
-@named controller = Controller_Zero_Order_Hold()
-
-# motor thrusts
-eqn1 = controller.U .~ plant.f_cmd
-
-# connect the subsystems
-eqns = vcat(eqn1)
-@named model = ODESystem(eqns,
-    systems=[plant, controller])
-
-sys = structural_simplify(model)
-
-# get system properties
-# states(sys)
-# ModelingToolkit.get_ps(sys)
+# build system model
+sys = build_system_model()
 
 # set controller params 
 allocation_matrix = body_thrust_to_motor_thrust(vehicle_params.arm_length, vehicle_params.actuators.constants.k_τ)
 ctrl_yaml[:allocation_matrix] = allocation_matrix
 
-## controllers
-x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x])
-y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y])
-z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z])
-
-roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll])
-pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch])
-
 control_callback = PeriodicCallback(integrator_callback, sim_params.callback_dt, initial_affect=true)
 
 ## Simulation
-
 tspan = (0.0, 60.0)
 
-# initial conditions
-r₀ = [0.0, 0.0, 1.0] # position
-ṙ₀ = [0.0, 0.0, 0.0] # velocity
-q₀ = QuatRotation(RotZYX(0.0, 0.0, 0.0)) # (Orientation - yaw, pitch, roll)
-ω₀ = [0.0, 0.0, 0.0] # angular velocity
-
-X₀ = [collect(plant.rb.r .=> r₀)
-    collect(plant.rb.ṙ .=> ṙ₀)
-    collect(plant.rb.q .=> [q₀.q.s, q₀.q.v1, q₀.q.v2, q₀.q.v3])
-    collect(plant.rb.ω .=> ω₀)]
-
-parameters = [
-    plant.rb.m => vehicle_params.mass,
-    plant.l => vehicle_params.arm_length,
-    plant.k_τ => vehicle_params.actuators.constants.k_τ,
-    plant.rb.I_xx => vehicle_params.I_xx,
-    plant.rb.I_yy => vehicle_params.I_yy,
-    plant.rb.I_zz => vehicle_params.I_zz,
-    plant.motor_1.first_order_system.T => vehicle_params.actuators.constants.τ,
-    plant.motor_2.first_order_system.T => vehicle_params.actuators.constants.τ,
-    plant.motor_3.first_order_system.T => vehicle_params.actuators.constants.τ,
-    plant.motor_4.first_order_system.T => vehicle_params.actuators.constants.τ]
-
-states(sys)
-
+X₀ = get_initial_conditions(vehicle_params)
+parameters = get_parameters(vehicle_params)
 
 reset_pid_controllers()
 prob = ODEProblem(sys, X₀, tspan, parameters, callback=control_callback)

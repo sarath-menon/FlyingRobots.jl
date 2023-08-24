@@ -1,4 +1,17 @@
 
+## pid controllers
+x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x])
+y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y])
+z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z])
+
+roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll])
+pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch])
+
+
+function load_controller_params(path::String)
+    ctrl_yaml = YAML.load_file(folder_path * path; dicttype=Dict{Symbol,Any})
+    return ctrl_yaml
+end
 
 function position_controller(vehicle_pose, ctrl_cmd, vehicle_params, rate_hz)
 
