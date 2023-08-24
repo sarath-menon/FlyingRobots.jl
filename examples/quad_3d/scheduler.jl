@@ -1,13 +1,22 @@
 function scheduler(clock, vehicle_pose, ctrl_cmd, vehicle_params)
 
-    if clock % tasks_per_ticks[:pos_ctrl_loop] == 0
-        position_controller(vehicle_pose, ctrl_cmd, vehicle_params)
-        # @show clock
-    end
+    # if clock % tasks_per_ticks[:position_controller] == 0
+    #     position_controller(vehicle_pose, ctrl_cmd, vehicle_params)
+    #     # @show clock
+    # end
 
-    if clock % tasks_per_ticks[:attitude_ctrl_loop] == 0
-        attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params)
-        # @show clock
+    # if clock % tasks_per_ticks[:attitude_controller] == 0
+    #     attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params)
+    #     # @show clock
+    # end
+
+    for task in vehicle_params.computer.tasks
+
+        func = getfield(Main, Symbol(task.name))
+
+        if clock % task.rate_per_tick == 0
+            func(vehicle_pose, ctrl_cmd, vehicle_params, task.rate)
+        end
     end
 
     control_allocator(vehicle_pose, ctrl_cmd, vehicle_params)

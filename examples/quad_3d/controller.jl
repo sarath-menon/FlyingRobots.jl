@@ -1,10 +1,10 @@
 
 
-function position_controller(vehicle_pose, ctrl_cmd, vehicle_params)
+function position_controller(vehicle_pose, ctrl_cmd, vehicle_params, rate_hz)
 
     m = vehicle_params.mass
     g = 9.81
-    dt = ctrl_yaml[:position_controller][:rate]
+    dt = 1 / rate_hz
 
     e_x = ctrl_cmd.x - vehicle_pose.pos.x
     e_y = ctrl_cmd.y - vehicle_pose.pos.y
@@ -21,9 +21,9 @@ function position_controller(vehicle_pose, ctrl_cmd, vehicle_params)
 end
 
 
-function attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params)
+function attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params, rate_hz)
 
-    dt = ctrl_yaml[:attitude_controller][:rate]
+    dt = 1 / rate_hz
 
     # convert quaternion attitude representation to euler angles 
     r, q, p = Rotations.params(RotZYX(vehicle_pose.orientation))

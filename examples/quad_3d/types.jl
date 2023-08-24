@@ -65,9 +65,3 @@ end
 
 Pose3d = Pose3d7
 
-let
-
-    @time pose = Pose3d()
-    vehicle_pose.pos = Vec3d(1, 2, 3)
-
-end

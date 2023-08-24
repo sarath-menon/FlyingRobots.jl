@@ -39,8 +39,8 @@ sensors:
 computer:
   clock_speed: 100 #Hz
   tasks:
-    pos_ctrl_loop:
+    - name: position_controller
       rate: 50 #Hz
 
-    attitude_ctrl_loop:
+    - name: attitude_controller
       rate: 100 #Hz

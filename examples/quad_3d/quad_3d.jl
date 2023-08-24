@@ -27,7 +27,6 @@ include("plotting.jl")
 include("gui.jl")
 include("gui_utilities.jl")
 include("scheduler.jl")
-include("integrator_callback.jl")
 include("vehicle.jl")
 
 # read settings file 
@@ -38,21 +37,25 @@ folder_path = pwd() * "/examples/quad_3d"
 
 ctrl_yaml = load_controller_params("/parameters/controller.yml")
 vehicle_params = load_vehicle_params("/parameters/vehicle.yml")
-sim_params = load_sim_params("/parameters/sim.yml")
+sim_params = load_sim_params("/parameters/sim.yml", vehicle_params)
+
+include("integrator_callback.jl")
 # sim_yaml = YAML.load_file(folder_path * "/parameters/sim.yml"; dicttype=Dict{Symbol,Any})
 
 # vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
+# vehicle_yaml = YAML.load_file(folder_path * "/parameters/vehicle.yml"; dicttype=Dict{Symbol,Any})
 
+# for task in vehicle_params.computer.tasks
+#     @show task
+# end
 
-task_rates = vehicle_params.computer.task_rates
-tasks_per_ticks = get_ticks_per_task(task_rates)
+# task_rates = vehicle_params.computer._rates
+# tasks_per_ticks = get_ticks_per_task(task_rates)
 
 # # set integrator callback rate
 # sim_yaml[:callback_dt] = 1 / vehicle_yaml[:computer][:clock_speed]
 
 # sim_params = recursive_dict_to_namedtuple(sim_yaml)
-
-
 
 ## initialize subsystems
 # @named plant = Quadcopter(; name=:quad1, l=0.7, k_τ=0.0035, m=1.0, I_xx=0.003, I_yy=0.003, I_zz=0.02)
@@ -76,8 +79,9 @@ sys = structural_simplify(model)
 # set controller params 
 allocation_matrix = body_thrust_to_motor_thrust(vehicle_params.arm_length, vehicle_params.actuators.constants.k_τ)
 ctrl_yaml[:allocation_matrix] = allocation_matrix
-ctrl_yaml[:position_controller][:rate] = 1 / vehicle_params.computer.tasks.pos_ctrl_loop.rate
-ctrl_yaml[:attitude_controller][:rate] = 1 / vehicle_params.computer.tasks.attitude_ctrl_loop.rate
+
+# ctrl_yaml[:position_controller][:rate] = 1 / vehicle_params.computer.tasks.position_controller.rate
+# ctrl_yaml[:attitude_controller][:rate] = 1 / vehicle_params.computer.tasks.attitude_controller.rate
 
 ## controllers
 x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x])
