@@ -50,7 +50,7 @@ ctrl_yaml[:allocation_matrix] = allocation_matrix
 control_callback = PeriodicCallback(integrator_callback, sim_params.callback_dt, initial_affect=true)
 
 ## Simulation
-tspan = (0.0, 60.0)
+tspan = (0.0, sim_params.duration)
 
 X₀ = get_initial_conditions(vehicle_params)
 parameters = get_parameters(vehicle_params)
