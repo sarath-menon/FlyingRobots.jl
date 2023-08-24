@@ -119,9 +119,6 @@ end
 PlotData = PlotData5
 
 
-temp = Pose3d()
-model_set_pose(temp)
-
 function model_set_pose(pose)
     max_range = plot_params.visualizer.axis.high - plot_params.visualizer.axis.low
     dist = max_range / 2

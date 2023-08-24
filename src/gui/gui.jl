@@ -8,10 +8,13 @@ using FileIO
 using YAML
 using StaticArrays
 
+include("../common/types.jl")
+include("../common/utilities/utilities.jl")
+
 include("gui_helper.jl")
 include("gui_tasks.jl")
-include("lib/utilities/utilities.jl")
-include("types.jl")
+
+
 
 export show_visualizer, PlotData, plot_reset
 

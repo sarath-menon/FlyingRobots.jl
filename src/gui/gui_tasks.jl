@@ -26,7 +26,7 @@ function show_visualizer()
     rowsize!(g_controller_plots, 2, Auto(0.6))
 
     # add titles
-    elements[:super_title], elements[:time_title] = add_title(g_top, "Jarvis", sim_time_obs)
+    elements[:super_title], elements[:time_title] = add_title(g_top, "Jarvis", sim_time)
 
     elements[:visualizer_3d] = add_3d_visualizer(fig, vis_params, g_planner, g_planner_plots)
 

@@ -17,11 +17,10 @@ using Rotations
     read(path, String)
 end FlyingRobots
 
-include("types.jl")
+include("common/types.jl")
+include("common/utilities/utilities.jl")
 
-include("lib/control/control.jl")
-include("gui.jl")
-
-include("lib/utilities/utilities.jl")
+include("control/control.jl")
+include("gui/gui.jl")
 
 end
