@@ -4,6 +4,7 @@ function scheduler(clock, vehicle_pose, ctrl_cmd, vehicle_params)
 
     # tasks defined in yaml file in given order 
 
+    for task in vehicle_params.computer.tasks
         # get function from task name
         func = getfield(Main, Symbol(task.name))
 
