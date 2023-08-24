@@ -41,7 +41,7 @@ vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
 task_rates = vehicle_params.computer.task_rates
 
 tasks_per_ticks = get_ticks_per_task(task_rates)
-tasks_per_ticks
+
 
 ## initialize subsystems
 # @named plant = Quadcopter(; name=:quad1, l=0.7, k_τ=0.0035, m=1.0, I_xx=0.003, I_yy=0.003, I_zz=0.02)
@@ -67,9 +67,9 @@ allocation_matrix = body_thrust_to_motor_thrust(vehicle_params.arm_length, vehic
 ctrl_yaml[:allocation_matrix] = allocation_matrix
 
 ## controllers
-x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x]; Ts=0.01)
-y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y]; Ts=0.01)
-z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z]; Ts=0.01)
+x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x]; Ts=0.02)
+y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y]; Ts=0.02)
+z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z]; Ts=0.02)
 
 roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll]; Ts=0.01)
 pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch]; Ts=0.01)
