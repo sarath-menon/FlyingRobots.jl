@@ -62,17 +62,19 @@ sys = structural_simplify(model)
 # states(sys)
 # ModelingToolkit.get_ps(sys)
 
-# add allocation matrix to controller params 
+# set controller params 
 allocation_matrix = body_thrust_to_motor_thrust(vehicle_params.arm_length, vehicle_params.actuators.constants.k_τ)
 ctrl_yaml[:allocation_matrix] = allocation_matrix
+ctrl_yaml[:position_controller][:rate] = 1 / vehicle_params.computer.task_rates.pos_ctrl_loop
+ctrl_yaml[:attitude_controller][:rate] = 1 / vehicle_params.computer.task_rates.attitude_ctrl_loop
 
 ## controllers
-x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x]; Ts=0.02)
-y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y]; Ts=0.02)
-z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z]; Ts=0.02)
+x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x]; Ts=ctrl_yaml[:position_controller][:rate])
+y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y]; Ts=ctrl_yaml[:position_controller][:rate])
+z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z]; Ts=ctrl_yaml[:position_controller][:rate])
 
-roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll]; Ts=0.01)
-pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch]; Ts=0.01)
+roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll]; Ts=ctrl_yaml[:attitude_controller][:rate])
+pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch]; Ts=ctrl_yaml[:attitude_controller][:rate])
 
 control_callback = PeriodicCallback(integrator_callback, 0.01, initial_affect=true)
 
