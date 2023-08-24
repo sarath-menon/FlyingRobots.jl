@@ -28,6 +28,7 @@ include("types.jl")
 include("dynamics.jl")
 include("controller.jl")
 include("plotting.jl")
+include("logging.jl")
 # include("gui.jl")
 
 include("gui_utilities.jl")
@@ -37,12 +38,14 @@ include("sim.jl")
 include("modelling.jl")
 
 # read settings file 
-folder_path = pwd() * "/examples/quad_3d"
 
+vehicle_params_path = "/parameters/vehicle.yml"
+ctrl_yaml_path = "/parameters/controller.yml"
+sim_params_yaml = "/parameters/sim.yml"
 
-vehicle_params = load_vehicle_params("/parameters/vehicle.yml")
-ctrl_yaml = load_controller_params("/parameters/controller.yml")
-sim_params = load_sim_params("/parameters/sim.yml", vehicle_params)
+vehicle_params = load_vehicle_params(vehicle_params_path)
+ctrl_yaml = load_controller_params(ctrl_yaml_path)
+sim_params = load_sim_params(sim_params_yaml, vehicle_params)
 
 include("integrator_callback.jl")
 

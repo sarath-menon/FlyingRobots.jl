@@ -25,16 +25,9 @@ function run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
     sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
     if save == true
-        df = DataFrame(sol)
-
-        # dataframe header formatting
-        rename!(df, replace.(names(df), r"getindex" => ""))
-        rename!(df, replace.(names(df), r"₊" => "."))
-
-        # save as CSV file
-        CSV.write("logs/log.csv", df)
-
+        log_sim(sol)
     end
 
     return sol
 end
+
