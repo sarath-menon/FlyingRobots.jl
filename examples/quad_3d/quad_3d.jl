@@ -27,6 +27,7 @@ include("plotting.jl")
 include("gui.jl")
 include("gui_utilities.jl")
 include("scheduler.jl")
+include("integrator_callback.jl")
 
 
 
@@ -73,7 +74,7 @@ z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z]; Ts=0.01)
 roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll]; Ts=0.01)
 pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch]; Ts=0.01)
 
-control_callback = PeriodicCallback(digital_controller, 0.01, initial_affect=true)
+control_callback = PeriodicCallback(integrator_callback, 0.01, initial_affect=true)
 
 ## Simulation
 
