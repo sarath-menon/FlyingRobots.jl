@@ -28,9 +28,9 @@ function show_visualizer()
     # add title
     add_title(g_top, "Jarvis", sim_time_obs)
 
-    vis_ax = add_3d_visualizer(fig, vis_params, g_planner, g_planner_plots)
+    visualizer_3d = add_3d_visualizer(fig, vis_params, g_planner, g_planner_plots)
 
-    add_3d_model(vis_ax, crazyflie_stl, vis_params)
+    add_3d_model(visualizer_3d, crazyflie_stl, vis_params)
 
     state_plots, control_plots = add_2d_plots(fig, g_state_plots, g_control_plots)
 
@@ -38,7 +38,9 @@ function show_visualizer()
 
     g_controller[2, 1] = g_controller_widgets
 
-    plot_initialize(state_plots, control_plots)
+    plot_data = plot_initialize(state_plots, control_plots)
+
+    return state_plots, control_plots, visualizer_3d, plot_data
 end
 
 
@@ -197,4 +199,16 @@ function plot_initialize(state_plots, control_plots)
     plot_data = PlotData(time_vec, data_1, data_2, data_3, data_4, data_5)
 
     return plot_data
+end
+
+
+function plot_reset(plot_data)
+    plot_data.axis_1[] = [0]
+    plot_data.axis_2[] = [0]
+    plot_data.axis_3[] = [0]
+
+    plot_data.axis_4[] = [0]
+    plot_data.axis_5[] = [0]
+
+    plot_data.time_vec[] = [0]
 end

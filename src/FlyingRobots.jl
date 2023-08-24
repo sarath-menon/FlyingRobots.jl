@@ -1,6 +1,5 @@
 module FlyingRobots
 
-using Revise
 using NamedTupleTools
 
 export FrRobotState, FrCtrlCmd, FrRobotDynamics, FrRobot
@@ -18,6 +17,8 @@ end FlyingRobots
 
 
 include("lib/control/control.jl")
+include("gui.jl")
+
 include("lib/utilities/utilities.jl")
 
 end

@@ -11,7 +11,7 @@ include("gui_helper.jl")
 include("gui_tasks.jl")
 include("lib/utilities/utilities.jl")
 
-export show_visualizer, PlotData
+export show_visualizer, PlotData, plot_reset
 
 set_theme!(
     #     font = "Arial", # inherited by layoutables if not overridden
@@ -39,9 +39,9 @@ graph_params = plot_params.graph
 configs_vec = get_configs_vec(plot_params.graph.axis.configs)
 
 
-# # Observables -------------------------------------------------
-# sim_time_obs = Observable{Float64}(0.0)
-# sim_state_obs = Observable{Bool}(false)
+# Observables -------------------------------------------------
+sim_time_obs = Observable{Float64}(0.0)
+sim_state_obs = Observable{Bool}(false)
 
 # # Top level
 # g_top = fig[0, 1:2] = GridLayout()
@@ -273,22 +273,6 @@ configs_vec = get_configs_vec(plot_params.graph.axis.configs)
 
 
 # plot_data = plot_initialize(state_plots)
-
-
-# function plot_reset(plot_data)
-#     plot_data.axis_1[] = [0]
-#     plot_data.axis_2[] = [0]
-#     plot_data.axis_3[] = [0]
-
-#     plot_data.axis_4[] = [0]
-#     plot_data.axis_5[] = [0]
-
-#     plot_data.time_vec[] = [0]
-# end
-
-
-
-
 
 
 # initial setup
