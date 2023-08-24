@@ -76,8 +76,8 @@ sys = structural_simplify(model)
 # set controller params 
 allocation_matrix = body_thrust_to_motor_thrust(vehicle_params.arm_length, vehicle_params.actuators.constants.k_τ)
 ctrl_yaml[:allocation_matrix] = allocation_matrix
-ctrl_yaml[:position_controller][:rate] = 1 / vehicle_params.computer.task_rates.pos_ctrl_loop
-ctrl_yaml[:attitude_controller][:rate] = 1 / vehicle_params.computer.task_rates.attitude_ctrl_loop
+ctrl_yaml[:position_controller][:rate] = 1 / vehicle_params.computer.tasks.pos_ctrl_loop.rate
+ctrl_yaml[:attitude_controller][:rate] = 1 / vehicle_params.computer.tasks.attitude_ctrl_loop.rate
 
 ## controllers
 x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x]; Ts=ctrl_yaml[:position_controller][:rate])
