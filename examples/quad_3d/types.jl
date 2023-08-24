@@ -1,6 +1,6 @@
 
 
-mutable struct CascadedPidCtrlCmd2
+mutable struct CascadedPidCtrlCmd3
     x::Float64
     y::Float64
     z::Float64
@@ -19,9 +19,13 @@ mutable struct CascadedPidCtrlCmd2
 
     f_net::Float64
 
-    CascadedPidCtrlCmd2() = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    τ_x::Float64
+    τ_y::Float64
+    τ_z::Float64
+
+    CascadedPidCtrlCmd3() = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 end
-CascadedPidCtrlCmd = CascadedPidCtrlCmd2
+CascadedPidCtrlCmd = CascadedPidCtrlCmd3
 
 
 # struct Vec3d2 <: FieldVector{3,Float64}

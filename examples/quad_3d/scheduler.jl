@@ -4,6 +4,11 @@ function scheduler(clock, vehicle_pose, ctrl_cmd, vehicle_params)
         position_controller(vehicle_pose, ctrl_cmd, vehicle_params)
         # @show clock
     end
+
+    if clock % tasks_per_ticks[:attitude_ctrl_loop] == 0
+        attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params)
+        # @show clock
+    end
 end
 
 function get_ticks_per_task(task_rates)
@@ -37,7 +42,28 @@ function position_controller(vehicle_pose, ctrl_cmd, vehicle_params)
 
     # z position controller
     ctrl_cmd.f_net = m * g + pid_controller(z_pos_pid; e=e_z, umin=-4.5, umax=40.0)
-
-    @show ctrl_cmd.f_net
-
 end
+
+
+function attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params)
+
+    # convert quaternion attitude representation to euler angles 
+    r, q, p = Rotations.params(RotZYX(vehicle_pose.orientation))
+
+    e_p = ctrl_cmd.p - p
+    e_q = ctrl_cmd.q - q
+
+    ctrl_cmd.τ_x = pid_controller(roll_pid; e=e_p, umin=-25, umax=25)
+    ctrl_cmd.τ_y = pid_controller(pitch_pid; e=e_q, umin=-25, umax=25)
+    ctrl_cmd.τ_z = 0
+end
+
+
+# function control_allocator(vehicle_pose, ctrl_cmd, vehicle_params)
+
+#     motor_thrusts = allocation_matrix * [ctrl_cmd.f_net; ctrl_cmd.τ_x; ctrl_cmd.τ_y; ctrl_cmd.τ_z]
+
+#     # set the control input
+#     c_index = 18
+#     int.u[c_index:c_index+3] .= motor_thrusts
+# end

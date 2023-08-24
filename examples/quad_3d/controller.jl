@@ -67,7 +67,6 @@ function digital_controller(int; params=callback_params)
 
     # get the clock count from simulation time
     clock = round(Int, int.t / dt) + 1
-    # @show clock
 
     # get reference 
     R = reference_generator(int.t)
@@ -100,23 +99,23 @@ function digital_controller(int; params=callback_params)
 
     # attitude controller
 
-    # convert quaternion attitude representation to euler angles 
-    r, q, p = Rotations.params(RotZYX(q1))
+    # # convert quaternion attitude representation to euler angles 
+    # r, q, p = Rotations.params(RotZYX(q1))
 
-    e_p = ctrl_cmd.p - p
-    e_q = ctrl_cmd.q - q
+    # e_p = ctrl_cmd.p - p
+    # e_q = ctrl_cmd.q - q
 
-    τ_x = pid_controller(roll_pid; e=e_p, umin=-25, umax=25)
-    τ_y = pid_controller(pitch_pid; e=e_q, umin=-25, umax=25)
-    τ_z = 0
+    # τ_x = pid_controller(roll_pid; e=e_p, umin=-25, umax=25)
+    # τ_y = pid_controller(pitch_pid; e=e_q, umin=-25, umax=25)
+    # τ_z = 0
 
     # f_net = 9.81
     # τ_x, τ_y= 0,0
 
-    motor_thrusts = allocation_matrix * [ctrl_cmd.f_net; τ_x; τ_y; τ_z]
+    motor_thrusts = allocation_matrix * [ctrl_cmd.f_net; ctrl_cmd.τ_x; ctrl_cmd.τ_y; ctrl_cmd.τ_z]
 
     # set the control input
-    c_index = 14
+    c_index = 18
     int.u[c_index:c_index+3] .= motor_thrusts
 
     # @show R_IB.q
@@ -131,3 +130,11 @@ function digital_controller(int; params=callback_params)
     # println("")    
 end
 
+function reset_pid_controllers()
+    pid_reset(x_pos_pid)
+    pid_reset(y_pos_pid)
+    pid_reset(z_pos_pid)
+
+    pid_reset(roll_pid)
+    pid_reset(pitch_pid)
+end
