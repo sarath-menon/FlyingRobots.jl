@@ -36,5 +36,7 @@ sensors:
     constants:
     sampling_rate: 500 #[Hz]
 
-computers: # These are more sophisticated and can run multiple processes at various rates.
-  - model: microcontroller # Generic flight computer; just runs its softwares
+computer:
+  task_rates:
+    pos_ctrl_loop: 50 #Hz
+    attitude_ctrl_loop: 100 #Hz
