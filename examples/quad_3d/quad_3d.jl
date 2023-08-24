@@ -80,12 +80,12 @@ ctrl_yaml[:position_controller][:rate] = 1 / vehicle_params.computer.tasks.pos_c
 ctrl_yaml[:attitude_controller][:rate] = 1 / vehicle_params.computer.tasks.attitude_ctrl_loop.rate
 
 ## controllers
-x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x]; Ts=ctrl_yaml[:position_controller][:rate])
-y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y]; Ts=ctrl_yaml[:position_controller][:rate])
-z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z]; Ts=ctrl_yaml[:position_controller][:rate])
+x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x])
+y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y])
+z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z])
 
-roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll]; Ts=ctrl_yaml[:attitude_controller][:rate])
-pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch]; Ts=ctrl_yaml[:attitude_controller][:rate])
+roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll])
+pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch])
 
 control_callback = PeriodicCallback(integrator_callback, sim_params.callback_dt, initial_affect=true)
 

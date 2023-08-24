@@ -1,34 +1,32 @@
 export pid_controller, pid_reset
 export PID
 
-mutable struct PID2
+mutable struct PID1
     kp::Float64 # proportional gain
     ki::Float64 # integral gain
     kd::Float64 # derivative gain
 
     k_aw::Float64 # integral antiwindup gain
 
-    Ts::Float64 # sampling time
-
     error_integral::Float64 # integral accumulated over time
     prev_error::Float64 # error from prvious time step
 
-    function PID2(; kp=kp, ki=ki, kd=kd, k_aw=k_aw, Ts=Ts)
-        new(kp, ki, kd, k_aw, Ts, 0.0, 0.0)
+    function PID1(; kp=kp, ki=ki, kd=kd, k_aw=k_aw)
+        new(kp, ki, kd, k_aw, 0.0, 0.0)
     end
 
-    function PID2(dict::Dict; Ts=Ts)
-        new(dict[:k_p], dict[:k_i], dict[:k_d], dict[:k_aw], Ts, 0.0, 0.0)
+    function PID1(dict::Dict)
+        new(dict[:k_p], dict[:k_i], dict[:k_d], dict[:k_aw], 0.0, 0.0)
     end
 
 end
 
-PID = PID2
+PID = PID1
 
-function pid_controller(pid::PID; e, umin, umax)
+function pid_controller(pid::PID; e, dt, umin, umax)
     # parameters
     kp, ki, kd = pid.kp, pid.ki, pid.kd
-    h, k_aw = pid.Ts, pid.k_aw
+    h, k_aw = dt, pid.k_aw
 
     # compute error terms
     e_dot = (e - pid.prev_error) / h
