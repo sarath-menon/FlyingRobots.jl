@@ -9,6 +9,8 @@ using NamedTupleTools
 using StaticArrays
 
 using GLMakie
+using DataFrames
+using CSV
 using BenchmarkTools
 using YAML
 
@@ -55,8 +57,7 @@ z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z])
 roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll])
 pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch])
 
-@time sol = run_sim(sys, subsystems, sim_params, vehicle_params)
-
+@time sol = run_sim(sys, subsystems, sim_params, vehicle_params; save=true)
 
 # plotting
 

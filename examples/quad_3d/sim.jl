@@ -10,9 +10,9 @@ function load_sim_params(path::String, vehicle_params)
     return sim_params
 end
 
-function run_sim(sys, subsystems, sim_params, vehicle_params)
+function run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
 
-    cb = PeriodicCallback(integrator_callback, sim_params.callback_dt, initial_affect=true)
+    cb = PeriodicCallback(integrator_callback, sim_params.callback_dt, initial_affect=true, save_positions=(true, false))
 
     tspan = (0.0, sim_params.duration)
 
@@ -23,6 +23,18 @@ function run_sim(sys, subsystems, sim_params, vehicle_params)
 
     prob = ODEProblem(sys, X₀, tspan, parameters, callback=cb)
     sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
+
+    if save == true
+        df = DataFrame(sol)
+
+        # dataframe header formatting
+        rename!(df, replace.(names(df), r"getindex" => ""))
+        rename!(df, replace.(names(df), r"₊" => "."))
+
+        # save as CSV file
+        CSV.write("logs/log.csv", df)
+
+    end
 
     return sol
 end
