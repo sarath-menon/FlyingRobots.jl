@@ -9,6 +9,8 @@ function scheduler(clock, vehicle_pose, ctrl_cmd, vehicle_params)
         attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params)
         # @show clock
     end
+
+    control_allocator(vehicle_pose, ctrl_cmd, vehicle_params)
 end
 
 function get_ticks_per_task(task_rates)
@@ -59,11 +61,7 @@ function attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params)
 end
 
 
-# function control_allocator(vehicle_pose, ctrl_cmd, vehicle_params)
+function control_allocator(vehicle_pose, ctrl_cmd, vehicle_params)
 
-#     motor_thrusts = allocation_matrix * [ctrl_cmd.f_net; ctrl_cmd.τ_x; ctrl_cmd.τ_y; ctrl_cmd.τ_z]
-
-#     # set the control input
-#     c_index = 18
-#     int.u[c_index:c_index+3] .= motor_thrusts
-# end
+    ctrl_cmd.motor_thrusts = ctrl_yaml[:allocation_matrix] * [ctrl_cmd.f_net; ctrl_cmd.τ_x; ctrl_cmd.τ_y; ctrl_cmd.τ_z]
+end

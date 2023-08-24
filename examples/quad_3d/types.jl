@@ -1,6 +1,5 @@
 
-
-mutable struct CascadedPidCtrlCmd3
+mutable struct CascadedPidCtrlCmd11
     x::Float64
     y::Float64
     z::Float64
@@ -23,10 +22,11 @@ mutable struct CascadedPidCtrlCmd3
     τ_y::Float64
     τ_z::Float64
 
-    CascadedPidCtrlCmd3() = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-end
-CascadedPidCtrlCmd = CascadedPidCtrlCmd3
+    motor_thrusts::Vector{Float64}
 
+    CascadedPidCtrlCmd11() = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [0, 0, 0, 0])
+end
+CascadedPidCtrlCmd = CascadedPidCtrlCmd11
 
 # struct Vec3d2 <: FieldVector{3,Float64}
 #     x::Float64

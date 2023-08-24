@@ -24,8 +24,7 @@ end
 ctrl_cmd = CascadedPidCtrlCmd()
 vehicle_pose = Pose3d()
 
-callback_params = (; allocation_matrix=body_thrust_to_motor_thrust(vehicle_params.arm_length, vehicle_params.actuators.constants.k_τ),
-    reference_generator=reference_generator, ctrl_cmd=ctrl_cmd, vehicle_pose=vehicle_pose, vehicle_params=vehicle_params)
+callback_params = (; reference_generator=reference_generator, ctrl_cmd=ctrl_cmd, vehicle_pose=vehicle_pose, vehicle_params=vehicle_params)
 
 function digital_controller(int; params=callback_params)
 
@@ -79,9 +78,6 @@ function digital_controller(int; params=callback_params)
     scheduler(clock, vehicle_pose, ctrl_cmd, vehicle_params)
 
     # controller ------------------------------------------------
-
-    allocation_matrix = params.allocation_matrix
-
     # e_x = R[1] - r[1]
     # e_y = R[2] - r[2]
     # e_z = R[3] - r[3]
@@ -112,11 +108,12 @@ function digital_controller(int; params=callback_params)
     # f_net = 9.81
     # τ_x, τ_y= 0,0
 
-    motor_thrusts = allocation_matrix * [ctrl_cmd.f_net; ctrl_cmd.τ_x; ctrl_cmd.τ_y; ctrl_cmd.τ_z]
+    # motor_thrusts = ctrl_yaml[:allocation_matrix] * [ctrl_cmd.f_net; ctrl_cmd.τ_x; ctrl_cmd.τ_y; ctrl_cmd.τ_z]
 
     # set the control input
     c_index = 18
-    int.u[c_index:c_index+3] .= motor_thrusts
+    # int.u[c_index:c_index+3] .= motor_thrusts
+    int.u[c_index:c_index+3] .= ctrl_cmd.motor_thrusts
 
     # @show R_IB.q
     # @show ctrl_cmd.f_net
@@ -138,3 +135,4 @@ function reset_pid_controllers()
     pid_reset(roll_pid)
     pid_reset(pitch_pid)
 end
+
