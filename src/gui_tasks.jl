@@ -25,22 +25,24 @@ function show_visualizer()
     # how much to shrink control plots grid
     rowsize!(g_controller_plots, 2, Auto(0.6))
 
-    # add title
-    add_title(g_top, "Jarvis", sim_time_obs)
+    # add titles
+    elements[:super_title], elements[:time_title] = add_title(g_top, "Jarvis", sim_time_obs)
 
-    visualizer_3d = add_3d_visualizer(fig, vis_params, g_planner, g_planner_plots)
+    elements[:visualizer_3d] = add_3d_visualizer(fig, vis_params, g_planner, g_planner_plots)
 
-    add_3d_model(visualizer_3d, crazyflie_stl, vis_params)
+    add_3d_model(elements[:visualizer_3d], crazyflie_stl, vis_params)
 
-    state_plots, control_plots = add_2d_plots(fig, g_state_plots, g_control_plots)
+    elements[:state_plots], elements[:control_plots] = add_2d_plots(fig, g_state_plots, g_control_plots)
 
     timeline_slider, timeline_btn, attitude_reset_btn, config_menu = add_ui_elements(fig, g_planner_widgets, g_controller_widgets)
 
     g_controller[2, 1] = g_controller_widgets
 
-    plot_data = plot_initialize(state_plots, control_plots)
+    plot_data = plot_initialize(elements[:state_plots], elements[:control_plots])
 
-    return state_plots, control_plots, visualizer_3d, plot_data
+    define_interactions()
+
+    return elements, plot_data
 end
 
 
@@ -52,8 +54,10 @@ function plot_empty_figure()
 end
 
 function add_title(g_top, title, sim_time_obs)
-    supertitle = Label(g_top[1, 1:2], title, fontsize=60)
+    super_title = Label(g_top[1, 1:2], title, fontsize=60)
     time_title = Label(g_top[2, 1:2], "Time = " * string(sim_time_obs[]) * " s", fontsize=40)
+
+    return super_title, time_title
 end
 
 function add_3d_visualizer(fig, vis_params, g_planner, g_planner_plots)
@@ -211,4 +215,11 @@ function plot_reset(plot_data)
     plot_data.axis_5[] = [0]
 
     plot_data.time_vec[] = [0]
+end
+
+function define_interactions()
+    # to change time in title
+    on(sim_time) do time
+        elements[:time_title].text = "Time: " * string(time) * " s"
+    end
 end
