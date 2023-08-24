@@ -28,8 +28,7 @@ callback_params = (; reference_generator=reference_generator, ctrl_cmd=ctrl_cmd,
 
 function integrator_callback(int; params=callback_params)
 
-    dt = 0.01
-    m = 1.0
+    dt = sim_params.callback_dt
     g = 9.81
 
     # extract the state

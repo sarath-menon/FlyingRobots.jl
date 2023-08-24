@@ -37,6 +37,7 @@ sensors:
     sampling_rate: 500 #[Hz]
 
 computer:
+  clock_speed: 100 #Hz
   task_rates:
     pos_ctrl_loop: 50 #Hz
     attitude_ctrl_loop: 100 #Hz

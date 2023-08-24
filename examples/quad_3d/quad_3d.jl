@@ -36,12 +36,16 @@ folder_path = pwd() * "/examples/quad_3d"
 
 vehicle_yaml = YAML.load_file(folder_path * "/parameters/vehicle.yml"; dicttype=Dict{Symbol,Any})
 ctrl_yaml = YAML.load_file(folder_path * "/parameters/controller.yml"; dicttype=Dict{Symbol,Any})
+sim_yaml = YAML.load_file(folder_path * "/parameters/sim.yml"; dicttype=Dict{Symbol,Any})
 
 vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
 task_rates = vehicle_params.computer.task_rates
-
 tasks_per_ticks = get_ticks_per_task(task_rates)
 
+# set integrator callback rate
+sim_yaml[:callback_dt] = 1 / vehicle_yaml[:computer][:clock_speed]
+
+sim_params = recursive_dict_to_namedtuple(sim_yaml)
 
 ## initialize subsystems
 # @named plant = Quadcopter(; name=:quad1, l=0.7, k_τ=0.0035, m=1.0, I_xx=0.003, I_yy=0.003, I_zz=0.02)
@@ -76,7 +80,7 @@ z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z]; Ts=ctrl_yaml[:position_
 roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll]; Ts=ctrl_yaml[:attitude_controller][:rate])
 pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch]; Ts=ctrl_yaml[:attitude_controller][:rate])
 
-control_callback = PeriodicCallback(integrator_callback, 0.01, initial_affect=true)
+control_callback = PeriodicCallback(integrator_callback, sim_params.callback_dt, initial_affect=true)
 
 ## Simulation
 
