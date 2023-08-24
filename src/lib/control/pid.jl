@@ -17,6 +17,10 @@ mutable struct PID2
         new(kp, ki, kd, k_aw, Ts, 0.0, 0.0)
     end
 
+    function PID2(dict::Dict; Ts=Ts)
+        new(dict[:k_p], dict[:k_i], dict[:k_d], dict[:k_aw], Ts, 0.0, 0.0)
+    end
+
 end
 
 PID = PID2

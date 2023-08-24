@@ -32,7 +32,9 @@ include("scheduler.jl")
 
 # read settings file 
 folder_path = pwd() * "/examples/quad_3d"
+
 vehicle_yaml = YAML.load_file(folder_path * "/parameters/vehicle.yml"; dicttype=Dict{Symbol,Any})
+ctrl_yaml = YAML.load_file(folder_path * "/parameters/controller.yml"; dicttype=Dict{Symbol,Any})
 
 vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
 task_rates = vehicle_params.computer.task_rates
@@ -59,13 +61,17 @@ sys = structural_simplify(model)
 # states(sys)
 # ModelingToolkit.get_ps(sys)
 
-## controllers
-x_pos_pid = PID(; kp=3.5, ki=0.00, kd=7, k_aw=0.0, Ts=0.01)
-y_pos_pid = PID(; kp=3.5, ki=0.00, kd=7, k_aw=0.0, Ts=0.01)
-z_pos_pid = PID(; kp=10, ki=1.2, kd=4.5, k_aw=0.0, Ts=0.01)
+# add allocation matrix to controller params 
+allocation_matrix = body_thrust_to_motor_thrust(vehicle_params.arm_length, vehicle_params.actuators.constants.k_τ)
+ctrl_yaml[:allocation_matrix] = allocation_matrix
 
-roll_pid = PID(; kp=0.05, ki=0.00, kd=0.07, k_aw=0.0, Ts=0.01)
-pitch_pid = PID(; kp=0.05, ki=0.00, kd=0.07, k_aw=0.0, Ts=0.01)
+## controllers
+x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x]; Ts=0.01)
+y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y]; Ts=0.01)
+z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z]; Ts=0.01)
+
+roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll]; Ts=0.01)
+pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch]; Ts=0.01)
 
 control_callback = PeriodicCallback(digital_controller, 0.01, initial_affect=true)
 

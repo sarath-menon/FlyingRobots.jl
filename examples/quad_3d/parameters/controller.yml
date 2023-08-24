@@ -1,0 +1,31 @@
+position_controller:
+  pid_x:
+    k_p: 3.5
+    k_i: 0
+    k_d: 7
+    k_aw: 0
+
+  pid_y:
+    k_p: 3.5
+    k_i: 0
+    k_d: 7
+    k_aw: 0
+
+  pid_z:
+    k_p: 10
+    k_i: 1.2
+    k_d: 4.5
+    k_aw: 0
+
+attitude_controller:
+  pid_roll:
+    k_p: 0.05
+    k_i: 0
+    k_d: 0.07
+    k_aw: 0
+
+  pid_pitch:
+    k_p: 0.05
+    k_i: 0
+    k_d: 0.07
+    k_aw: 0
