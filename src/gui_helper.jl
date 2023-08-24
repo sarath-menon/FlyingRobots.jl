@@ -76,48 +76,33 @@ function plot_trajectory(configs_vec::Vector{String}, config::String)
     end
 end
 
-function plot_3d_trajectory(; sim_time_obs::Observable, sim_state_obs::Observable, duration=10.0, dt=0.01, frame_rate=25)
 
+# function plot_3d_trajectory(x_pos, y_pos, z_pos; sim_time_obs::Observable, sim_state_obs::Observable, duration=10.0, dt=0.01, frame_rate=25)
+
+function plot_3d_trajectory(pose; duration=10.0, dt=0.01, frame_rate=25)
     step_count::Integer = convert(Integer, duration / dt)
 
     n_skip_frames::Int8 = convert(Int8, 100 / frame_rate)
 
-    for i in 1:n_skip_frames:step_count
+    # for i in 1:n_skip_frames:step_count
 
-        # stop simulation is stop button is pressed
-        if sim_state_obs[] == true
+    #     # stop simulation is stop button is pressed
+    #     if sim_state_obs[] == true
 
-            max_range = plot_params.visualizer.axis.high - plot_params.visualizer.axis.low
-            dist = max_range / 2
+    model_set_pose(pose)
 
-            x_pos::Float64 = 0.0
-            y_pos::Float64 = df[!, "y"][i]
-            z_pos::Float64 = df[!, "z"][i]
+    # # set the time observable
+    # sim_time::Float64 = round(df[!, "timestamp"][i], digits=2)
+    # sim_time_obs[] = sim_time
 
-            x_low::Float64 = x_pos - dist
-            y_low::Float64 = y_pos - dist
-            z_low::Float64 = z_pos - dist
+    # # set timeline slider value 
+    # set_close_to!(timeline_slider, sim_time)
 
-            x_high::Float64 = x_pos + dist
-            y_high::Float64 = y_pos + dist
-            z_high::Float64 = z_pos + dist
 
-            # set the time observable
-            sim_time::Float64 = round(df[!, "timestamp"][i], digits=2)
-            sim_time_obs[] = sim_time
+    # sleep(n_skip_frames * dt)
 
-            # set timeline slider value 
-            set_close_to!(timeline_slider, sim_time)
-
-            vis_ax.limits = (x_low, x_high, y_low, y_high, z_low, z_high)
-            translate!(m, Vec3f(x_pos, y_pos, z_pos))
-
-            rotate!(m, Vec3f(1, 0, 0), rad2deg(df[!, "θ"][i]))
-
-            sleep(n_skip_frames * dt)
-
-        end
-    end
+    #     end
+    # end
 end
 
 struct PlotData5
@@ -132,3 +117,25 @@ struct PlotData5
 end
 
 PlotData = PlotData5
+
+
+temp = Pose3d()
+model_set_pose(temp)
+
+function model_set_pose(pose)
+    max_range = plot_params.visualizer.axis.high - plot_params.visualizer.axis.low
+    dist = max_range / 2
+
+    x_low = pose.pos.x - dist
+    y_low = pose.pos.y - dist
+    z_low = pose.pos.z - dist
+
+    x_high = pose.pos.x + dist
+    y_high = pose.pos.y + dist
+    z_high = pose.pos.z + dist
+
+    elements[:visualizer_3d].limits = (x_low, x_high, y_low, y_high, z_low, z_high)
+    translate!(elements[:model], Vec3f(pose.pos.x, pose.pos.y, pose.pos.z))
+
+    rotate!(elements[:model], to_makie_quaternion(pose.orientation))
+end

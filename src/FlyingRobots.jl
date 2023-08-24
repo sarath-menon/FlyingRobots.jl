@@ -7,6 +7,8 @@ export FrCtrlCmd, FrActuatorCmd
 export FrDigitalController
 using MtkLibrary
 
+using StaticArrays
+using Rotations
 
 # Use the README as the module docs
 @doc let
@@ -15,6 +17,7 @@ using MtkLibrary
     read(path, String)
 end FlyingRobots
 
+include("types.jl")
 
 include("lib/control/control.jl")
 include("gui.jl")

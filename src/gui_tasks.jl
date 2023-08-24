@@ -30,7 +30,7 @@ function show_visualizer()
 
     elements[:visualizer_3d] = add_3d_visualizer(fig, vis_params, g_planner, g_planner_plots)
 
-    add_3d_model(elements[:visualizer_3d], crazyflie_stl, vis_params)
+    elements[:model] = add_3d_model(elements[:visualizer_3d], crazyflie_stl, vis_params)
 
     elements[:state_plots], elements[:control_plots] = add_2d_plots(fig, g_state_plots, g_control_plots)
 
@@ -96,15 +96,17 @@ end
 
 function add_3d_model(vis_ax, stl_file, vis_params)
 
-    m = mesh!(vis_ax, stl_file, color=:red)
+    model = mesh!(vis_ax, stl_file, color=:red)
 
-    scale!(m, vis_params.mesh.scale, vis_params.mesh.scale, vis_params.mesh.scale)
+    scale!(model, vis_params.mesh.scale, vis_params.mesh.scale, vis_params.mesh.scale)
 
     # center mesh at the origin
-    translate!(m, Vec3f(vis_params.mesh.initial_translation[1], vis_params.mesh.initial_translation[2], vis_params.mesh.initial_translation[3]))
+    translate!(model, Vec3f(vis_params.mesh.initial_translation[1], vis_params.mesh.initial_translation[2], vis_params.mesh.initial_translation[3]))
 
     # apply initial orientation
-    rotate_mesh(m, QuatRotation(1, 0, 0, 0))
+    rotate_mesh(model, QuatRotation(1, 0, 0, 0))
+
+    return model
 end
 
 
@@ -223,3 +225,4 @@ function define_interactions()
         elements[:time_title].text = "Time: " * string(time) * " s"
     end
 end
+
