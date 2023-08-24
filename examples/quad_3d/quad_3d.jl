@@ -5,6 +5,8 @@ using DiffEqCallbacks
 using LinearAlgebra
 using OrdinaryDiffEq
 using Rotations
+using NamedTupleTools
+using StaticArrays
 
 using GLMakie
 using BenchmarkTools
@@ -17,12 +19,15 @@ using MtkLibrary
 
 include("dynamics_utilities.jl")
 include("controller_utilities.jl")
+include("types.jl")
 
 include("dynamics.jl")
 include("controller.jl")
 include("plotting.jl")
 include("gui.jl")
 include("gui_utilities.jl")
+include("scheduler.jl")
+
 
 
 # read settings file 
@@ -30,6 +35,10 @@ folder_path = pwd() * "/examples/quad_3d"
 vehicle_yaml = YAML.load_file(folder_path * "/parameters/vehicle.yml"; dicttype=Dict{Symbol,Any})
 
 vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
+task_rates = vehicle_params.computer.task_rates
+
+tasks_per_ticks = get_ticks_per_task(task_rates)
+tasks_per_ticks
 
 ## initialize subsystems
 # @named plant = Quadcopter(; name=:quad1, l=0.7, k_τ=0.0035, m=1.0, I_xx=0.003, I_yy=0.003, I_zz=0.02)
@@ -47,19 +56,18 @@ eqns = vcat(eqn1)
 sys = structural_simplify(model)
 
 # get system properties
-states(sys)
-ModelingToolkit.get_ps(sys)
+# states(sys)
+# ModelingToolkit.get_ps(sys)
 
 ## controllers
 x_pos_pid = PID(; kp=3.5, ki=0.00, kd=7, k_aw=0.0, Ts=0.01)
 y_pos_pid = PID(; kp=3.5, ki=0.00, kd=7, k_aw=0.0, Ts=0.01)
-z_pos_pid = PID(; kp=30, ki=12, kd=6.5, k_aw=0.0, Ts=0.01)
+z_pos_pid = PID(; kp=10, ki=1.2, kd=4.5, k_aw=0.0, Ts=0.01)
 
 roll_pid = PID(; kp=0.05, ki=0.00, kd=0.07, k_aw=0.0, Ts=0.01)
 pitch_pid = PID(; kp=0.05, ki=0.00, kd=0.07, k_aw=0.0, Ts=0.01)
 
 control_callback = PeriodicCallback(digital_controller, 0.01, initial_affect=true)
-
 
 ## Simulation
 
@@ -86,23 +94,24 @@ parameters = [
     plant.motor_1.first_order_system.T => vehicle_params.actuators.constants.τ,
     plant.motor_2.first_order_system.T => vehicle_params.actuators.constants.τ,
     plant.motor_3.first_order_system.T => vehicle_params.actuators.constants.τ,
-    plant.motor_4.first_order_system.T => vehicle_params.actuators.constants.τ,
-]
+    plant.motor_4.first_order_system.T => vehicle_params.actuators.constants.τ]
+
+states(sys)
 
 
+reset_pid_controllers()
 prob = ODEProblem(sys, X₀, tspan, parameters, callback=control_callback)
 @time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
-
 # plotting
 # plot_position_attitude(sol)
-state_indices = (position=(1, 3), orientation=(7, 10), motor_thrusts=(14, 15))
+state_indices = (position=(1, 3), orientation=(7, 10), motor_thrusts=(17, 21))
 
 Gui.plot_reset(Gui.plot_data)
 
 plot_position(Gui.state_plots, Gui.plot_data, sol, state_indices)
 # @time plot_orientation(Gui.state_plots, Gui.plot_data, sol, state_indices)
 
-plot_control_input(Gui.control_plots, Gui.plot_data, sol, state_indices)
+plot_control_input(Gui.control_plots, Gui.plot_data, sol, state_indices, vehicle_params)
 
 end
