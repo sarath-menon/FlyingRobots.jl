@@ -5,7 +5,7 @@ function log_sim(df)
     log_path = "logs/"
 
     # get date-time as string
-    date = Dates.format(Dates.now(), "e,dd-u-yyyy HH:MM:SS")
+    date = Dates.format(Dates.now(), "e,dd-u-yyyy HH-MM-SS")
 
     log_folder_path = log_path * date
 
