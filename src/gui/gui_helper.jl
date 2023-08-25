@@ -79,7 +79,7 @@ end
 
 # function plot_3d_trajectory(x_pos, y_pos, z_pos; sim_time_obs::Observable, sim_state_obs::Observable, duration=10.0, dt=0.01, frame_rate=25)
 
-function plot_3d_trajectory(df; duration=10.0, dt=0.01, frame_rate=25)
+function plot_3d_trajectory(df, elements; duration=10.0, dt=0.01, frame_rate=25)
     step_count::Integer = convert(Integer, duration / dt)
 
     n_skip_frames::Int8 = convert(Int8, 100 / frame_rate)
@@ -92,7 +92,7 @@ function plot_3d_trajectory(df; duration=10.0, dt=0.01, frame_rate=25)
         position = Vec3d(df[!, 2][i], df[!, 3][i], df[!, 4][i])
         orientation = QuatRotation(df[!, 8][i], df[!, 9][i], df[!, 10][i], df[!, 11][i])
 
-        model_set_pose(position, orientation)
+        model_set_pose(elements, position, orientation)
 
         # set the time observable
         sim_time[] = round(df[!, "timestamp"][i], digits=2)
@@ -119,8 +119,7 @@ end
 
 PlotData = PlotData5
 
-
-function model_set_pose(position, orientation)
+function model_set_pose(elements, position, orientation)
 
     plot_params = elements[:plot_params]
 

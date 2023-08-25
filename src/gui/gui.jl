@@ -41,10 +41,10 @@ crazyflie_stl = load(assetpath(folder_path * "/assets/cf2_assembly.obj"))
 # vis_params = plot_params.visualizer
 # graph_params = plot_params.graph
 
-configs_vec = get_configs_vec(plot_params.graph.axis.configs)
+# configs_vec = get_configs_vec(plot_params.graph.axis.configs)
 
-# to store plot elements
-elements = Dict()
+# # to store plot elements
+# elements = Dict()
 
 # Observables -------------------------------------------------
 sim_time = Observable{Float64}(0.0)
@@ -89,9 +89,6 @@ sim_state = Observable{Bool}(false)
 # end
 
 
-# # lift(timeline_slider.value) do val
-# #     # sim_time_obs[] = val
-# # end
 
 # on(sim_time_obs) do time
 #     elements[:time_title].text = "Time: " * string(time) * " s"

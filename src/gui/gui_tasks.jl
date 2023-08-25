@@ -1,13 +1,20 @@
 function show_visualizer()
 
+    # to store plot elements
+    elements = Dict()
+
     plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
     plot_params = recursive_dict_to_namedtuple(plot_yaml)
-    vis_params = plot_params.visualizer
-    graph_params = plot_params.graph
+
+
+    elements[:configs_vec] = get_configs_vec(plot_params.graph.axis.configs)
 
     elements[:plot_params] = plot_params
+    elements[:vis_params] = plot_params.visualizer
+    elements[:graph_params] = plot_params.graph
 
     fig = plot_empty_figure()
+    elements[:fig] = fig
 
     # add grids
     # Top level
@@ -34,21 +41,21 @@ function show_visualizer()
     rowsize!(g_controller_plots, 2, Auto(0.6))
 
     # add titles
-    elements[:super_title], elements[:time_title] = add_title(g_top, "Jarvis", sim_time)
+    add_title(elements, g_top, "Jarvis", sim_time)
 
-    elements[:visualizer_3d] = add_3d_visualizer(fig, vis_params, g_planner, g_planner_plots)
+    add_3d_visualizer(elements, g_planner, g_planner_plots)
 
-    elements[:model] = add_3d_model(elements[:visualizer_3d], crazyflie_stl, vis_params)
+    add_3d_model(elements, crazyflie_stl)
 
-    elements[:state_plots], elements[:control_plots] = add_2d_plots(fig, g_state_plots, g_control_plots)
+    add_2d_plots(elements, g_state_plots, g_control_plots)
 
-    timeline_slider, timeline_btn, attitude_reset_btn, config_menu = add_ui_elements(fig, g_planner_widgets, g_controller_widgets)
+    add_ui_elements(elements, g_planner_widgets, g_controller_widgets)
 
     g_controller[2, 1] = g_controller_widgets
 
-    plot_data = plot_initialize(elements[:state_plots], elements[:control_plots])
+    plot_data = plot_initialize(elements)
 
-    define_interactions()
+    define_interactions(elements)
 
     return elements, plot_data
 end
@@ -61,14 +68,15 @@ function plot_empty_figure()
     return fig
 end
 
-function add_title(g_top, title, sim_time_obs)
-    super_title = Label(g_top[1, 1:2], title, fontsize=60)
-    time_title = Label(g_top[2, 1:2], "Time = " * string(sim_time_obs[]) * " s", fontsize=40)
-
-    return super_title, time_title
+function add_title(elements, g_top, title, sim_time_obs)
+    elements[:super_title] = Label(g_top[1, 1:2], title, fontsize=60)
+    elements[:time_title] = Label(g_top[2, 1:2], "Time = " * string(sim_time_obs[]) * " s", fontsize=40)
 end
 
-function add_3d_visualizer(fig, vis_params, g_planner, g_planner_plots)
+function add_3d_visualizer(elements, g_planner, g_planner_plots)
+
+    fig = elements[:fig]
+    vis_params = elements[:vis_params]
 
     # 3d axis for airplane visualization
     vis_ax = Axis3(g_planner_plots[1, 1],
@@ -99,10 +107,13 @@ function add_3d_visualizer(fig, vis_params, g_planner, g_planner_plots)
     # force 3d visualizer to have an aspect ratio of 1
     rowsize!(g_planner, 1, Aspect(1, 1.0))
 
-    return vis_ax
+    elements[:visualizer_3d] = vis_ax
 end
 
-function add_3d_model(vis_ax, stl_file, vis_params)
+function add_3d_model(elements, stl_file)
+
+    vis_params = elements[:vis_params]
+    vis_ax = elements[:visualizer_3d]
 
     model = mesh!(vis_ax, stl_file, color=:red)
 
@@ -114,17 +125,20 @@ function add_3d_model(vis_ax, stl_file, vis_params)
     # apply initial orientation
     rotate_mesh(model, QuatRotation(1, 0, 0, 0))
 
-    return model
+    elements[:model] = model
 end
 
 
-function add_2d_plots(fig, g_state_plots, g_control_plots)
+function add_2d_plots(elements, g_state_plots, g_control_plots)
+
+    fig = elements[:fig]
+    graph_params = elements[:graph_params]
 
     state_plots = Axis[]
     control_plots = Axis[]
 
     for i in 1:graph_params.n_state
-        plot = Axis(fig, ylabel=graph_params.ylabels[i], titlesize=graph_params.titlesize)
+        plot = Axis(fig)
         push!(state_plots, plot)
 
         # g_controller_plots[i,1] = state_plots[i]
@@ -143,12 +157,16 @@ function add_2d_plots(fig, g_state_plots, g_control_plots)
         g_control_plots[i, 1] = control_plots[i]
     end
 
-    return state_plots, control_plots
+    elements[:state_plots] = state_plots
+    elements[:control_plots] = control_plots
 
 end
 
 
-function add_ui_elements(fig, g_planner_widgets, g_controller_widgets)
+function add_ui_elements(elements, g_planner_widgets, g_controller_widgets)
+
+    fig = elements[:fig]
+
     # slider grid for timeline control
     timeline_slider = Slider(fig, range=0:0.01:10, startvalue=0, linewidth=25.0, tellheight=false,
         halign=:left)
@@ -173,7 +191,7 @@ function add_ui_elements(fig, g_planner_widgets, g_controller_widgets)
 
     # dropdown menu
     config_menu = Menu(fig,
-        options=configs_vec,
+        options=elements[:configs_vec],
         default="positions")
 
     g_controller_widgets[1, 2] = config_menu
@@ -188,11 +206,16 @@ function add_ui_elements(fig, g_planner_widgets, g_controller_widgets)
     # g_controller_toggles[1, 2] = grid!(hcat(toggles[2], labels[2]), tellheight=false, tellwidth=false)
     # g_controller_toggles[1, 3] = grid!(hcat(toggles[3], labels[3]), tellheight=false, tellwidth=false)
 
-    return timeline_slider, timeline_btn, attitude_reset_btn, config_menu
-
+    elements[:timeline_slider] = timeline_slider
+    elements[:timeline_btn] = timeline_btn
+    elements[:attitude_reset_btn] = attitude_reset_btn
+    elements[:config_menu] = config_menu
 end
 
-function plot_initialize(state_plots, control_plots)
+function plot_initialize(elements)
+    state_plots = elements[:state_plots]
+    control_plots = elements[:control_plots]
+
     data_1 = Observable{Vector{Float64}}(zeros(1))
     data_2 = Observable{Vector{Float64}}(zeros(1))
     data_3 = Observable{Vector{Float64}}(zeros(1))
@@ -227,10 +250,15 @@ function plot_reset(plot_data)
     plot_data.time_vec[] = [0]
 end
 
-function define_interactions()
-    # to change time in title
+function define_interactions(elements)
+    # to set time in title
     on(sim_time) do time
         elements[:time_title].text = "Time: " * string(time) * " s"
     end
-end
 
+    # change displayed time according to slider position
+    lift(elements[:timeline_slider].value) do val
+        sim_time[] = val
+    end
+
+end
