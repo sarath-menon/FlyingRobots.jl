@@ -16,10 +16,7 @@ function build_system_model()
 
     sys = structural_simplify(sys_unsimplified)
 
-    subsystems = Dict()
-
-    subsystems[:plant] = quadcopter
-    subsystems[:controller] = controller
+    subsystems = (; plant=quadcopter, controller=controller)
 
     return sys, subsystems
 end
