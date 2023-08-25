@@ -19,7 +19,6 @@ function reference_generator(t)
     return [x_ref, y_ref, z_ref]
 end
 
-
 # vehicle_pose = Pose3d()
 ctrl_cmd = CascadedPidCtrlCmd()
 vehicle_pose = Pose3d()
@@ -69,9 +68,9 @@ function integrator_callback(int; params=callback_params)
     # get reference 
     R = reference_generator(int.t)
 
-    ctrl_cmd.x = R[1]
-    ctrl_cmd.y = R[2]
-    ctrl_cmd.z = R[3]
+    ctrl_cmd.pos.x = R[1]
+    ctrl_cmd.pos.y = R[2]
+    ctrl_cmd.pos.z = R[3]
 
     # run the scheduler ------------------------------------------------
     scheduler(clock, vehicle_pose, ctrl_cmd, vehicle_params)
