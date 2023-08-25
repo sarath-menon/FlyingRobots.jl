@@ -1,6 +1,6 @@
 
 function load_vehicle_params(path::String)
-    vehicle_yaml = YAML.load_file(folder_path * path; dicttype=Dict{Symbol,Any})
+    vehicle_yaml = YAML.load_file(path; dicttype=Dict{Symbol,Any})
 
     # # set tasks per ticks for each computer task
     for task in vehicle_yaml[:computer][:tasks]

@@ -15,9 +15,9 @@ function log_sim(df)
 
     CSV.write(log_folder_path * "/sim_output.csv", df)
 
-    # copy the parameer files 
+    # copy the parameter files 
     Base.Filesystem.cp(folder_path * vehicle_params_path, log_folder_path * vehicle_params_path)
     Base.Filesystem.cp(folder_path * ctrl_yaml_path, log_folder_path * ctrl_yaml_path)
-    Base.Filesystem.cp(folder_path * sim_params_yaml, log_folder_path * sim_params_yaml)
+    Base.Filesystem.cp(folder_path * sim_params_path, log_folder_path * sim_params_path)
 
 end
