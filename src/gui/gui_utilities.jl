@@ -1,5 +1,9 @@
 
-function plot_position(plots, plot_data, df::DataFrame)
+function plot_position(elements)
+
+    df = elements[:df]
+    plots = elements[:state_plots]
+    plot_data = elements[:plot_data]
 
     plot_data.time_vec[] = df[!, "timestamp"]
 
@@ -22,14 +26,18 @@ function plot_position(plots, plot_data, df::DataFrame)
     plots[3].ylabel = "pos [m]"
 end
 
-function plot_orientation(plots, plot_data, df)
+function plot_orientation(elements)
+
+    df = elements[:df]
+    plots = elements[:state_plots]
+    plot_data = elements[:plot_data]
 
     plot_data.time_vec[] = df[!, "timestamp"]
 
-    qs = log_sim_output[!, "(quad1.rb.q(t), 1)"]
-    q1 = log_sim_output[!, "(quad1.rb.q(t), 2)"]
-    q2 = log_sim_output[!, "(quad1.rb.q(t), 3)"]
-    q3 = log_sim_output[!, "(quad1.rb.q(t), 4)"]
+    qs = df[!, "(quad1.rb.q(t), 1)"]
+    q1 = df[!, "(quad1.rb.q(t), 2)"]
+    q2 = df[!, "(quad1.rb.q(t), 3)"]
+    q3 = df[!, "(quad1.rb.q(t), 4)"]
 
     quat_vec = QuatRotation.(qs, q1, q2, q3, false)
 
@@ -61,10 +69,14 @@ function plot_orientation(plots, plot_data, df)
     plots[3].ylabel = "angle [°]"
 end
 
-function plot_control_input(plots, plot_data, df, vehicle_params)
+function plot_control_input(elements, motor_thrust_to_body_thrust)
+
+    df = elements[:df]
+    plots = elements[:control_plots]
+    plot_data = elements[:plot_data]
 
     plot_data.time_vec[] = df[!, "timestamp"]
-    n_timesteps = size(log_sim_output)[1]
+    n_timesteps = size(df)[1]
 
     # convert motor thrusts to body thrust, torque
     f_net_vec = Float64[]
@@ -73,16 +85,16 @@ function plot_control_input(plots, plot_data, df, vehicle_params)
     τ_z_vec = Float64[]
 
     # find index of motor_1 thrust 
-    # id = findfirst(x -> x == "(controller.U(t), 1)", names(log_sim_output))
+    # id = findfirst(x -> x == "(controller.U(t), 1)", names(df))
 
     M = motor_thrust_to_body_thrust(l=vehicle_params.arm_length, k_τ=vehicle_params.actuators.constants.k_τ)
 
     motor_thrusts = zeros(4, n_timesteps)
 
-    motor_thrusts[1, :] = log_sim_output[!, "(controller.U(t), 1)"]
-    motor_thrusts[2, :] = log_sim_output[!, "(controller.U(t), 2)"]
-    motor_thrusts[3, :] = log_sim_output[!, "(controller.U(t), 3)"]
-    motor_thrusts[4, :] = log_sim_output[!, "(controller.U(t), 4)"]
+    motor_thrusts[1, :] = df[!, "(controller.U(t), 1)"]
+    motor_thrusts[2, :] = df[!, "(controller.U(t), 2)"]
+    motor_thrusts[3, :] = df[!, "(controller.U(t), 3)"]
+    motor_thrusts[4, :] = df[!, "(controller.U(t), 4)"]
 
     result = M * motor_thrusts
 

@@ -79,12 +79,15 @@ end
 
 # function plot_3d_trajectory(x_pos, y_pos, z_pos; sim_time_obs::Observable, sim_state_obs::Observable, duration=10.0, dt=0.01, frame_rate=25)
 
-function plot_3d_trajectory(df, elements; duration=10.0, dt=0.01, frame_rate=25)
+function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=25)
+
+    df = elements[:df]
 
     sim_state = elements[:sim_state]
     sim_time = elements[:sim_time]
 
     timeline_slider = elements[:widgets][:timeline_slider]
+    timeline_btn = elements[:widgets][:timeline_btn]
 
     step_count = convert(Integer, duration / dt)
     n_skip_frames = convert(Integer, 100 / frame_rate)
@@ -96,7 +99,11 @@ function plot_3d_trajectory(df, elements; duration=10.0, dt=0.01, frame_rate=25)
         return false
     end
 
-    start_3d_animation(elements)
+    # set sim state flag to true
+    sim_state[] = true
+
+    # change button text to show "Stop"
+    timeline_btn.label = "Stop"
 
     animation_loop = @async begin
         for i in 1:n_skip_frames:step_count

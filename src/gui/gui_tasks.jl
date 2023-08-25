@@ -58,11 +58,11 @@ function show_visualizer()
 
     g_controller[2, 1] = g_controller_widgets
 
-    plot_data = plot_initialize(elements)
+    plot_initialize(elements)
 
     define_interactions(elements, sim_time)
 
-    return elements, plot_data
+    return elements
 end
 
 
@@ -249,7 +249,8 @@ function plot_initialize(elements)
 
     plot_data = PlotData(time_vec, data_1, data_2, data_3, data_4, data_5)
 
-    return plot_data
+    elements[:plot_data] = plot_data
+    # return plot_data
 end
 
 
@@ -295,16 +296,6 @@ function define_interactions(elements, sim_time)
     end
 end
 
-function start_3d_animation(elements)
-    sim_state = elements[:sim_state]
-    timeline_btn = elements[:widgets][:timeline_btn]
-
-    # set sim state flag to true
-    sim_state[] = true
-
-    # change button text to show "Stop"
-    timeline_btn.label = "Stop"
-end
 
 function stop_3d_animation(elements)
     sim_state = elements[:sim_state]
@@ -317,4 +308,8 @@ function stop_3d_animation(elements)
     timeline_btn.label = "Play"
 end
 
+
+function set_sim_instance(elements, df::DataFrame)
+    elements[:df] = df
+end
 

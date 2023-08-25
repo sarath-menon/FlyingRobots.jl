@@ -20,7 +20,7 @@ GLMakie.activate!(inline=false)
 using MtkLibrary
 using FlyingRobots
 
-# plot_elements, plot_data = FlyingRobots.Gui.show_visualizer()
+plot_elements = FlyingRobots.Gui.show_visualizer()
 
 include("dynamics_utilities.jl")
 include("controller_utilities.jl")
@@ -44,11 +44,11 @@ folder_path = pwd() * "/examples/quad_3d"
 
 vehicle_params_path = "/parameters/vehicle.yml"
 ctrl_yaml_path = "/parameters/controller.yml"
-sim_params_yaml = "/parameters/sim.yml"
+sim_params_path = "/parameters/sim.yml"
 
-vehicle_params = load_vehicle_params(vehicle_params_path)
-ctrl_yaml = load_controller_params(ctrl_yaml_path)
-sim_params = load_sim_params(sim_params_yaml, vehicle_params)
+vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
+ctrl_yaml = load_controller_params(folder_path * ctrl_yaml_path)
+sim_params = load_sim_params(folder_path * sim_params_path, vehicle_params)
 
 include("integrator_callback.jl")
 
@@ -67,22 +67,47 @@ pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch])
 
 # plotting
 
-# plot_position_attitude(sol)
-state_indices = (position=(1, 3), orientation=(7, 10), motor_thrusts=(17, 21))
-
 FlyingRobots.Gui.plot_reset(plot_data)
 
-plot_position(plot_elements[:state_plots], plot_data, sol, state_indices)
-# @time plot_orientation(Gui.state_plots, Gui.plot_data, sol, state_indices)
+plot_position(plot_elements[:state_plots], plot_data, df)
+plot_orientation(plot_elements[:state_plots], plot_data, df)
 
-plot_control_input(plot_elements[:control_plots], plot_data, sol, state_indices, vehicle_params)
+plot_control_input(plot_elements[:control_plots], plot_data, df, vehicle_params)
 
+flag = FlyingRobots.Gui.plot_3d_trajectory(df, plot_elements)
 
-@time @view df[!, 1][1]
+## new gui
+using FlyingRobots
 
-plot_elements, plot_data = FlyingRobots.Gui.show_visualizer()
+plot_elements = FlyingRobots.Gui.show_visualizer()
 
-sim_task = @async FlyingRobots.Gui.plot_3d_trajectory(df, plot_elements)
+FlyingRobots.Gui.set_sim_instance(plot_elements, df)
 
-plot_elements[:sim_state]
+#flag = FlyingRobots.Gui.start_3d_animation(plot_elements)
+
+FlyingRobots.Gui.plot_position(plot_elements)
+FlyingRobots.Gui.plot_orientation(plot_elements)
+FlyingRobots.Gui.plot_control_input(plot_elements, motor_thrust_to_body_thrust)
+
+plot_elements[:visualizer_3d]
+## to replay log file
+# # load parameters
+# log_file_path = pwd() * "/logs/Fri,25-Aug-2023 16-01-45"
+
+# vehicle_params_path = "/parameters/vehicle.yml"
+# ctrl_yaml_path = "/parameters/controller.yml"
+# sim_params_path = "/parameters/sim.yml"
+
+# vehicle_params = load_vehicle_params(log_file_path * vehicle_params_path)
+# ctrl_yaml = load_controller_params(log_file_path * ctrl_yaml_path)
+# sim_params = load_sim_params(log_file_path * sim_params_path, vehicle_params)
+
+# # load data
+# log_sim_output = CSV.read(log_file_path * "/sim_output.csv", DataFrame)
+
+# plot_position(plot_elements[:state_plots], plot_data, log_sim_output)
+# plot_orientation(plot_elements[:state_plots], plot_data, log_sim_output)
+
+# plot_control_input(plot_elements[:control_plots], plot_data, log_sim_output, vehicle_params)
+
 end
