@@ -47,8 +47,8 @@ crazyflie_stl = load(assetpath(folder_path * "/assets/cf2_assembly.obj"))
 # elements = Dict()
 
 # Observables -------------------------------------------------
-sim_time = Observable{Float64}(0.0)
-sim_state = Observable{Bool}(false)
+# sim_time = Observable{Float64}(0.0)
+# sim_state = Observable{Bool}(false)
 
 # # event handling
 # on(config_menu.selection) do config
@@ -89,10 +89,6 @@ sim_state = Observable{Bool}(false)
 # end
 
 
-
-# on(sim_time_obs) do time
-#     elements[:time_title].text = "Time: " * string(time) * " s"
-# end
 
 # time_marker = lift(sim_time_obs) do time_val
 #     time_val

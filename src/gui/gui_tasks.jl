@@ -1,11 +1,16 @@
 function show_visualizer()
 
+    sim_time = Observable{Float64}(0.0)
+    sim_state = Observable{Bool}(false)
+
     # to store plot elements
     elements = Dict()
 
+    elements[:sim_state] = sim_state
+    elements[:sim_time] = sim_time
+
     plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
     plot_params = recursive_dict_to_namedtuple(plot_yaml)
-
 
     elements[:configs_vec] = get_configs_vec(plot_params.graph.axis.configs)
 
@@ -41,7 +46,7 @@ function show_visualizer()
     rowsize!(g_controller_plots, 2, Auto(0.6))
 
     # add titles
-    add_title(elements, g_top, "Jarvis", sim_time)
+    add_titles(elements, g_top, "Jarvis")
 
     add_3d_visualizer(elements, g_planner, g_planner_plots)
 
@@ -49,13 +54,13 @@ function show_visualizer()
 
     add_2d_plots(elements, g_state_plots, g_control_plots)
 
-    add_ui_elements(elements, g_planner_widgets, g_controller_widgets)
+    add_widgets(elements, g_planner_widgets, g_controller_widgets)
 
     g_controller[2, 1] = g_controller_widgets
 
     plot_data = plot_initialize(elements)
 
-    define_interactions(elements)
+    define_interactions(elements, sim_time)
 
     return elements, plot_data
 end
@@ -68,9 +73,14 @@ function plot_empty_figure()
     return fig
 end
 
-function add_title(elements, g_top, title, sim_time_obs)
-    elements[:super_title] = Label(g_top[1, 1:2], title, fontsize=60)
-    elements[:time_title] = Label(g_top[2, 1:2], "Time = " * string(sim_time_obs[]) * " s", fontsize=40)
+function add_titles(elements, g_top, title)
+
+    titles = Dict()
+
+    titles[:super_title] = Label(g_top[1, 1:2], title, fontsize=60)
+    titles[:time_title] = Label(g_top[2, 1:2], "Time = " * string(0.0) * " s", fontsize=40)
+
+    elements[:titles] = titles
 end
 
 function add_3d_visualizer(elements, g_planner, g_planner_plots)
@@ -163,7 +173,7 @@ function add_2d_plots(elements, g_state_plots, g_control_plots)
 end
 
 
-function add_ui_elements(elements, g_planner_widgets, g_controller_widgets)
+function add_widgets(elements, g_planner_widgets, g_controller_widgets)
 
     fig = elements[:fig]
 
@@ -196,6 +206,8 @@ function add_ui_elements(elements, g_planner_widgets, g_controller_widgets)
 
     g_controller_widgets[1, 2] = config_menu
 
+    widgets = Dict()
+
     # # toggle buttons
     # toggles = [Toggle(fig, active=active) for active in [true, true, true]]
     # labels = [Label(fig, label) for label in ["y", "z", "θ"]]
@@ -206,10 +218,12 @@ function add_ui_elements(elements, g_planner_widgets, g_controller_widgets)
     # g_controller_toggles[1, 2] = grid!(hcat(toggles[2], labels[2]), tellheight=false, tellwidth=false)
     # g_controller_toggles[1, 3] = grid!(hcat(toggles[3], labels[3]), tellheight=false, tellwidth=false)
 
-    elements[:timeline_slider] = timeline_slider
-    elements[:timeline_btn] = timeline_btn
-    elements[:attitude_reset_btn] = attitude_reset_btn
-    elements[:config_menu] = config_menu
+    widgets[:timeline_slider] = timeline_slider
+    widgets[:timeline_btn] = timeline_btn
+    widgets[:attitude_reset_btn] = attitude_reset_btn
+    widgets[:config_menu] = config_menu
+
+    elements[:widgets] = widgets
 end
 
 function plot_initialize(elements)
@@ -250,15 +264,57 @@ function plot_reset(plot_data)
     plot_data.time_vec[] = [0]
 end
 
-function define_interactions(elements)
+function define_interactions(elements, sim_time)
+
+    time_title = elements[:titles][:time_title]
+    sim_state = elements[:sim_state]
+
     # to set time in title
     on(sim_time) do time
-        elements[:time_title].text = "Time: " * string(time) * " s"
+        time_title.text[] = "Time: " * string(time) * " s"
     end
 
     # change displayed time according to slider position
-    lift(elements[:timeline_slider].value) do val
+    timeline_slider = elements[:widgets][:timeline_slider]
+    timeline_btn = elements[:widgets][:timeline_btn]
+
+    lift(timeline_slider.value) do val
         sim_time[] = val
     end
 
+    # play 3d visualization if 'Play' button is clicked
+    on(timeline_btn.clicks) do clicks
+
+        # if sim is not already running, start sim
+        if sim_state[] == false
+
+            start_3d_animation(elements)
+        else
+            stop_3d_animation(elements)
+        end
+    end
 end
+
+function start_3d_animation(elements)
+    sim_state = elements[:sim_state]
+    timeline_btn = elements[:widgets][:timeline_btn]
+
+    # set sim state flag to true
+    sim_state[] = true
+
+    # change button text to show "Stop"
+    timeline_btn.label = "Stop"
+end
+
+function stop_3d_animation(elements)
+    sim_state = elements[:sim_state]
+    timeline_btn = elements[:widgets][:timeline_btn]
+
+    # if sim is currently running, set sim state flag to false
+    sim_state[] = false
+
+    # change button text to show "Stop"
+    timeline_btn.label = "Play"
+end
+
+
