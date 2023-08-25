@@ -6,7 +6,9 @@ function load_vehicle_params(path::String)
     for task in vehicle_yaml[:computer][:tasks]
         clock_speed = vehicle_yaml[:computer][:clock_speed]
         task_rate_hz = task[:rate]
-        @show task[:rate_per_tick] = Int(clock_speed / task_rate_hz)
+        task[:rate_per_tick] = Int(clock_speed / task_rate_hz)
+
+        task[:func] = getfield(Main, Symbol(task[:name]))
     end
 
     vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
