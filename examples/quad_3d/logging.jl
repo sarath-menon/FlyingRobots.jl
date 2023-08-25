@@ -1,11 +1,5 @@
 
-function log_sim(sol)
-
-    df = DataFrame(sol)
-
-    # dataframe header formatting
-    rename!(df, replace.(names(df), r"getindex" => ""))
-    rename!(df, replace.(names(df), r"₊" => "."))
+function log_sim(df)
 
     # save as CSV file
     log_path = "logs/"
