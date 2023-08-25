@@ -16,7 +16,7 @@ include("gui_tasks.jl")
 
 
 
-export show_visualizer, PlotData, plot_reset
+export show_visualizer, PlotData, plot_reset, plot_3d_trajectory
 
 set_theme!(
     #     font = "Arial", # inherited by layoutables if not overridden
@@ -26,11 +26,11 @@ set_theme!(
 # read settings file 
 folder_path = pwd() * "/examples/quad_3d"
 
-plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
+# plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
 vehicle_yaml = YAML.load_file(folder_path * "/parameters/vehicle.yml"; dicttype=Dict{Symbol,Any})
 
 vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
-plot_params = recursive_dict_to_namedtuple(plot_yaml)
+# plot_params = recursive_dict_to_namedtuple(plot_yaml)
 
 # load mesh 
 crazyflie_stl = load(assetpath(folder_path * "/assets/cf2_assembly.obj"))
@@ -38,8 +38,8 @@ crazyflie_stl = load(assetpath(folder_path * "/assets/cf2_assembly.obj"))
 
 # Params --------------------------------------------
 
-vis_params = plot_params.visualizer
-graph_params = plot_params.graph
+# vis_params = plot_params.visualizer
+# graph_params = plot_params.graph
 
 configs_vec = get_configs_vec(plot_params.graph.axis.configs)
 

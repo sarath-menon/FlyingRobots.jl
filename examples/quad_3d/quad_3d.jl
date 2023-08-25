@@ -60,7 +60,7 @@ z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z])
 roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll])
 pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch])
 
-@time sol = run_sim(sys, subsystems, sim_params, vehicle_params; save=true)
+@time sol, df = run_sim(sys, subsystems, sim_params, vehicle_params; save=true)
 
 # plotting
 
@@ -73,5 +73,12 @@ plot_position(plot_elements[:state_plots], plot_data, sol, state_indices)
 # @time plot_orientation(Gui.state_plots, Gui.plot_data, sol, state_indices)
 
 plot_control_input(plot_elements[:control_plots], plot_data, sol, state_indices, vehicle_params)
+
+
+@time @view df[!, 1][1]
+
+FlyingRobots.Gui.plot_3d_trajectory(df)
+
+FlyingRobots.Gui.model_set_pose(Vec3d(0, 0, 0), QuatRotation(0, 1, 0, 0))
 
 end

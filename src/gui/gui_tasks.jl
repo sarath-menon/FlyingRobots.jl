@@ -1,4 +1,12 @@
 function show_visualizer()
+
+    plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
+    plot_params = recursive_dict_to_namedtuple(plot_yaml)
+    vis_params = plot_params.visualizer
+    graph_params = plot_params.graph
+
+    elements[:plot_params] = plot_params
+
     fig = plot_empty_figure()
 
     # add grids

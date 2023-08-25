@@ -79,30 +79,31 @@ end
 
 # function plot_3d_trajectory(x_pos, y_pos, z_pos; sim_time_obs::Observable, sim_state_obs::Observable, duration=10.0, dt=0.01, frame_rate=25)
 
-function plot_3d_trajectory(pose; duration=10.0, dt=0.01, frame_rate=25)
+function plot_3d_trajectory(df; duration=10.0, dt=0.01, frame_rate=25)
     step_count::Integer = convert(Integer, duration / dt)
 
     n_skip_frames::Int8 = convert(Int8, 100 / frame_rate)
 
-    # for i in 1:n_skip_frames:step_count
+    for i in 1:n_skip_frames:step_count
 
-    #     # stop simulation is stop button is pressed
-    #     if sim_state_obs[] == true
+        # # stop simulation is stop button is pressed
+        # if sim_state[] == true
 
-    model_set_pose(pose)
+        position = Vec3d(df[!, 2][i], df[!, 3][i], df[!, 4][i])
+        orientation = QuatRotation(df[!, 8][i], df[!, 9][i], df[!, 10][i], df[!, 11][i])
 
-    # # set the time observable
-    # sim_time::Float64 = round(df[!, "timestamp"][i], digits=2)
-    # sim_time_obs[] = sim_time
+        model_set_pose(position, orientation)
 
-    # # set timeline slider value 
-    # set_close_to!(timeline_slider, sim_time)
+        # set the time observable
+        sim_time[] = round(df[!, "timestamp"][i], digits=2)
 
+        # # set timeline slider value 
+        # set_close_to!(timeline_slider, sim_time)
 
-    # sleep(n_skip_frames * dt)
+        sleep(n_skip_frames * dt)
 
-    #     end
-    # end
+        # end
+    end
 end
 
 struct PlotData5
@@ -119,20 +120,31 @@ end
 PlotData = PlotData5
 
 
-function model_set_pose(pose)
+function model_set_pose(position, orientation)
+
+    plot_params = elements[:plot_params]
+
     max_range = plot_params.visualizer.axis.high - plot_params.visualizer.axis.low
     dist = max_range / 2
 
-    x_low = pose.pos.x - dist
-    y_low = pose.pos.y - dist
-    z_low = pose.pos.z - dist
+    x_low = position.x - dist
+    y_low = position.y - dist
+    z_low = position.z - dist
 
-    x_high = pose.pos.x + dist
-    y_high = pose.pos.y + dist
-    z_high = pose.pos.z + dist
+    x_high = position.x + dist
+    y_high = position.y + dist
+    z_high = position.z + dist
 
     elements[:visualizer_3d].limits = (x_low, x_high, y_low, y_high, z_low, z_high)
-    translate!(elements[:model], Vec3f(pose.pos.x, pose.pos.y, pose.pos.z))
+    translate!(elements[:model], Vec3f(position.x, position.y, position.z))
 
-    rotate!(elements[:model], to_makie_quaternion(pose.orientation))
+    rotate!(elements[:model], to_makie_quaternion(orientation))
 end
+
+# let
+
+#     q = to_makie_quaternion(QuatRotation(0, 0, 1, 0))
+
+#     rotate!(elements[:model], q)
+# end
+

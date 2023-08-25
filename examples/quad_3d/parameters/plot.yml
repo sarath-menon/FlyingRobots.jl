@@ -4,8 +4,8 @@ title:
 visualizer:
   title: Crazyflie
   axis:
-    low: -0.5
-    high: 0.5
+    low: -0.2
+    high: 0.2
     aspect_x: 1
     aspect_y: 1
     aspect_z: 1
