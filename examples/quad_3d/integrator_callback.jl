@@ -24,7 +24,7 @@ end
 ctrl_cmd = CascadedPidCtrlCmd()
 vehicle_pose = Pose3d()
 
-callback_params = (; reference_generator=reference_generator, ctrl_cmd=ctrl_cmd, vehicle_pose=vehicle_pose, vehicle_params=vehicle_params)
+callback_params = (; ctrl_cmd=ctrl_cmd, vehicle_pose=vehicle_pose)
 
 function integrator_callback(int; params=callback_params)
 
@@ -45,7 +45,7 @@ function integrator_callback(int; params=callback_params)
     int.u[7:10] = [q1.q.s, q1.q.v1, q1.q.v2, q1.q.v3]
 
     # update vehicle state ------------------------------------------------
-    vehicle_params = params.vehicle_params
+    # vehicle_params = params.vehicle_params
     vehicle_pose = params.vehicle_pose
     ctrl_cmd = params.ctrl_cmd
 
@@ -80,17 +80,6 @@ function integrator_callback(int; params=callback_params)
     c_index = 18
     # int.u[c_index:c_index+3] .= motor_thrusts
     int.u[c_index:c_index+3] .= ctrl_cmd.motor_thrusts
-
-    # @show R_IB.q
-    # @show ctrl_cmd.f_net
-
-    # @show e_x,e_y,e_z 
-    # # @show p, q
-    # # @show p_ref, q_ref
-    # @show e_p,e_q
-    # @show  τ_x, τ_y
-    # @show motor_thrusts 
-    # println("")    
 end
 
 
