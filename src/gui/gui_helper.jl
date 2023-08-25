@@ -93,33 +93,46 @@ function plot_3d_trajectory(df, elements; duration=10.0, dt=0.01, frame_rate=25)
 
     # check if simulation is already running
     if sim_state[] == true
-        return
+        return false
     end
 
-    sim_state[] = true
+    start_3d_animation(elements)
 
-    for i in 1:n_skip_frames:step_count
+    animation_loop = @async begin
+        for i in 1:n_skip_frames:step_count
 
-        # stop simulation is stop button is pressed
-        if sim_state[] == false
-            break
+            # stop simulation is stop button is pressed
+            if sim_state[] == false
+                break
+            end
+
+            position = Vec3d(df[!, 2][i], df[!, 3][i], df[!, 4][i])
+            orientation = QuatRotation(df[!, 8][i], df[!, 9][i], df[!, 10][i], df[!, 11][i])
+
+            model_set_pose(elements, position, orientation)
+
+            # set the time observable
+            sim_time[] = round(df[!, "timestamp"][i], digits=2)
+
+            # set timeline slider value 
+            set_close_to!(timeline_slider, sim_time[])
+
+            # account for skipped frames in sleep time
+            sleep(n_skip_frames * dt)
+
         end
-
-        position = Vec3d(df[!, 2][i], df[!, 3][i], df[!, 4][i])
-        orientation = QuatRotation(df[!, 8][i], df[!, 9][i], df[!, 10][i], df[!, 11][i])
-
-        model_set_pose(elements, position, orientation)
-
-        # set the time observable
-        sim_time[] = round(df[!, "timestamp"][i], digits=2)
-
-        # set timeline slider value 
-        set_close_to!(timeline_slider, sim_time[])
-
-        # account for skipped frames in sleep time
-        sleep(n_skip_frames * dt)
-
     end
+
+    @async begin
+        # wait for animtion to finish
+        wait(animation_loop)
+
+        println("animation done")
+
+        stop_3d_animation(elements)
+    end
+    return animation_loop
+
 end
 
 
