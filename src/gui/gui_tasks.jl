@@ -14,9 +14,9 @@ function show_visualizer()
 
     elements[:configs_vec] = get_configs_vec(plot_params.graph.axis.configs)
 
-    elements[:plot_params] = plot_params
-    elements[:vis_params] = plot_params.visualizer
-    elements[:graph_params] = plot_params.graph
+    params = Dict(:visualizer_3d => plot_params.visualizer, :plot_2d => plot_params.graph)
+
+    elements[:params] = params
 
     fig = plot_empty_figure()
     elements[:fig] = fig
@@ -86,16 +86,17 @@ end
 function add_3d_visualizer(elements, g_planner, g_planner_plots)
 
     fig = elements[:fig]
-    vis_params = elements[:vis_params]
+    # vis_3d_params = elements[:vis_3d_params]
+    vis_3d_params = elements[:params][:visualizer_3d]
 
     # 3d axis for airplane visualization
     vis_ax = Axis3(g_planner_plots[1, 1],
-        title=vis_params.title,
-        limits=(vis_params.axis.low, vis_params.axis.high, vis_params.axis.low, vis_params.axis.high, vis_params.axis.low, vis_params.axis.high),
-        aspect=(vis_params.axis.aspect_x, vis_params.axis.aspect_y, vis_params.axis.aspect_z),
-        xlabel=vis_params.axis.labels.x, xlabelsize=vis_params.axis.label_size,
-        ylabel=vis_params.axis.labels.y, ylabelsize=vis_params.axis.label_size,
-        zlabel=vis_params.axis.labels.z, zlabelsize=vis_params.axis.label_size,
+        title=vis_3d_params.title,
+        limits=(vis_3d_params.axis.low, vis_3d_params.axis.high, vis_3d_params.axis.low, vis_3d_params.axis.high, vis_3d_params.axis.low, vis_3d_params.axis.high),
+        aspect=(vis_3d_params.axis.aspect_x, vis_3d_params.axis.aspect_y, vis_3d_params.axis.aspect_z),
+        xlabel=vis_3d_params.axis.labels.x, xlabelsize=vis_3d_params.axis.label_size,
+        ylabel=vis_3d_params.axis.labels.y, ylabelsize=vis_3d_params.axis.label_size,
+        zlabel=vis_3d_params.axis.labels.z, zlabelsize=vis_3d_params.axis.label_size,
         halign=:left,
         xspinecolor_1=:white,
         xspinecolor_3=:white,
@@ -103,51 +104,55 @@ function add_3d_visualizer(elements, g_planner, g_planner_plots)
         yspinecolor_3=:white,
         zspinecolor_1=:white,
         zspinecolor_3=:white,
-        xspinewidth=vis_params.axis.spine_width,
-        yspinewidth=vis_params.axis.spine_width,
-        zspinewidth=vis_params.axis.spine_width,
-        xlabeloffset=vis_params.axis.label_offset,
-        ylabeloffset=vis_params.axis.label_offset,
-        zlabeloffset=vis_params.axis.label_offset,
-        xgridwidth=vis_params.axis.grid_width,
-        ygridwidth=vis_params.axis.grid_width,
-        zgridwidth=vis_params.axis.grid_width,
+        xspinewidth=vis_3d_params.axis.spine_width,
+        yspinewidth=vis_3d_params.axis.spine_width,
+        zspinewidth=vis_3d_params.axis.spine_width,
+        xlabeloffset=vis_3d_params.axis.label_offset,
+        ylabeloffset=vis_3d_params.axis.label_offset,
+        zlabeloffset=vis_3d_params.axis.label_offset,
+        xgridwidth=vis_3d_params.axis.grid_width,
+        ygridwidth=vis_3d_params.axis.grid_width,
+        zgridwidth=vis_3d_params.axis.grid_width,
     )
 
     # force 3d visualizer to have an aspect ratio of 1
     rowsize!(g_planner, 1, Aspect(1, 1.0))
 
-    elements[:visualizer_3d] = vis_ax
+    elements[:visualizer_3d] = Dict{Symbol,Any}(:axis => vis_ax)
 end
 
 function add_3d_model(elements, stl_file)
 
-    vis_params = elements[:vis_params]
-    vis_ax = elements[:visualizer_3d]
+    # vis_3d_params = elements[:vis_3d_params]
+    vis_3d_params = elements[:params][:visualizer_3d]
+    vis_ax = elements[:visualizer_3d][:axis]
 
     model = mesh!(vis_ax, stl_file, color=:red)
 
-    scale!(model, vis_params.mesh.scale, vis_params.mesh.scale, vis_params.mesh.scale)
+    scale!(model, vis_3d_params.mesh.scale, vis_3d_params.mesh.scale, vis_3d_params.mesh.scale)
 
     # center mesh at the origin
-    translate!(model, Vec3f(vis_params.mesh.initial_translation[1], vis_params.mesh.initial_translation[2], vis_params.mesh.initial_translation[3]))
+    translate!(model, Vec3f(vis_3d_params.mesh.initial_translation[1], vis_3d_params.mesh.initial_translation[2], vis_3d_params.mesh.initial_translation[3]))
 
     # apply initial orientation
     rotate_mesh(model, QuatRotation(1, 0, 0, 0))
 
-    elements[:model] = model
+    elements[:visualizer_3d][:model] = model
 end
 
 
 function add_2d_plots(elements, g_state_plots, g_control_plots)
 
     fig = elements[:fig]
-    graph_params = elements[:graph_params]
+    plot_2d_params = elements[:params][:plot_2d]
+
+
+    plots_2d = Dict()
 
     state_plots = Axis[]
     control_plots = Axis[]
 
-    for i in 1:graph_params.n_state
+    for i in 1:plot_2d_params.n_state
         plot = Axis(fig)
         push!(state_plots, plot)
 
@@ -156,10 +161,10 @@ function add_2d_plots(elements, g_state_plots, g_control_plots)
     end
 
 
-    for i in 1:graph_params.n_control
+    for i in 1:plot_2d_params.n_control
         plot = Axis(
             fig,
-            # ylabel=graph_params.ylabels[i] 
+            # ylabel=plot_2d_params.ylabels[i] 
         )
         push!(control_plots, plot)
 
@@ -167,10 +172,12 @@ function add_2d_plots(elements, g_state_plots, g_control_plots)
         g_control_plots[i, 1] = control_plots[i]
     end
 
-    elements[:state_plots] = state_plots
-    elements[:control_plots] = control_plots
+    plots_2d[:state_plots] = state_plots
+    plots_2d[:control_plots] = control_plots
 
+    elements[:plots_2d] = plots_2d
 end
+
 
 
 function add_widgets(elements, g_planner_widgets, g_controller_widgets)
@@ -227,8 +234,8 @@ function add_widgets(elements, g_planner_widgets, g_controller_widgets)
 end
 
 function plot_initialize(elements)
-    state_plots = elements[:state_plots]
-    control_plots = elements[:control_plots]
+    state_plots = elements[:plots_2d][:state_plots]
+    control_plots = elements[:plots_2d][:control_plots]
 
     data_1 = Observable{Vector{Float64}}(zeros(1))
     data_2 = Observable{Vector{Float64}}(zeros(1))
@@ -247,22 +254,22 @@ function plot_initialize(elements)
     lines!(control_plots[1], time_vec, data_4, color=:black)
     lines!(control_plots[2], time_vec, data_5, color=:black)
 
-    plot_data = PlotData(time_vec, data_1, data_2, data_3, data_4, data_5)
+    plots_2d_data = PlotData(time_vec, data_1, data_2, data_3, data_4, data_5)
 
-    elements[:plot_data] = plot_data
-    # return plot_data
+    elements[:plots_2d_data] = plots_2d_data
+    # return plots_2d_data
 end
 
 
-function plot_reset(plot_data)
-    plot_data.axis_1[] = [0]
-    plot_data.axis_2[] = [0]
-    plot_data.axis_3[] = [0]
+function plot_reset(plots_2d_data)
+    plots_2d_data.axis_1[] = [0]
+    plots_2d_data.axis_2[] = [0]
+    plots_2d_data.axis_3[] = [0]
 
-    plot_data.axis_4[] = [0]
-    plot_data.axis_5[] = [0]
+    plots_2d_data.axis_4[] = [0]
+    plots_2d_data.axis_5[] = [0]
 
-    plot_data.time_vec[] = [0]
+    plots_2d_data.time_vec[] = [0]
 end
 
 function define_interactions(elements, sim_time)

@@ -118,7 +118,7 @@ function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=25)
 
             model_set_pose(elements, position, orientation)
 
-            # set the time observable
+            # set the time 
             sim_time[] = round(df[!, "timestamp"][i], digits=2)
 
             # set timeline slider value 
@@ -158,9 +158,10 @@ PlotData = PlotData5
 
 function model_set_pose(elements, position, orientation)
 
-    plot_params = elements[:plot_params]
+    # plot_params = elements[:plot_params]
+    vis_3d_params = elements[:params][:visualizer_3d]
 
-    max_range = plot_params.visualizer.axis.high - plot_params.visualizer.axis.low
+    max_range = vis_3d_params.axis.high - vis_3d_params.axis.low
     dist = max_range / 2
 
     x_low = position.x - dist
@@ -171,16 +172,13 @@ function model_set_pose(elements, position, orientation)
     y_high = position.y + dist
     z_high = position.z + dist
 
-    elements[:visualizer_3d].limits = (x_low, x_high, y_low, y_high, z_low, z_high)
-    translate!(elements[:model], Vec3f(position.x, position.y, position.z))
+    model = elements[:visualizer_3d][:model]
 
-    rotate!(elements[:model], to_makie_quaternion(orientation))
+    elements[:visualizer_3d][:axis].limits = (x_low, x_high, y_low, y_high, z_low, z_high)
+    translate!(model, Vec3f(position.x, position.y, position.z))
+
+    rotate!(model, to_makie_quaternion(orientation))
 end
 
-# let
 
-#     q = to_makie_quaternion(QuatRotation(0, 0, 1, 0))
-
-#     rotate!(elements[:model], q)
-# end
 

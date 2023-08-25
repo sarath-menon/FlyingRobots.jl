@@ -2,14 +2,14 @@
 function plot_position(elements)
 
     df = elements[:df]
-    plots = elements[:state_plots]
-    plot_data = elements[:plot_data]
+    plots = elements[:plots_2d][:state_plots]
+    plots_2d_data = elements[:plots_2d_data]
 
-    plot_data.time_vec[] = df[!, "timestamp"]
+    plots_2d_data.time_vec[] = df[!, "timestamp"]
 
-    plot_data.axis_1[] = df[!, "(quad1.rb.r(t), 1)"]
-    plot_data.axis_2[] = df[!, "(quad1.rb.r(t), 2)"]
-    plot_data.axis_3[] = df[!, "(quad1.rb.r(t), 3)"]
+    plots_2d_data.axis_1[] = df[!, "(quad1.rb.r(t), 1)"]
+    plots_2d_data.axis_2[] = df[!, "(quad1.rb.r(t), 2)"]
+    plots_2d_data.axis_3[] = df[!, "(quad1.rb.r(t), 3)"]
 
     autolimits!(plots[1])
     autolimits!(plots[2])
@@ -26,13 +26,14 @@ function plot_position(elements)
     plots[3].ylabel = "pos [m]"
 end
 
+
 function plot_orientation(elements)
 
     df = elements[:df]
-    plots = elements[:state_plots]
-    plot_data = elements[:plot_data]
+    plots = elements[:plots_2d][:state_plots]
+    plots_2d_data = elements[:plots_2d_data]
 
-    plot_data.time_vec[] = df[!, "timestamp"]
+    plots_2d_data.time_vec[] = df[!, "timestamp"]
 
     qs = df[!, "(quad1.rb.q(t), 1)"]
     q1 = df[!, "(quad1.rb.q(t), 2)"]
@@ -50,9 +51,9 @@ function plot_orientation(elements)
     q_vec = res_matrix[2, :]
     p_vec = res_matrix[3, :]
 
-    plot_data.axis_1[] = p_vec
-    plot_data.axis_2[] = q_vec
-    plot_data.axis_3[] = r_vec
+    plots_2d_data.axis_1[] = p_vec
+    plots_2d_data.axis_2[] = q_vec
+    plots_2d_data.axis_3[] = r_vec
 
     autolimits!(plots[1])
     autolimits!(plots[2])
@@ -72,10 +73,10 @@ end
 function plot_control_input(elements, motor_thrust_to_body_thrust)
 
     df = elements[:df]
-    plots = elements[:control_plots]
-    plot_data = elements[:plot_data]
+    plots = elements[:plots_2d][:control_plots]
+    plots_2d_data = elements[:plots_2d_data]
 
-    plot_data.time_vec[] = df[!, "timestamp"]
+    plots_2d_data.time_vec[] = df[!, "timestamp"]
     n_timesteps = size(df)[1]
 
     # convert motor thrusts to body thrust, torque
@@ -101,9 +102,9 @@ function plot_control_input(elements, motor_thrust_to_body_thrust)
     f_net = result[1, :]
     τ_x = result[2, :]
 
-    plot_data.axis_4[] = f_net
-    plot_data.axis_5[] = τ_x
-    # plot_data.axis_3[] = r_vec
+    plots_2d_data.axis_4[] = f_net
+    plots_2d_data.axis_5[] = τ_x
+    # plots_2d_data.axis_3[] = r_vec
 
     autolimits!(plots[1])
     autolimits!(plots[2])
