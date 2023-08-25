@@ -1,4 +1,4 @@
-export Vec3d, Pose3d
+export Vec3d, Pose3d, EulerAngleZYX
 
 #--------------------------------------------------------------------------
 struct SafetyBox5
@@ -53,4 +53,15 @@ mutable struct Pose3d7
 end
 
 Pose3d = Pose3d7
+
+
+
+mutable struct EulerAngleZYX2
+    p::Float64
+    q::Float64
+    r::Float64
+
+    EulerAngleZYX2() = new(0, 0, 0)
+end
+EulerAngleZYX = EulerAngleZYX2
 
