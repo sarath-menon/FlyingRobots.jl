@@ -13,13 +13,14 @@ using DataFrames
 using CSV
 using BenchmarkTools
 using YAML
+import Dates
 
 GLMakie.activate!(inline=false)
 
 using MtkLibrary
 using FlyingRobots
 
-plot_elements, plot_data = FlyingRobots.Gui.show_visualizer()
+# plot_elements, plot_data = FlyingRobots.Gui.show_visualizer()
 
 include("dynamics_utilities.jl")
 include("controller_utilities.jl")
@@ -38,6 +39,8 @@ include("sim.jl")
 include("modelling.jl")
 
 # read settings file 
+# read settings file 
+folder_path = pwd() * "/examples/quad_3d"
 
 vehicle_params_path = "/parameters/vehicle.yml"
 ctrl_yaml_path = "/parameters/controller.yml"
@@ -77,8 +80,9 @@ plot_control_input(plot_elements[:control_plots], plot_data, sol, state_indices,
 
 @time @view df[!, 1][1]
 
-FlyingRobots.Gui.plot_3d_trajectory(df)
+plot_elements, plot_data = FlyingRobots.Gui.show_visualizer()
 
-FlyingRobots.Gui.model_set_pose(Vec3d(0, 0, 0), QuatRotation(0, 1, 0, 0))
+sim_task = @async FlyingRobots.Gui.plot_3d_trajectory(df, plot_elements)
 
+plot_elements[:sim_state]
 end
