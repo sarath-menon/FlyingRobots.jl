@@ -19,7 +19,7 @@ function run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
     X₀ = get_initial_conditions(subsystems.plant, vehicle_params)
     parameters = get_parameters(subsystems.plant, vehicle_params)
 
-    reset_pid_controllers()
+    # reset_pid_controllers()
 
     prob = ODEProblem(sys, X₀, tspan, parameters, callback=cb)
     @time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)

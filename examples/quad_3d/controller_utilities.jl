@@ -7,7 +7,7 @@ motor_thrust_to_body_thrust(; l, k_τ) = [1 1 1 1
 body_thrust_to_motor_thrust(l, k_τ) = inv(motor_thrust_to_body_thrust(; l=l, k_τ=k_τ))
 
 
-function load_controller_params(path::String)
+function load_controller_params(path::String, vehicle_params)
     ctrl_yaml = YAML.load_file(path; dicttype=Dict{Symbol,Any})
 
     # set controller params 

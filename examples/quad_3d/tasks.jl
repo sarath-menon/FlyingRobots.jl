@@ -1,16 +1,17 @@
 
 
 
-function position_controller(vehicle_pose, ctrl_cmd, vehicle_params, rate_hz)
+function position_controller(computer, vehicle_pose, ctrl_cmd, rate_hz)
 
-    m = vehicle_params.mass
     g = 9.81
     dt = 1 / rate_hz
 
+    vehicle_params = computer.rom_memory.params.vehicle
+    m = vehicle_params.mass
 
-    x_pos_pid = memory[:x_pos_pid]
-    y_pos_pid = memory[:y_pos_pid]
-    z_pos_pid = memory[:z_pos_pid]
+    x_pos_pid = computer.rom_memory.pid.x_pos
+    y_pos_pid = computer.rom_memory.pid.y_pos
+    z_pos_pid = computer.rom_memory.pid.z_pos
 
     e_x = ctrl_cmd.pos.x - vehicle_pose.pos.x
     e_y = ctrl_cmd.pos.y - vehicle_pose.pos.y
@@ -27,14 +28,12 @@ function position_controller(vehicle_pose, ctrl_cmd, vehicle_params, rate_hz)
 end
 
 
-function attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params, rate_hz)
+function attitude_controller(computer, vehicle_pose, ctrl_cmd, rate_hz)
 
     dt = 1 / rate_hz
 
-
-    roll_pid = memory[:roll_pid]
-    pitch_pid = memory[:pitch_pid]
-
+    roll_pid = computer.rom_memory.pid.roll
+    pitch_pid = computer.rom_memory.pid.pitch
 
     # convert quaternion attitude representation to euler angles 
     r, q, p = Rotations.params(RotZYX(vehicle_pose.orientation))
@@ -48,16 +47,19 @@ function attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params, rate_hz)
 end
 
 
-function control_allocator(vehicle_pose, ctrl_cmd, vehicle_params)
+function control_allocator(computer, vehicle_pose, ctrl_cmd)
 
-    ctrl_cmd.motor_thrusts = ctrl_yaml[:allocation_matrix] * [ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
+    vehicle_params = computer.rom_memory.params.vehicle
+    allocation_matrix = computer.rom_memory.allocation_matrix
+
+    ctrl_cmd.motor_thrusts = allocation_matrix * [ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
 end
 
-function reset_pid_controllers()
-    pid_reset(x_pos_pid)
-    pid_reset(y_pos_pid)
-    pid_reset(z_pos_pid)
+# function reset_pid_controllers()
+#     pid_reset(x_pos_pid)
+#     pid_reset(y_pos_pid)
+#     pid_reset(z_pos_pid)
 
-    pid_reset(roll_pid)
-    pid_reset(pitch_pid)
-end
+#     pid_reset(roll_pid)
+#     pid_reset(pitch_pid)
+# end

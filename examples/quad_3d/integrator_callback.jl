@@ -72,11 +72,8 @@ function integrator_callback(int; params=callback_params)
     ctrl_cmd.pos.y = R[2]
     ctrl_cmd.pos.z = R[3]
 
-    # Set the computer clock time ------------------------------------------------
-    Computer.increment_clock(Computer.main_clock)
-
     # run the scheduler ------------------------------------------------
-    Computer.scheduler(vehicle_pose, ctrl_cmd)
+    Computer.scheduler(flight_controller, vehicle_pose, ctrl_cmd)
 
     # set the control input
     c_index = 18
