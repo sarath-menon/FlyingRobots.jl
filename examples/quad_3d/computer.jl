@@ -52,6 +52,9 @@ function create_computer(name)
     ram_memory = Dict()
     ram_memory[:ctrl_cmd] = CascadedPidCtrlCmd()
     ram_memory[:vehicle_pose] = Pose3d()
+    ram_memory[:trajectory_reference] = TrajectoryReference()
+
+
 
     return OnboardComputer(name; main_clock=main_clock, ram_memory=ram_memory,
         rom_memory=rom_memory, tasks=vehicle_params.computer.tasks)

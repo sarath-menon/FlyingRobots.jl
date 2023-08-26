@@ -62,14 +62,13 @@ function integrator_callback(int)
 
     # get trajectory reference command
     R = reference_generator(int.t)
-    trajectory_reference = TrajectoryReference()
+
+    # set the trajectory reference
+    trajectory_reference = flight_controller.ram_memory[:trajectory_reference]
 
     trajectory_reference.pos.x = R[1]
     trajectory_reference.pos.y = R[2]
     trajectory_reference.pos.z = R[3]
-
-    # set the trajectory reference
-    flight_controller.ram_memory[:trajectory_reference] = trajectory_reference
 
     # run the scheduler ------------------------------------------------
     motor_thrusts = Computer.scheduler(flight_controller)

@@ -26,7 +26,6 @@ include("types.jl")
 
 include("dynamics.jl")
 # include("controller.jl")
-include("plotting.jl")
 include("logging.jl")
 
 # include("scheduler.jl")
