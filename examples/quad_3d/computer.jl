@@ -11,6 +11,7 @@ include("controller_utilities.jl")
 include("scheduler.jl")
 include("tasks.jl")
 include("computer_types.jl")
+include("types.jl")
 
 export scheduler, increment_clock_timer!, create_computer
 

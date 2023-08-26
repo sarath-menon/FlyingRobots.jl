@@ -1,6 +1,8 @@
 
 
-function scheduler(computer, vehicle_pose, ctrl_cmd)
+function scheduler(computer, vehicle_pose)
+
+    ctrl_cmd = CascadedPidCtrlCmd()
 
     #increment the main clock
     increment_clock(computer.main_clock)
@@ -15,6 +17,8 @@ function scheduler(computer, vehicle_pose, ctrl_cmd)
 
     # run control allocator
     control_allocator(computer, vehicle_pose, ctrl_cmd)
+
+    return ctrl_cmd.motor_thrusts
 end
 
 

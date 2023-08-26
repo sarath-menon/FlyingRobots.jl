@@ -6,6 +6,8 @@ function position_controller(computer, vehicle_pose, ctrl_cmd, rate_hz)
     g = 9.81
     dt = 1 / rate_hz
 
+    trajectory_reference = computer.ram_memory[:trajectory_reference]
+
     vehicle_params = computer.rom_memory.params.vehicle
     m = vehicle_params.mass
 
@@ -13,9 +15,9 @@ function position_controller(computer, vehicle_pose, ctrl_cmd, rate_hz)
     y_pos_pid = computer.rom_memory.pid.y_pos
     z_pos_pid = computer.rom_memory.pid.z_pos
 
-    e_x = ctrl_cmd.pos.x - vehicle_pose.pos.x
-    e_y = ctrl_cmd.pos.y - vehicle_pose.pos.y
-    e_z = ctrl_cmd.pos.z - vehicle_pose.pos.z
+    e_x = trajectory_reference.pos.x - vehicle_pose.pos.x
+    e_y = trajectory_reference.pos.y - vehicle_pose.pos.y
+    e_z = trajectory_reference.pos.z - vehicle_pose.pos.z
 
     # x position controller
     ctrl_cmd.orientation_euler.q = pid_controller(x_pos_pid; e=e_x, dt=dt, umin=-0.5, umax=0.5) / g

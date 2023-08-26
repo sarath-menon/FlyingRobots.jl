@@ -18,3 +18,14 @@ mutable struct CascadedPidCtrlCmd4
 end
 CascadedPidCtrlCmd = CascadedPidCtrlCmd4
 
+mutable struct TrajectoryReference3
+    pos::Vec3d
+
+    vel::Vec3d
+
+    acc::Vec3d
+
+    TrajectoryReference3() = new(Vec3d(), Vec3d(), Vec3d())
+end
+
+TrajectoryReference = TrajectoryReference3

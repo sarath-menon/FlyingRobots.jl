@@ -20,10 +20,10 @@ function reference_generator(t)
 end
 
 # vehicle_pose = Pose3d()
-ctrl_cmd = CascadedPidCtrlCmd()
+# ctrl_cmd = CascadedPidCtrlCmd()
 vehicle_pose = Pose3d()
 
-callback_params = (; ctrl_cmd=ctrl_cmd, vehicle_pose=vehicle_pose)
+callback_params = (; vehicle_pose=vehicle_pose)
 
 function integrator_callback(int; params=callback_params)
 
@@ -46,7 +46,6 @@ function integrator_callback(int; params=callback_params)
     # update vehicle state ------------------------------------------------
     # vehicle_params = params.vehicle_params
     vehicle_pose = params.vehicle_pose
-    ctrl_cmd = params.ctrl_cmd
 
     vehicle_pose.pos.x = r[1]
     vehicle_pose.pos.y = r[2]
@@ -67,18 +66,21 @@ function integrator_callback(int; params=callback_params)
 
     # get reference 
     R = reference_generator(int.t)
+    trajectory_reference = TrajectoryReference()
 
-    ctrl_cmd.pos.x = R[1]
-    ctrl_cmd.pos.y = R[2]
-    ctrl_cmd.pos.z = R[3]
+    trajectory_reference.pos.x = R[1]
+    trajectory_reference.pos.y = R[2]
+    trajectory_reference.pos.z = R[3]
+
+    # set the trajectory reference
+    flight_controller.ram_memory[:trajectory_reference] = trajectory_reference
 
     # run the scheduler ------------------------------------------------
-    Computer.scheduler(flight_controller, vehicle_pose, ctrl_cmd)
+    motor_thrusts = Computer.scheduler(flight_controller, vehicle_pose)
 
     # set the control input
     c_index = 18
-    # int.u[c_index:c_index+3] .= motor_thrusts
-    int.u[c_index:c_index+3] .= ctrl_cmd.motor_thrusts
+    int.u[c_index:c_index+3] = motor_thrusts
 end
 
 
