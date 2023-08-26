@@ -49,11 +49,10 @@ function create_computer(name)
     rom_memory = (; params=params, pid=pid, allocation_matrix=allocation_matrix)
 
     # RAM memory
-    ram_memory = Dict()
+    ram_memory = Dict{Symbol,Any}
     ram_memory[:ctrl_cmd] = CascadedPidCtrlCmd()
     ram_memory[:vehicle_pose] = Pose3d()
     ram_memory[:trajectory_reference] = TrajectoryReference()
-
 
 
     return OnboardComputer(name; main_clock=main_clock, ram_memory=ram_memory,

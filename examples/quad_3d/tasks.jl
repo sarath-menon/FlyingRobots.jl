@@ -11,15 +11,15 @@ function position_controller(computer, rate_hz)
     vehicle_pose = computer.ram_memory[:vehicle_pose]
 
     vehicle_params = computer.rom_memory.params.vehicle
-    m = vehicle_params.mass
+    m::Float64 = vehicle_params.mass
 
     x_pos_pid = computer.rom_memory.pid.x_pos
     y_pos_pid = computer.rom_memory.pid.y_pos
     z_pos_pid = computer.rom_memory.pid.z_pos
 
-    e_x = trajectory_reference.pos.x - vehicle_pose.pos.x
-    e_y = trajectory_reference.pos.y - vehicle_pose.pos.y
-    e_z = trajectory_reference.pos.z - vehicle_pose.pos.z
+    e_x::Float64 = trajectory_reference.pos.x - vehicle_pose.pos.x
+    e_y::Float64 = trajectory_reference.pos.y - vehicle_pose.pos.y
+    e_z::Float64 = trajectory_reference.pos.z - vehicle_pose.pos.z
 
     # x position controller
     ctrl_cmd.orientation_euler.q = pid_controller(x_pos_pid; e=e_x, dt=dt, umin=-0.5, umax=0.5) / g
@@ -43,10 +43,10 @@ function attitude_controller(computer, rate_hz)
     pitch_pid = computer.rom_memory.pid.pitch
 
     # convert quaternion attitude representation to euler angles 
-    r, q, p = Rotations.params(RotZYX(vehicle_pose.orientation))
+    r::Float64, q::Float64, p::Float64 = Rotations.params(RotZYX(vehicle_pose.orientation))
 
-    e_p = ctrl_cmd.orientation_euler.p - p
-    e_q = ctrl_cmd.orientation_euler.q - q
+    e_p::Float64 = ctrl_cmd.orientation_euler.p - p
+    e_q::Float64 = ctrl_cmd.orientation_euler.q - q
 
     ctrl_cmd.τ.x = pid_controller(roll_pid; e=e_p, dt=dt, umin=-25, umax=25)
     ctrl_cmd.τ.y = pid_controller(pitch_pid; e=e_q, dt=dt, umin=-25, umax=25)
@@ -58,9 +58,9 @@ function control_allocator(computer)
 
     ctrl_cmd = computer.ram_memory[:ctrl_cmd]
 
-    allocation_matrix = computer.rom_memory.allocation_matrix
+    allocation_matrix::Matrix{Float64} = computer.rom_memory.allocation_matrix
 
-    motor_thrusts = allocation_matrix * [ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
+    motor_thrusts::Vector{Float64} = allocation_matrix * [ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
 
     return motor_thrusts
 end
