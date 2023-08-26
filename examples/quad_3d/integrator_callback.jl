@@ -19,13 +19,8 @@ function reference_generator(t)
     return [x_ref, y_ref, z_ref]
 end
 
-# vehicle_pose = Pose3d()
-# ctrl_cmd = CascadedPidCtrlCmd()
-vehicle_pose = Pose3d()
 
-callback_params = (; vehicle_pose=vehicle_pose)
-
-function integrator_callback(int; params=callback_params)
+function integrator_callback(int)
 
     dt = sim_params.callback_dt
     g = 9.81
@@ -44,8 +39,9 @@ function integrator_callback(int; params=callback_params)
     int.u[7:10] = [q1.q.s, q1.q.v1, q1.q.v2, q1.q.v3]
 
     # update vehicle state ------------------------------------------------
-    # vehicle_params = params.vehicle_params
-    vehicle_pose = params.vehicle_pose
+
+    # set state estimate to ground truth value for now
+    vehicle_pose = flight_controller.ram_memory[:vehicle_pose]
 
     vehicle_pose.pos.x = r[1]
     vehicle_pose.pos.y = r[2]
@@ -64,7 +60,7 @@ function integrator_callback(int; params=callback_params)
     # get the clock count from simulation time
     clock_time = round(Int, int.t / dt) + 1
 
-    # get reference 
+    # get trajectory reference command
     R = reference_generator(int.t)
     trajectory_reference = TrajectoryReference()
 
@@ -76,7 +72,7 @@ function integrator_callback(int; params=callback_params)
     flight_controller.ram_memory[:trajectory_reference] = trajectory_reference
 
     # run the scheduler ------------------------------------------------
-    motor_thrusts = Computer.scheduler(flight_controller, vehicle_pose)
+    motor_thrusts = Computer.scheduler(flight_controller)
 
     # set the control input
     c_index = 18

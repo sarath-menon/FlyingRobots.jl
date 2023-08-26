@@ -1,8 +1,6 @@
 
 
-function scheduler(computer, vehicle_pose)
-
-    ctrl_cmd = CascadedPidCtrlCmd()
+function scheduler(computer)
 
     #increment the main clock
     increment_clock(computer.main_clock)
@@ -11,14 +9,14 @@ function scheduler(computer, vehicle_pose)
     for task in computer.tasks
         # run task if it's time
         if computer.main_clock.count % task.rate_per_tick == 0
-            task.func(computer, vehicle_pose, ctrl_cmd, task.rate)
+            task.func(computer, task.rate)
         end
     end
 
     # run control allocator
-    control_allocator(computer, vehicle_pose, ctrl_cmd)
+    motor_thrusts = control_allocator(computer)
 
-    return ctrl_cmd.motor_thrusts
+    return motor_thrusts
 end
 
 

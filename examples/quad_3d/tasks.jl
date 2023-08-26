@@ -1,12 +1,14 @@
 
 
 
-function position_controller(computer, vehicle_pose, ctrl_cmd, rate_hz)
+function position_controller(computer, rate_hz)
 
     g = 9.81
     dt = 1 / rate_hz
 
     trajectory_reference = computer.ram_memory[:trajectory_reference]
+    ctrl_cmd = computer.ram_memory[:ctrl_cmd]
+    vehicle_pose = computer.ram_memory[:vehicle_pose]
 
     vehicle_params = computer.rom_memory.params.vehicle
     m = vehicle_params.mass
@@ -30,9 +32,12 @@ function position_controller(computer, vehicle_pose, ctrl_cmd, rate_hz)
 end
 
 
-function attitude_controller(computer, vehicle_pose, ctrl_cmd, rate_hz)
+function attitude_controller(computer, rate_hz)
 
     dt = 1 / rate_hz
+
+    ctrl_cmd = computer.ram_memory[:ctrl_cmd]
+    vehicle_pose = computer.ram_memory[:vehicle_pose]
 
     roll_pid = computer.rom_memory.pid.roll
     pitch_pid = computer.rom_memory.pid.pitch
@@ -49,19 +54,13 @@ function attitude_controller(computer, vehicle_pose, ctrl_cmd, rate_hz)
 end
 
 
-function control_allocator(computer, vehicle_pose, ctrl_cmd)
+function control_allocator(computer)
 
-    vehicle_params = computer.rom_memory.params.vehicle
+    ctrl_cmd = computer.ram_memory[:ctrl_cmd]
+
     allocation_matrix = computer.rom_memory.allocation_matrix
 
-    ctrl_cmd.motor_thrusts = allocation_matrix * [ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
+    motor_thrusts = allocation_matrix * [ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
+
+    return motor_thrusts
 end
-
-# function reset_pid_controllers()
-#     pid_reset(x_pos_pid)
-#     pid_reset(y_pos_pid)
-#     pid_reset(z_pos_pid)
-
-#     pid_reset(roll_pid)
-#     pid_reset(pitch_pid)
-# end

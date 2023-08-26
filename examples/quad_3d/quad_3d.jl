@@ -71,3 +71,5 @@ FlyingRobots.Gui.plot_control_input(plot_elements, motor_thrust_to_body_thrust)
 
 flag = FlyingRobots.Gui.start_3d_animation(plot_elements)
 end
+
+å

@@ -1,7 +1,5 @@
 
-mutable struct CascadedPidCtrlCmd4
-    pos::Vec3d
-
+mutable struct CascadedPidCtrlCmd5
     vel::Vec3d
 
     orientation_euler::EulerAngleZYX
@@ -14,7 +12,7 @@ mutable struct CascadedPidCtrlCmd4
 
     motor_thrusts::Vector{Float64}
 
-    CascadedPidCtrlCmd4() = new(Vec3d(), Vec3d(), EulerAngleZYX(), Vec3d(), Vec3d(), Vec3d(), [0, 0, 0, 0])
+    CascadedPidCtrlCmd5() = new(Vec3d(), EulerAngleZYX(), Vec3d(), Vec3d(), Vec3d(), [0, 0, 0, 0])
 end
 CascadedPidCtrlCmd = CascadedPidCtrlCmd4
 
