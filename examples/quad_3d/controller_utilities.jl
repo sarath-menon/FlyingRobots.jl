@@ -1,14 +1,18 @@
-# force control input to be constant over sampling time, actual control law applied inside callback
-function Controller_Zero_Order_Hold(; name)
-    sts = @variables t U(t)[1:4] = 0 (R(t))[1:3] = 0
 
-    # define operators
-    D = Differential(t)
+motor_thrust_to_body_thrust(; l, k_τ) = [1 1 1 1
+    0 l 0 -l
+    -l 0 l 0
+    k_τ -k_τ k_τ -k_τ]
 
-    eqn1 = D.(U) .~ 0
-    eqn2 = D.(R) .~ 0
+body_thrust_to_motor_thrust(l, k_τ) = inv(motor_thrust_to_body_thrust(; l=l, k_τ=k_τ))
 
-    eqns = vcat(eqn1, eqn2)
 
-    ODESystem(eqns, t; name)
+function load_controller_params(path::String)
+    ctrl_yaml = YAML.load_file(path; dicttype=Dict{Symbol,Any})
+
+    # set controller params 
+    allocation_matrix = body_thrust_to_motor_thrust(vehicle_params.arm_length, vehicle_params.actuators.constants.k_τ)
+    ctrl_yaml[:allocation_matrix] = allocation_matrix
+
+    return ctrl_yaml
 end

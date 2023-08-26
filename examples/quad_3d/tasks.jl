@@ -1,13 +1,4 @@
 
-function load_controller_params(path::String)
-    ctrl_yaml = YAML.load_file(path; dicttype=Dict{Symbol,Any})
-
-    # set controller params 
-    allocation_matrix = body_thrust_to_motor_thrust(vehicle_params.arm_length, vehicle_params.actuators.constants.k_τ)
-    ctrl_yaml[:allocation_matrix] = allocation_matrix
-
-    return ctrl_yaml
-end
 
 
 function position_controller(vehicle_pose, ctrl_cmd, vehicle_params, rate_hz)
@@ -15,6 +6,11 @@ function position_controller(vehicle_pose, ctrl_cmd, vehicle_params, rate_hz)
     m = vehicle_params.mass
     g = 9.81
     dt = 1 / rate_hz
+
+
+    x_pos_pid = memory[:x_pos_pid]
+    y_pos_pid = memory[:y_pos_pid]
+    z_pos_pid = memory[:z_pos_pid]
 
     e_x = ctrl_cmd.pos.x - vehicle_pose.pos.x
     e_y = ctrl_cmd.pos.y - vehicle_pose.pos.y
@@ -34,6 +30,11 @@ end
 function attitude_controller(vehicle_pose, ctrl_cmd, vehicle_params, rate_hz)
 
     dt = 1 / rate_hz
+
+
+    roll_pid = memory[:roll_pid]
+    pitch_pid = memory[:pitch_pid]
+
 
     # convert quaternion attitude representation to euler angles 
     r, q, p = Rotations.params(RotZYX(vehicle_pose.orientation))

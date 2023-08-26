@@ -63,7 +63,7 @@ function integrator_callback(int; params=callback_params)
     vehicle_pose.angular_vel.z = ω[3]
 
     # get the clock count from simulation time
-    clock = round(Int, int.t / dt) + 1
+    clock_time = round(Int, int.t / dt) + 1
 
     # get reference 
     R = reference_generator(int.t)
@@ -72,8 +72,11 @@ function integrator_callback(int; params=callback_params)
     ctrl_cmd.pos.y = R[2]
     ctrl_cmd.pos.z = R[3]
 
+    # Set the computer clock time ------------------------------------------------
+    Computer.increment_clock(Computer.main_clock)
+
     # run the scheduler ------------------------------------------------
-    scheduler(clock, vehicle_pose, ctrl_cmd, vehicle_params)
+    Computer.scheduler(vehicle_pose, ctrl_cmd)
 
     # set the control input
     c_index = 18

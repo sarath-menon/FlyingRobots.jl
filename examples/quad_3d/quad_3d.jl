@@ -23,42 +23,39 @@ using FlyingRobots
 plot_elements = FlyingRobots.Gui.show_visualizer()
 
 include("dynamics_utilities.jl")
-include("controller_utilities.jl")
+include("mtk_models.jl")
 include("types.jl")
 
 include("dynamics.jl")
-include("controller.jl")
+# include("controller.jl")
 include("plotting.jl")
 include("logging.jl")
 
 include("scheduler.jl")
-include("vehicle.jl")
+# include("vehicle.jl")
 include("sim.jl")
 include("modelling.jl")
+include("vehicle.jl")
+include("computer.jl")
+
+
 
 # read settings file 
 folder_path = pwd() * "/examples/quad_3d"
 
 vehicle_params_path = "/parameters/vehicle.yml"
-ctrl_yaml_path = "/parameters/controller.yml"
+
 sim_params_path = "/parameters/sim.yml"
-
-vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
-ctrl_yaml = load_controller_params(folder_path * ctrl_yaml_path)
-sim_params = load_sim_params(folder_path * sim_params_path, vehicle_params)
-
-include("integrator_callback.jl")
 
 # build system model
 sys, subsystems = build_system_model()
 
-## pid controllers
-x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x])
-y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y])
-z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z])
+vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
+# ctrl_yaml = load_controller_params(folder_path * ctrl_yaml_path)
+sim_params = load_sim_params(folder_path * sim_params_path, vehicle_params)
 
-roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll])
-pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch])
+
+include("integrator_callback.jl")
 
 @time sol, df = run_sim(sys, subsystems, sim_params, vehicle_params; save=true)
 

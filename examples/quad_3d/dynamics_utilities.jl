@@ -9,9 +9,3 @@ end
 
 
 
-motor_thrust_to_body_thrust(; l, k_τ) = [1 1 1 1
-    0 l 0 -l
-    -l 0 l 0
-    k_τ -k_τ k_τ -k_τ]
-
-body_thrust_to_motor_thrust(l, k_τ) = inv(motor_thrust_to_body_thrust(; l=l, k_τ=k_τ))
