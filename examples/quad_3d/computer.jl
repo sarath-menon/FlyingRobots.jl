@@ -9,8 +9,8 @@ using StaticArrays
 
 include("vehicle.jl")
 include("controller_utilities.jl")
-include("scheduler.jl")
 include("tasks.jl")
+include("scheduler.jl")
 include("computer_types.jl")
 include("types.jl")
 
@@ -48,6 +48,11 @@ function create_computer(name)
     allocation_matrix = ctrl_yaml[:allocation_matrix]
 
     rom_memory = (; params=params, pid=pid, allocation_matrix=allocation_matrix)
+
+    @NamedTuple begin
+        x_pos::PID
+        b::Union{String,Missing}
+    end
 
     # RAM memory
     ram_memory = Dict{Symbol,Any}()

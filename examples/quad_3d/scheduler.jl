@@ -1,9 +1,23 @@
 
 
-function scheduler(computer)
+function scheduler(computer, t)
+
+    # get the clock count from simulation time
+    clock_time = round(Int64, t / 0.01) + 1
+
 
     #increment the main clock
     increment_clock(computer.main_clock)
+
+    # get trajectory reference command
+    R = reference_generator(t)
+
+    # set the trajectory reference
+    trajectory_reference = computer.ram_memory[:trajectory_reference]
+
+    trajectory_reference.pos.x = R[1]
+    trajectory_reference.pos.y = R[2]
+    trajectory_reference.pos.z = R[3]
 
     # execute tasks defined in yaml file in given order 
     for task in computer.tasks

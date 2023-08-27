@@ -43,12 +43,8 @@ function integrator_callback(int, sim_params=sim_params)
 
     flight_controller.ram_memory[:vehicle_pose] = vehicle_pose
 
-    # get the clock count from simulation time
-    clock_time = round(Int64, int.t / dt) + 1
-
     # # run the scheduler ------------------------------------------------
     motor_thrusts = Computer.scheduler(flight_controller, int.t)
-    # motor_thrusts = Computer.scheduler(flight_controller)
 
     # set the control input
     c_index = 18

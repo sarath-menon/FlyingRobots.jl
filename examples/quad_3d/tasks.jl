@@ -64,3 +64,24 @@ function control_allocator(computer)
 
     return motor_thrusts
 end
+
+
+
+function reference_generator(t)
+
+    r = 0.5    # circle radius 
+    ω = 0.2    # angular velocity
+
+    z_0 = 1
+
+    # circular trajectory 
+    x_ref = r * sin(ω * t)
+    y_ref = r * sin(ω * t)
+    z_ref = 1.0
+
+    # x_ref = 0.0
+    # y_ref = 0.0
+    # z_ref = 1.0
+
+    return [x_ref, y_ref, z_ref]
+end
