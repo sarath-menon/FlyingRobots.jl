@@ -28,7 +28,7 @@ function position_controller(computer, rate_hz)
     ctrl_cmd.orientation_euler.p = -pid_controller(y_pos_pid; e=e_y, dt=dt, umin=-0.5, umax=0.5) / g
 
     # z position controller
-    ctrl_cmd.f_net.z = m * g + pid_controller(z_pos_pid; e=e_z, dt=dt, umin=-4.5, umax=40.0)
+    ctrl_cmd.f_net.z = m * (g + pid_controller(z_pos_pid; e=e_z, dt=dt, umin=-4.5, umax=40.0))
 end
 
 
