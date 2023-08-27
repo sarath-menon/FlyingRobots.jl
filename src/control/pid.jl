@@ -1,4 +1,4 @@
-export pid_controller, pid_reset
+export pid_controller, pid_reset, pd_tuning
 export PID
 
 mutable struct PID1
@@ -51,4 +51,22 @@ end
 function pid_reset(pid::PID)
     pid.error_integral = 0
     pid.prev_error = 0
+end
+
+function pd_tuning(; response, ζ=0, τ=0)
+
+    if response == :second_order
+
+        kp = 1 / τ^2
+        kd = 2 * ζ / τ
+
+    elseif response == :first_order
+        kp = 1 / τ^2
+        kd = 0
+
+    else
+        println("reponse type is invalid: only :first_order and :second order are supported")
+
+    end
+    @show kp, kd
 end
