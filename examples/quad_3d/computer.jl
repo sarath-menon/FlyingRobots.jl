@@ -5,6 +5,7 @@ module Computer
 using YAML
 using FlyingRobots
 using Rotations
+using StaticArrays
 
 include("vehicle.jl")
 include("controller_utilities.jl")
@@ -49,7 +50,7 @@ function create_computer(name)
     rom_memory = (; params=params, pid=pid, allocation_matrix=allocation_matrix)
 
     # RAM memory
-    ram_memory = Dict{Symbol,Any}
+    ram_memory = Dict{Symbol,Any}()
     ram_memory[:ctrl_cmd] = CascadedPidCtrlCmd()
     ram_memory[:vehicle_pose] = Pose3d()
     ram_memory[:trajectory_reference] = TrajectoryReference()
