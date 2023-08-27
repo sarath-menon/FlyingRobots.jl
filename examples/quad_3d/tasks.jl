@@ -21,14 +21,18 @@ function position_controller(computer, rate_hz)
     e_y::Float64 = trajectory_reference.pos.y - vehicle_pose.pos.y
     e_z::Float64 = trajectory_reference.pos.z - vehicle_pose.pos.z
 
+    ẍ_cmd = trajectory_reference.acc.x
+    ÿ_cmd = trajectory_reference.acc.y
+    z̈_cmd = trajectory_reference.acc.z
+
     # x position controller
-    ctrl_cmd.orientation_euler.q = pid_controller(x_pos_pid; e=e_x, dt=dt, umin=-0.5, umax=0.5) / g
+    ctrl_cmd.orientation_euler.q = ẍ_cmd + pid_controller(x_pos_pid; e=e_x, dt=dt, umin=-0.5, umax=0.5) / g
 
     # y position controller
-    ctrl_cmd.orientation_euler.p = -pid_controller(y_pos_pid; e=e_y, dt=dt, umin=-0.5, umax=0.5) / g
+    ctrl_cmd.orientation_euler.p = ÿ_cmd + -pid_controller(y_pos_pid; e=e_y, dt=dt, umin=-0.5, umax=0.5) / g
 
     # z position controller
-    ctrl_cmd.f_net.z = m * (g + pid_controller(z_pos_pid; e=e_z, dt=dt, umin=-4.5, umax=40.0))
+    ctrl_cmd.f_net.z = m * (g + z̈_cmd + pid_controller(z_pos_pid; e=e_z, dt=dt, umin=-4.5, umax=40.0))
 end
 
 
