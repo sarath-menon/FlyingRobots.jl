@@ -60,7 +60,7 @@ function control_allocator(computer)
 
     allocation_matrix::Matrix{Float64} = computer.rom_memory.allocation_matrix
 
-    motor_thrusts::Vector{Float64} = allocation_matrix * [ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
+    motor_thrusts = allocation_matrix * @SVector Float64[ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
 
     return motor_thrusts
 end
