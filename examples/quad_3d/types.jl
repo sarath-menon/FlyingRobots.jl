@@ -14,16 +14,16 @@ mutable struct CascadedPidCtrlCmd5
 
     CascadedPidCtrlCmd5() = new(Vec3d(), EulerAngleZYX(), Vec3d(), Vec3d(), Vec3d(), [0, 0, 0, 0])
 end
-CascadedPidCtrlCmd = CascadedPidCtrlCmd4
+CascadedPidCtrlCmd = CascadedPidCtrlCmd5
 
-mutable struct TrajectoryReference3
+struct TrajectoryReference4
     pos::Vec3d
 
     vel::Vec3d
 
     acc::Vec3d
 
-    TrajectoryReference3() = new(Vec3d(), Vec3d(), Vec3d())
+    TrajectoryReference4() = new(Vec3d(), Vec3d(), Vec3d())
 end
 
-TrajectoryReference = TrajectoryReference3
+TrajectoryReference = TrajectoryReference4
