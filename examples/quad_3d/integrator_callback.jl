@@ -1,7 +1,7 @@
 
 function integrator_callback(int, sim_params=sim_params)
 
-    dt::Float64 = 0.01
+    dt::Float64 = sim_params.callback_dt
     g = 9.81
 
     # extract the state
@@ -24,7 +24,6 @@ function integrator_callback(int, sim_params=sim_params)
     # update vehicle state ------------------------------------------------
 
     # set state estimate to ground truth value for now
-    # vehicle_pose = flight_controller.ram_memory[:vehicle_pose]
     vehicle_pose = FlyingRobots.Pose3d7()
 
     vehicle_pose.pos.x = r[1]
