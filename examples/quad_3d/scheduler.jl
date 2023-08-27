@@ -2,10 +2,6 @@
 
 function scheduler(computer, t)
 
-    # get the clock count from simulation time
-    clock_time = round(Int64, t / 0.01) + 1
-
-
     #increment the main clock
     increment_clock(computer.main_clock)
 
