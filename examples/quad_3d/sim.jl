@@ -12,7 +12,12 @@ end
 
 function run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
 
-    cb = PeriodicCallback(integrator_callback, sim_params.callback_dt, initial_affect=true, save_positions=(true, false))
+    condition(u, t, integrator) = true
+
+    control_cb = PeriodicCallback(computer_cycle, sim_params.callback_dt, initial_affect=true, save_positions=(true, false))
+    integrator_cb = DiscreteCallback(condition, quaternion_integrator!, save_positions=(false, false))
+
+    cb_set = CallbackSet(integrator_cb, control_cb)
 
     tspan = (0.0, sim_params.duration)
 
@@ -21,7 +26,7 @@ function run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
 
     # reset_pid_controllers()
 
-    prob = ODEProblem(sys, X₀, tspan, parameters, callback=cb)
+    prob = ODEProblem(sys, X₀, tspan, parameters, callback=cb_set)
     @time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
     df = DataFrame(sol)
