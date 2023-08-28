@@ -7,6 +7,7 @@ using OrdinaryDiffEq
 using Rotations
 using NamedTupleTools
 using StaticArrays
+using ThreadPools
 
 using GLMakie
 using DataFrames
@@ -53,27 +54,38 @@ vehicle_params = load_vehicle_params_non_computer(folder_path * vehicle_params_p
 # ctrl_yaml = load_controller_params(folder_path * ctrl_yaml_path)
 sim_params = load_sim_params(folder_path * sim_params_path, vehicle_params)
 
-
 # create computer 
 flight_controller = Computer.create_computer("stm32")
 #@time Computer.position_controller(flight_controller, 10)
 
 include("integrator_callback.jl")
 
-c1 = Channel{Vector{Float64}}(10)
-# condition = Threads.Condition()
-condition = Condition()
+# running vizulizer, simulator and  onboard computer on single thread -----
 
-# task = @tspawnat 2 Computer.scheduler(flight_controller, 0.2)
-computer_task = @async Computer.scheduler(flight_controller)
+# Full simulation
+@time df = run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
 
-@time sim_task = @async run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
-# @time df = run_sim_stepping1(sys, subsystems, sim_params, vehicle_params; save=false)
+# Stepping simulation
+@time df = run_sim_stepping(sys, subsystems, sim_params, vehicle_params; save=false)
 
+# -----------------------------------------------------------------
+# running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
+
+# Full simulation
+@time sim_task = @tspawnat 2 run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
 df = fetch(sim_task)
 
-# Multithreaded simulation 
+# Stepping simulation
+@btime sim_task = @tspawnat 2 run_sim_stepping1(sys, subsystems, sim_params, vehicle_params; save=false)
+df = fetch(sim_task)
 
+# -----------------------------------------------------------------
+# # running vizulizer, simulator,onboard computer on 3 different threads
+# c1 = Channel{Vector{Float64}}(10)
+# condition = Threads.Condition()
+
+# computer_task = @tspawnat 1 Computer.scheduler(flight_controller)
+# @time sim_task = @tspawnat 2 run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
 
 # plotting
 FlyingRobots.Gui.set_sim_instance(plot_elements, df)
