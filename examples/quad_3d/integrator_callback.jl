@@ -52,14 +52,15 @@ function computer_cycle(int)
     flight_controller.ram_memory[:vehicle_pose] = vehicle_pose
 
     # notify scheduler 
+    lock(Main.condition)
     notify(condition, int.t)
 
     # wait till scheduler completes one cycle
+    lock(Main.condition)
     wait(condition)
 
     # get data from the channel
     motor_thrusts = take!(c1)
-
 
     # # # run the scheduler ------------------------------------------------
     # motor_thrusts = Computer.scheduler(flight_controller, int.t)
@@ -77,17 +78,21 @@ function callback_test()
 
     for i = 1:10
         # notify scheduler 
+        lock(condition)
+        Core.println("Starting loop")
         notify(condition, 0.2)
+        # unlock(condition)
 
-        println("Waiting for motor input")
+        Core.println("Waiting for motor thrusts")
 
         # wait till scheduler completes one cycle
+        lock(condition)
         wait(condition)
+        # unlock(condition)
 
         # get data from the channel
         motor_thrusts = take!(c1)
-
-        @show motor_thrusts
+        Core.println("Motor thrusts received")
 
     end
 end
