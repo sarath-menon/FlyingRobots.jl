@@ -39,6 +39,6 @@ function run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
         log_sim(df)
     end
 
-    return sol, df
+    return df
 end
 
