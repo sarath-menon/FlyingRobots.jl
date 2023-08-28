@@ -1,17 +1,8 @@
 
 
-function scheduler(computer)
-
-    Core.println("Waiting to be notified by the simulator")
+function scheduler(computer, t)
 
     while true
-
-        # wait for notification from sim
-        lock(Main.condition)
-        t = wait(Main.condition)
-
-
-        Core.println("notified")
 
         #increment the main clock
         increment_clock(computer.main_clock)
@@ -37,17 +28,7 @@ function scheduler(computer)
         # run control allocator
         motor_thrusts = control_allocator(computer)
 
-        # put data in channel
-        Core.println("Putting data in the channel")
-        put!(Main.c1, motor_thrusts)
-
-        # notify sim that one compute cycle is done
-        lock(Main.condition)
-        notify(Main.condition)
-        # unlock(condition)
-
-        # return motor_thrusts
+        return motor_thrusts
     end
+
 end
-
-
