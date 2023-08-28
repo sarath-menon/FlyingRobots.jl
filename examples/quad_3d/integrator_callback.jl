@@ -51,8 +51,18 @@ function computer_cycle(int)
 
     flight_controller.ram_memory[:vehicle_pose] = vehicle_pose
 
-    # # run the scheduler ------------------------------------------------
-    motor_thrusts = Computer.scheduler(flight_controller, int.t)
+    # notify scheduler 
+    notify(condition, int.t)
+
+    # wait till scheduler completes one cycle
+    wait(condition)
+
+    # get data from the channel
+    motor_thrusts = take!(c1)
+
+
+    # # # run the scheduler ------------------------------------------------
+    # motor_thrusts = Computer.scheduler(flight_controller, int.t)
 
     # set the control input
     c_index = 18
@@ -61,4 +71,23 @@ function computer_cycle(int)
     int.u[c_index+1] = motor_thrusts[2]
     int.u[c_index+2] = motor_thrusts[3]
     int.u[c_index+3] = motor_thrusts[4]
+end
+
+function callback_test()
+
+    for i = 1:10
+        # notify scheduler 
+        notify(condition, 0.2)
+
+        println("Waiting for motor input")
+
+        # wait till scheduler completes one cycle
+        wait(condition)
+
+        # get data from the channel
+        motor_thrusts = take!(c1)
+
+        @show motor_thrusts
+
+    end
 end
