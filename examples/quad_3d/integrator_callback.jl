@@ -18,9 +18,8 @@ function quaternion_integrator!(integrator)
 end
 
 
-function computer_cycle(int, sim_params=sim_params)
+function computer_cycle(int)
 
-    dt::Float64 = sim_params.callback_dt
     g = 9.81
 
     # extract the state
