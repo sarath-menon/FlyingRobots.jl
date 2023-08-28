@@ -57,6 +57,8 @@ sim_params = load_sim_params(folder_path * sim_params_path, vehicle_params)
 flight_controller = Computer.create_computer("stm32")
 #@time Computer.position_controller(flight_controller, 10)
 
+flight_controller.scheduler
+
 include("integrator_callback.jl")
 
 @time df = run_sim(sys, subsystems, sim_params, vehicle_params; save=false)
