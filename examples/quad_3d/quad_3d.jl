@@ -76,7 +76,7 @@ include("integrator_callback.jl")
 df = fetch(sim_task)
 
 # Stepping simulation
-@btime sim_task = @tspawnat 2 run_sim_stepping1(sys, subsystems, sim_params, vehicle_params; save=false)
+@time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, sim_params, vehicle_params; save=false)
 df = fetch(sim_task)
 
 # -----------------------------------------------------------------

@@ -44,7 +44,7 @@ end
 
 
 
-function run_sim_stepping1(sys, subsystems, sim_params, vehicle_params; save=false)
+function run_sim_stepping(sys, subsystems, sim_params, vehicle_params; save=false)
 
     condition(u, t, integrator) = true
 
