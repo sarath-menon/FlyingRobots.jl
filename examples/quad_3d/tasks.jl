@@ -1,5 +1,5 @@
 
-
+using FlyingRobots.Computer: get_elapsed_time
 
 function position_controller(computer, rate_hz)
 
@@ -69,9 +69,23 @@ function control_allocator(computer)
     return motor_thrusts
 end
 
+function reference_generator(computer, rate_hz)
 
+    t = get_elapsed_time(flight_controller)
 
-function reference_generator(t)
+    # get trajectory reference command
+    ref = get_circle_trajectory(t)
+
+    # set the trajectory reference
+    trajectory_reference = computer.ram_memory[:trajectory_reference]
+
+    trajectory_reference.pos.x = ref[1]
+    trajectory_reference.pos.y = ref[2]
+    trajectory_reference.pos.z = ref[3]
+
+end
+
+function get_circle_trajectory(t)
 
     r = 0.5    # circle radius 
     ω = 0.2    # angular velocity
