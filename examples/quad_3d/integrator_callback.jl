@@ -1,5 +1,7 @@
 
-function quaternion_integrator!(integrator)
+using FlyingRobots.Dynamics: quaternion_integrator
+
+function integrator_callback(integrator)
     # extract the state
     q_vec = @view integrator.u[7:10]
     ω = @view integrator.u[11:13]

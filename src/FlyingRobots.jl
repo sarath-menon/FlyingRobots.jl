@@ -23,7 +23,9 @@ include("common/utilities/utilities.jl")
 include("control/control.jl")
 include("gui/gui.jl")
 include("computer/computer.jl")
+include("dynamics/dynamics.jl")
 
+using .Dynamics
 using .Computer
 
 end

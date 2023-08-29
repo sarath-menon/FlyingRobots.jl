@@ -49,7 +49,7 @@ function run_sim_stepping(sys, subsystems, sim_params, vehicle_params; save=fals
     condition(u, t, integrator) = true
 
     control_cb = PeriodicCallback(computer_cycle, sim_params.callback_dt, initial_affect=true, save_positions=(false, true))
-    integrator_cb = DiscreteCallback(condition, quaternion_integrator!, save_positions=(false, false))
+    integrator_cb = DiscreteCallback(condition, integrator_callback, save_positions=(false, false))
 
     cb_set = CallbackSet(integrator_cb, control_cb)
 
