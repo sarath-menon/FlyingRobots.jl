@@ -46,3 +46,9 @@ computer:
 
     - name: attitude_controller
       rate: 100 #Hz
+
+    - name: control_allocator
+      rate: 100 #Hz
+
+
+       

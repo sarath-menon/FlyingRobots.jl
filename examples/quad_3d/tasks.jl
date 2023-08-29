@@ -58,15 +58,15 @@ function attitude_controller(computer, rate_hz)
 end
 
 
-function control_allocator(computer)
+function control_allocator(computer, rate_hz)
 
     ctrl_cmd = computer.ram_memory[:ctrl_cmd]
 
     allocation_matrix::Matrix{Float64} = computer.rom_memory.allocation_matrix
 
-    motor_thrusts = allocation_matrix * @SVector Float64[ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
+    ctrl_cmd.motor_thrusts = allocation_matrix * @SVector Float64[ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
 
-    return motor_thrusts
+    # return motor_thrusts
 end
 
 function reference_generator(computer, rate_hz)
