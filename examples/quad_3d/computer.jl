@@ -51,22 +51,6 @@ function create_computer(name)
         rom_memory=rom_memory, tasks=vehicle_params.computer.tasks)
 end
 
-function load_vehicle_params_computer(path::String)
-    vehicle_yaml = YAML.load_file(path; dicttype=Dict{Symbol,Any})
-
-    # # set tasks per ticks for each computer task
-    for task in vehicle_yaml[:computer][:tasks]
-        clock_speed = vehicle_yaml[:computer][:clock_speed]
-        task_rate_hz = task[:rate]
-        task[:rate_per_tick] = Int(clock_speed / task_rate_hz)
-
-        task[:func] = getfield(Main, Symbol(task[:name]))
-    end
-
-    vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
-
-    return vehicle_params
-end
 
 
 
