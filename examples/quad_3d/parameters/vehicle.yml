@@ -38,6 +38,9 @@ sensors:
 computer:
   clock_speed: 100 #Hz
   tasks:
+    - name: reference_generator
+      rate: 100 #Hz
+
     - name: position_controller
       rate: 50 #Hz
 
