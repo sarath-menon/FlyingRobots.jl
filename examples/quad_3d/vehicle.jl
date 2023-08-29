@@ -10,8 +10,6 @@ end
 
 
 
-
-
 function get_initial_conditions(plant, vehicle_params)
 
     initial_state = vehicle_params.initial_state
