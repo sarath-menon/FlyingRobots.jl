@@ -1,3 +1,5 @@
+export ComputerClock, OnboardComputer
+
 mutable struct ComputerClock1
     count::Int64
 

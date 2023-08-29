@@ -1,20 +1,6 @@
 
-
-module Computer
-
-using YAML
-using FlyingRobots
-using Rotations
-using StaticArrays
-
-include("vehicle.jl")
-include("controller_utilities.jl")
-include("tasks.jl")
-include("scheduler.jl")
-include("computer_types.jl")
-include("types.jl")
-
-export scheduler, increment_clock_timer!, create_computer
+using FlyingRobots.Computer: OnboardComputer, ComputerClock
+using FlyingRobots.Computer: increment_clock
 
 function create_computer(name)
 
@@ -26,7 +12,7 @@ function create_computer(name)
     # SharedMemory objects ----------------------------------------------------
 
     # clock
-    main_clock = ComputerClock1()
+    main_clock = ComputerClock()
 
     # parameters
     vehicle_params = load_vehicle_params_computer(folder_path * vehicle_params_path)
@@ -65,29 +51,6 @@ function create_computer(name)
         rom_memory=rom_memory, tasks=vehicle_params.computer.tasks)
 end
 
-
-function increment_clock(clock)
-    clock.count += 1
-end
-
-function reset_clock(clock)
-    clock.count = 0
-end
-
-function reset_memory()
-    pid_reset(x_pos_pid)
-    pid_reset(y_pos_pid)
-    pid_reset(z_pos_pid)
-
-    pid_reset(roll_pid)
-    pid_reset(pitch_pid)
-end
-
-function full_reset()
-    reset_clock(main_clock)
-    reset_memory()
-end
-
 function load_vehicle_params_computer(path::String)
     vehicle_yaml = YAML.load_file(path; dicttype=Dict{Symbol,Any})
 
@@ -97,7 +60,7 @@ function load_vehicle_params_computer(path::String)
         task_rate_hz = task[:rate]
         task[:rate_per_tick] = Int(clock_speed / task_rate_hz)
 
-        task[:func] = getfield(Main.Computer, Symbol(task[:name]))
+        task[:func] = getfield(Main, Symbol(task[:name]))
     end
 
     vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
@@ -105,5 +68,37 @@ function load_vehicle_params_computer(path::String)
     return vehicle_params
 end
 
-end
 
+
+function scheduler(computer)
+
+    # while true
+
+    #increment the main clock
+    increment_clock(computer.main_clock)
+
+    # # get trajectory reference command
+    # R = reference_generator(t)
+
+    # # set the trajectory reference
+    # trajectory_reference = computer.ram_memory[:trajectory_reference]
+
+    # trajectory_reference.pos.x = R[1]
+    # trajectory_reference.pos.y = R[2]
+    # trajectory_reference.pos.z = R[3]
+
+    # execute tasks defined in yaml file in given order 
+    for task in computer.tasks
+        # run task if it's time
+        if computer.main_clock.count % task.rate_per_tick == 0
+            task.func(computer, task.rate)
+        end
+    end
+
+    # run control allocator
+    motor_thrusts = control_allocator(computer)
+
+    return motor_thrusts
+    # end
+
+end

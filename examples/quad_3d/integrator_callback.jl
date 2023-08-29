@@ -52,7 +52,7 @@ function computer_cycle(int)
     flight_controller.ram_memory[:vehicle_pose] = vehicle_pose
 
     # # run the scheduler ------------------------------------------------
-    motor_thrusts = Computer.scheduler(flight_controller, int.t)
+    motor_thrusts = scheduler(flight_controller)
 
     # set the control input
     c_index = 18

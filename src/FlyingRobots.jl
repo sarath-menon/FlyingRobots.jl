@@ -22,5 +22,8 @@ include("common/utilities/utilities.jl")
 
 include("control/control.jl")
 include("gui/gui.jl")
+include("computer/computer.jl")
+
+using .Computer
 
 end
