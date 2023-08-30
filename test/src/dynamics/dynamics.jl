@@ -20,7 +20,7 @@ q1 = quaternion_integrator(q0, ω, dt)
 
 # in-place function test 
 q = one(QuatRotation)
-ω = [1 0 0]
+ω = [1.0 0 0]
 dt = 0.01
 
 quaternion_integrator!(q, ω, dt)
