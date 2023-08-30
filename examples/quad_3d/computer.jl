@@ -1,6 +1,6 @@
 
 using FlyingRobots.Computer: OnboardComputer, ComputerClock
-using FlyingRobots.Computer: increment_clock
+using FlyingRobots.Computer: increment_clock!
 
 function create_computer(name)
 
@@ -11,12 +11,12 @@ function create_computer(name)
 
     # SharedMemory objects ----------------------------------------------------
 
-    # clock
-    main_clock = ComputerClock()
-
     # parameters
     vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
     ctrl_yaml = load_controller_params(folder_path * ctrl_yaml_path, vehicle_params)
+
+    # clock
+    main_clock = ComputerClock(; speed=vehicle_params.computer.clock_speed)
 
     # create pid objects
     x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x])
@@ -35,11 +35,6 @@ function create_computer(name)
 
     rom_memory = (; params=params, pid=pid, allocation_matrix=allocation_matrix)
 
-    @NamedTuple begin
-        x_pos::PID
-        b::Union{String,Missing}
-    end
-
     # RAM memory
     ram_memory = Dict{Symbol,Any}()
     ram_memory[:ctrl_cmd] = CascadedPidCtrlCmd()
@@ -52,12 +47,10 @@ function create_computer(name)
 end
 
 
-
-
 function scheduler(computer)
 
     #increment the main clock
-    increment_clock(computer.main_clock)
+    increment_clock!(computer.main_clock)
 
     # execute tasks defined in yaml file in given order 
     for task in computer.tasks
@@ -66,9 +59,6 @@ function scheduler(computer)
             task.func(computer, task.rate)
         end
     end
-
-    # # run control allocator
-    # motor_thrusts = control_allocator(computer)
 
     ctrl_cmd = computer.ram_memory[:ctrl_cmd]
     return ctrl_cmd.motor_thrusts

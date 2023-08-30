@@ -1,24 +1,31 @@
 export ComputerClock, OnboardComputer
+export ClockSpeed
 
-mutable struct ComputerClock1
-    count::Int64
+# Abstract types -----------------------------
 
-    ComputerClock1() = new(0)
+abstract type AbstractComputer end
+
+# Concrete types -----------------------------
+
+mutable struct ComputerClock4
+    count::Integer
+    speed::Integer
+    ComputerClock4(; speed) = new(0, speed)
 end
 
-ComputerClock = ComputerClock1
+ComputerClock = ComputerClock4
 
-struct OnboardComputer4
+struct OnboardComputer6 <: AbstractComputer
     name::String
     main_clock::ComputerClock
     ram_memory::Dict
     rom_memory::NamedTuple
     tasks::Vector{NamedTuple}
 
-    OnboardComputer4(name; main_clock, ram_memory, rom_memory, tasks) =
+    OnboardComputer6(name; main_clock, ram_memory, rom_memory, tasks) =
         new(name, main_clock, ram_memory, rom_memory, tasks)
 end
 
-OnboardComputer = OnboardComputer4
+OnboardComputer = OnboardComputer6
 
 # convenience constructor
