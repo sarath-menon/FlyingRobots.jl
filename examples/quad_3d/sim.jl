@@ -12,7 +12,7 @@ end
 
 function run_sim(sys, subsystems; save=false)
 
-    prob, tspan = sim_setup(sys, subsystems)
+    prob = sim_setup(sys, subsystems)
 
     @time sol = solve(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
@@ -25,11 +25,11 @@ end
 
 function run_sim_stepping(sys, subsystems; save=false)
 
-    prob, tspan = sim_setup(sys, subsystems)
+    prob = sim_setup(sys, subsystems)
 
     integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
-    while floor(integrator.t) <= tspan[2]
+    while floor(integrator.t) <= prob.tspan[2]
         step!(integrator)
     end
 
@@ -38,6 +38,7 @@ function run_sim_stepping(sys, subsystems; save=false)
     return df
 end
 
+# pre-sim setup
 function sim_setup(sys, subsystems)
     # load params
     vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
@@ -57,7 +58,7 @@ function sim_setup(sys, subsystems)
 
     prob = ODEProblem(sys, X₀, tspan, parameters, callback=cb_set)
 
-    return prob, tspan
+    return prob
 end
 
 function sim_logging(sol)
