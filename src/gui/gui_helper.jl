@@ -12,7 +12,7 @@ function rotate_mesh(m, q)
     GLMakie.rotate!(m, makie_q)
 end
 
-function get_primary_resolution(index::Integer)
+function get_primary_resolution(index::Int)
     monitors = GLMakie.GLFW.GetMonitors()
 
     videomode = GLMakie.MonitorProperties(monitors[index]).videomode
@@ -89,8 +89,8 @@ function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=25)
     timeline_slider = elements[:widgets][:timeline_slider]
     timeline_btn = elements[:widgets][:timeline_btn]
 
-    step_count = convert(Integer, duration / dt)
-    n_skip_frames = convert(Integer, 100 / frame_rate)
+    step_count = convert(Int, duration / dt)
+    n_skip_frames = convert(Int, 100 / frame_rate)
 
     @show sim_state
 
