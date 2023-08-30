@@ -21,11 +21,8 @@ GLMakie.activate!(inline=false)
 using MtkLibrary
 using FlyingRobots
 
-include("dynamics_utilities.jl")
 include("mtk_models.jl")
 include("types.jl")
-
-include("dynamics.jl")
 include("logging.jl")
 
 include("sim.jl")
@@ -46,7 +43,7 @@ ctrl_yaml_path = "/parameters/controller.yml"
 
 vehicle_yaml = YAML.load_file(folder_path * vehicle_params_path; dicttype=Dict{Symbol,Any})
 
-vehicle_params = load_vehicle_params_non_computer(folder_path * vehicle_params_path)
+vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
 # ctrl_yaml = load_controller_params(folder_path * ctrl_yaml_path)
 sim_params = load_sim_params(folder_path * sim_params_path, vehicle_params)
 

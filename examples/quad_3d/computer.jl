@@ -15,7 +15,7 @@ function create_computer(name)
     main_clock = ComputerClock()
 
     # parameters
-    vehicle_params = load_vehicle_params_computer(folder_path * vehicle_params_path)
+    vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
     ctrl_yaml = load_controller_params(folder_path * ctrl_yaml_path, vehicle_params)
 
     # create pid objects
