@@ -26,13 +26,13 @@ function position_controller(computer, rate_hz)
     z̈_cmd = trajectory_reference.acc.z
 
     # x position controller
-    ctrl_cmd.orientation_euler.q = ẍ_cmd + pid_controller(x_pos_pid; e=e_x, dt=dt, umin=-0.5, umax=0.5) / g
+    ctrl_cmd.orientation_euler.q = ẍ_cmd + pid_controller!(x_pos_pid; e=e_x, dt=dt, umin=-0.5, umax=0.5) / g
 
     # y position controller
-    ctrl_cmd.orientation_euler.p = ÿ_cmd + -pid_controller(y_pos_pid; e=e_y, dt=dt, umin=-0.5, umax=0.5) / g
+    ctrl_cmd.orientation_euler.p = ÿ_cmd + -pid_controller!(y_pos_pid; e=e_y, dt=dt, umin=-0.5, umax=0.5) / g
 
     # z position controller
-    ctrl_cmd.f_net.z = m * (g + z̈_cmd + pid_controller(z_pos_pid; e=e_z, dt=dt, umin=-4.5, umax=40.0))
+    ctrl_cmd.f_net.z = m * (g + z̈_cmd + pid_controller!(z_pos_pid; e=e_z, dt=dt, umin=-4.5, umax=40.0))
 end
 
 
@@ -52,8 +52,8 @@ function attitude_controller(computer, rate_hz)
     e_p::Float64 = ctrl_cmd.orientation_euler.p - p
     e_q::Float64 = ctrl_cmd.orientation_euler.q - q
 
-    ctrl_cmd.τ.x = pid_controller(roll_pid; e=e_p, dt=dt, umin=-25, umax=25)
-    ctrl_cmd.τ.y = pid_controller(pitch_pid; e=e_q, dt=dt, umin=-25, umax=25)
+    ctrl_cmd.τ.x = pid_controller!(roll_pid; e=e_p, dt=dt, umin=-25, umax=25)
+    ctrl_cmd.τ.y = pid_controller!(pitch_pid; e=e_q, dt=dt, umin=-25, umax=25)
     ctrl_cmd.τ.z = 0
 end
 
