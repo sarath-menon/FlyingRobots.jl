@@ -1,7 +1,7 @@
 type: quadcopter
 name: crazyflie
 
-mass: 1 #[kg]
+mass: 1.0 #[kg]
 I_xx: 0.003
 I_yy: 0.003
 I_zz: 0.02
