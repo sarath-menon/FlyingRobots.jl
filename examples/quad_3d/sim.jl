@@ -39,17 +39,25 @@ function run_sim_stepping(sys, subsystems; save=false)
 end
 
 # pre-sim setup
-function sim_setup(sys, subsystems)
-    # load params
-    vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
-    sim_params = load_sim_params(folder_path * sim_params_path, vehicle_params)
 
+
+function setup_callbacks(sim_params)
     condition(u, t, integrator) = true
 
     control_cb = PeriodicCallback(computer_cycle, sim_params.callback_dt, initial_affect=true, save_positions=(false, true))
     integrator_cb = DiscreteCallback(condition, integrator_callback, save_positions=(false, false))
 
     cb_set = CallbackSet(integrator_cb, control_cb)
+
+    return cb_set
+end
+
+function sim_setup(sys, subsystems)
+    # load params
+    vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
+    sim_params = load_sim_params(folder_path * sim_params_path, vehicle_params)
+
+    cb_set = setup_callbacks(sim_params)
 
     tspan = (0.0, sim_params.duration)
 
