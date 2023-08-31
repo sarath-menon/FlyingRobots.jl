@@ -26,7 +26,7 @@ function show_visualizer()
     # add grids
     # Top level
     g_top = fig[0, 1:2] = GridLayout()
-    g_left = fig[0:1, 1] = GridLayout(alignmode=Outside(50))
+    g_left = fig[0:1, 1] = GridLayout()
     g_right = fig[1, 2] = GridLayout()
 
     # Right Grid 
@@ -42,11 +42,9 @@ function show_visualizer()
 
     # Box(g_left_plots[0, 1], color=(:red, 0.2), strokewidth=0)
     # Box(g_left_plots[1, 1], color=(:green, 0.2), strokewidth=0)
-    rowgap!(g_left_plots, 1)
 
     # # Column size adjust
-    colsize!(g_left, 1, Auto(1))
-    colsize!(g_right, 1, Auto(1))
+    colsize!(g_right_plots, 1, Auto(0.5))
 
     # how much to shrink control plots grid
     rowsize!(g_right_plots, 2, Auto(0.6))
@@ -105,9 +103,9 @@ function add_closeup_visualizer(elements, g_left, g_left_plots)
         # title=params.title,
         limits=(params.axis.low, params.axis.high, params.axis.low, params.axis.high, params.axis.low, params.axis.high),
         aspect=(params.axis.aspect_x, params.axis.aspect_y, params.axis.aspect_z),
-        xlabel=params.axis.labels.x, xlabelsize=params.axis.label_size,
-        ylabel=params.axis.labels.y, ylabelsize=params.axis.label_size,
-        zlabel=params.axis.labels.z, zlabelsize=params.axis.label_size,
+        # xlabel=params.axis.labels.x, xlabelsize=params.axis.label_size,
+        # ylabel=params.axis.labels.y, ylabelsize=params.axis.label_size,
+        # zlabel=params.axis.labels.z, zlabelsize=params.axis.label_size,
         halign=:left,
         xspinecolor_1=:white,
         xspinecolor_3=:white,
@@ -115,6 +113,9 @@ function add_closeup_visualizer(elements, g_left, g_left_plots)
         yspinecolor_3=:white,
         zspinecolor_1=:white,
         zspinecolor_3=:white,
+        xticklabelcolor=RGBAf(0, 0, 0, 0.3),
+        yticklabelcolor=RGBAf(0, 0, 0, 0.3),
+        zticklabelcolor=RGBAf(0, 0, 0, 0.3),
         xspinewidth=params.axis.spine_width,
         yspinewidth=params.axis.spine_width,
         zspinewidth=params.axis.spine_width,
