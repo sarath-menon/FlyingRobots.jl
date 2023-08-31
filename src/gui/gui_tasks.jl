@@ -55,7 +55,8 @@ function show_visualizer()
     # add titles
     add_titles(elements, g_top, "Jarvis")
 
-    add_closeup_visualizer(elements, g_left, g_left_plots)
+    # add_closeup_visualizer(elements, g_left, g_left_plots)
+    add_closeup_visualizer_attitude(elements, g_left, g_left_plots)
 
     add_fullscene_visualizer(elements, g_left, g_left_plots)
 
@@ -109,15 +110,73 @@ function add_closeup_visualizer(elements, g_left, g_left_plots)
         # ylabel=params.axis.labels.y, ylabelsize=params.axis.label_size,
         # zlabel=params.axis.labels.z, zlabelsize=params.axis.label_size,
         halign=:left,
-        xspinecolor_1=:white,
-        xspinecolor_3=:white,
-        yspinecolor_1=:white,
-        yspinecolor_3=:white,
-        zspinecolor_1=:white,
-        zspinecolor_3=:white,
-        xticklabelcolor=RGBAf(0, 0, 0, 0.3),
-        yticklabelcolor=RGBAf(0, 0, 0, 0.3),
-        zticklabelcolor=RGBAf(0, 0, 0, 0.3),
+        xspinecolor_1=:black,
+        xspinecolor_3=:black,
+        yspinecolor_1=:black,
+        yspinecolor_3=:black,
+        zspinecolor_1=:black,
+        zspinecolor_3=:black,
+        xspinecolor_2=:white,
+        yspinecolor_2=:white,
+        zspinecolor_2=:white,
+        xticklabelcolor=RGBf(220, 220, 220),
+        yticklabelcolor=RGBf(220, 220, 220),
+        zticklabelcolor=RGBf(220, 220, 220),
+        # zgridcolor=RGBAf(220, 220, 220, 0.12);
+        xspinewidth=params.axis.spine_width,
+        yspinewidth=params.axis.spine_width,
+        zspinewidth=params.axis.spine_width,
+        xlabeloffset=params.axis.label_offset,
+        ylabeloffset=params.axis.label_offset,
+        zlabeloffset=params.axis.label_offset,
+        xgridwidth=params.axis.grid_width,
+        ygridwidth=params.axis.grid_width,
+        zgridwidth=params.axis.grid_width,
+        xtickwidth=0.1,
+        ytickwidth=0.1,
+        ztickwidth=0.1,
+        xticks=WilkinsonTicks(3; k_min=1, k_max=3),
+        yticks=WilkinsonTicks(3; k_min=1, k_max=3),
+        zticks=WilkinsonTicks(3; k_min=1, k_max=3),
+        xticklabelsize=25,
+        yticklabelsize=25,
+        zticklabelsize=25
+    )
+
+    # force 3d visualizer to have an aspect ratio of 1
+    rowsize!(g_left_plots, 1, Auto(0.8))
+
+    elements[:closeup_visualizer] = Dict{Symbol,Any}(:axis => vis_ax)
+end
+
+function add_closeup_visualizer_attitude(elements, g_left, g_left_plots)
+
+    fig = elements[:fig]
+
+    params = elements[:params][:closeup_visualizer]
+
+    # 3d axis for airplane visualization
+    vis_ax = Axis3(g_left_plots[1, 1],
+        # title=params.title,
+        limits=(params.axis.low, params.axis.high, params.axis.low, params.axis.high, params.axis.low, params.axis.high),
+        aspect=(params.axis.aspect_x, params.axis.aspect_y, params.axis.aspect_z),
+        # xlabel=params.axis.labels.x, xlabelsize=params.axis.label_size,
+        # ylabel=params.axis.labels.y, ylabelsize=params.axis.label_size,
+        # zlabel=params.axis.labels.z, zlabelsize=params.axis.label_size,
+        halign=:left,
+        # xspinecolor_1=:black,
+        # xspinecolor_3=:black,
+        # yspinecolor_1=:black,
+        # yspinecolor_3=:black,
+        # zspinecolor_1=:black,
+        # zspinecolor_3=:black,
+        # xspinecolor_2=:white,
+        # yspinecolor_2=:white,
+        # zspinecolor_2=:white,
+        xticklabelcolor=RGBf(220, 220, 220),
+        yticklabelcolor=RGBf(220, 220, 220),
+        zticklabelcolor=RGBf(220, 220, 220),
+        # zgridcolor=RGBAf(220, 220, 220, 0.12);
         xspinewidth=params.axis.spine_width,
         yspinewidth=params.axis.spine_width,
         zspinewidth=params.axis.spine_width,
@@ -136,6 +195,9 @@ function add_closeup_visualizer(elements, g_left, g_left_plots)
         xticklabelsize=25,
         yticklabelsize=25,
         zticklabelsize=25,
+        xticklabelsvisible=false,
+        yticklabelsvisible=false,
+        zticklabelsvisible=false,
     )
 
     # force 3d visualizer to have an aspect ratio of 1
@@ -172,6 +234,9 @@ function add_fullscene_visualizer(elements, g_left, g_left_plots)
         xgridwidth=params.axis.grid_width,
         ygridwidth=params.axis.grid_width,
         zgridwidth=params.axis.grid_width,
+        xticklabelsvisible=:false,
+        yticklabelsvisible=:false,
+        zticklabelsvisible=:false
     )
 
     # plot cube volume 
@@ -179,16 +244,37 @@ function add_fullscene_visualizer(elements, g_left, g_left_plots)
     bbox_width = params.axis.y_high - params.axis.y_low
     bbox_height = params.axis.z_high - params.axis.z_low
 
-    mr = Rect3f(Vec3f(0.0), Vec3f(bbox_length, bbox_width, bbox_height))
-    bbox_volume = mesh!(vis_ax, mr; color=(:white, 0.25), transparency=true)
+    # mr = Rect3f(Vec3f(0), Vec3f(bbox_length, bbox_width, bbox_height))
+    # bbox_volume = mesh!(vis_ax, mr; color=(:yellow, 0.1), transparency=true)
+    # translate!(bbox_volume, Vec3f(-bbox_length / 2, -bbox_width / 2, 0))
 
-    # plot cube wireframe
-    bbox_wireframe = wireframe!(vis_ax, mr; color=:black, linewidth=0.4)
+    # # plot cube wireframe
+    # bbox_wireframe = wireframe!(vis_ax, mr; color=:black, linewidth=0.4)
+    # translate!(bbox_wireframe, Vec3f(-bbox_length / 2, -bbox_width / 2, 0))
 
-    translate!(bbox_volume, Vec3f(-bbox_length / 2, -bbox_width / 2, 0))
-    translate!(bbox_wireframe, Vec3f(-bbox_length / 2, -bbox_width / 2, 0))
+    # add floor
+    floor_width = 50
+    floor_mesh = meshcube(Vec3f(0.5, 0.5, 0.49), Vec3f(bbox_length, bbox_width, 0.01))
+    # floor = mesh!(vis_ax, floor_mesh; color=:grey, interpolate=false, diffuse=Vec3f(0.4), specular=Vec3f(0.4))
+    floor = mesh!(vis_ax, floor_mesh; color=:green, interpolate=false)
+
+    translate!(floor, Vec3f(-bbox_length / 2, -bbox_width / 2, 0))
 
     elements[:fullscene_visualizer] = Dict{Symbol,Any}(:axis => vis_ax)
+end
+
+function meshcube(o=Vec3f(0), sizexyz=Vec3f(1))
+    uvs = map(v -> v ./ (3, 2), Vec2f[
+        (0, 0), (0, 1), (1, 1), (1, 0),
+        (1, 0), (1, 1), (2, 1), (2, 0),
+        (2, 0), (2, 1), (3, 1), (3, 0),
+        (0, 1), (0, 2), (1, 2), (1, 1),
+        (1, 1), (1, 2), (2, 2), (2, 1),
+        (2, 1), (2, 2), (3, 2), (3, 1),
+    ])
+    m = normal_mesh(Rect3f(Vec3f(-0.5) .+ o, sizexyz))
+    m = GeometryBasics.Mesh(meta(coordinates(m);
+            uv=uvs, normals=normals(m)), faces(m))
 end
 
 function add_3d_model_closeup_visualizer(elements, stl_file)
@@ -197,12 +283,19 @@ function add_3d_model_closeup_visualizer(elements, stl_file)
 
     vis_ax = elements[:closeup_visualizer][:axis]
 
-    model = mesh!(vis_ax, stl_file, color=:red)
+    model = mesh!(vis_ax, stl_file, color=:green, shading=false)
 
     scale!(model, params.mesh.scale, params.mesh.scale, params.mesh.scale)
 
-    # center mesh at the origin
-    translate!(model, Vec3f(params.mesh.initial_translation[1], params.mesh.initial_translation[2], params.mesh.initial_translation[3]))
+    # draw axis lines 
+    point = [0, 0.1]
+
+    # x-line
+    lines!(vis_ax, zeros(2), zeros(2), point, color=:white, linewidth=1)
+    # y-line
+    lines!(vis_ax, zeros(2), -point, zeros(2), color=:white, linewidth=1)
+    # z-line
+    lines!(vis_ax, -point, zeros(2), zeros(2), color=:white, linewidth=1)
 
     # apply initial orientation
     rotate_mesh(model, QuatRotation(1, 0, 0, 0))
@@ -216,7 +309,7 @@ function add_3d_model_fullscene_visualizer(elements, stl_file)
 
     vis_ax = elements[:fullscene_visualizer][:axis]
 
-    model = mesh!(vis_ax, stl_file, color=:red)
+    model = mesh!(vis_ax, stl_file, color=:white)
 
     scale!(model, params.mesh.scale, params.mesh.scale, params.mesh.scale)
 
@@ -289,7 +382,7 @@ function add_widgets(elements, g_left_widgets, g_right_widgets)
         halign=:left)
 
     #timeline button
-    timeline_btn = Button(fig, label="Play", tellwidth=false, halign=:center, fontsize=40)
+    timeline_btn = Button(fig, label="Play", tellwidth=false, halign=:center, fontsize=40, buttoncolor=:yellow, labelcolor=:black)
     timeline_left_label = Label(fig, "0.0 s", justification=:left)
     timeline_right_label = Label(fig, "10.0 s", justification=:left)
 

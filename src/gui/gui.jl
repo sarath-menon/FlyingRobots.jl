@@ -35,5 +35,7 @@ vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)
 
 # load mesh 
 crazyflie_stl = load(assetpath(folder_path * "/assets/cf2_assembly.obj"))
+# Load assets
+floor_img = load(assetpath(folder_path * "/assets/floor/checker_repeat.png"))
 
 end

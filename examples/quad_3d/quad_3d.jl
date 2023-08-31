@@ -56,15 +56,21 @@ sys, subsystems = fetch(system_build_task)
 df = fetch(sim_task)
 
 # plotting ----------------------------------------------------
+plot_elements = FlyingRobots.Gui.show_visualizer()
+
 FlyingRobots.Gui.set_sim_instance(plot_elements, df)
 
-@async FlyingRobots.Gui.plot_position(plot_elements)
-@async FlyingRobots.Gui.plot_orientation(plot_elements)
+FlyingRobots.Gui.plot_position(plot_elements)
+FlyingRobots.Gui.plot_orientation(plot_elements)
 FlyingRobots.Gui.plot_control_input(plot_elements, motor_thrust_to_body_thrust)
 
-flag = FlyingRobots.Gui.start_3d_animation(plot_elements)
+@time flag = FlyingRobots.Gui.start_3d_animation(plot_elements)
 
+reference_generator(Main.quad_3d.Circle_TrajectoryGen(), flight_controller, 10)
 
+scheduler(flight_controller)
+
+Main.quad_3d.Circle_TrajectoryGen == Circle_TrajectoryGen
 
 end
 
