@@ -27,3 +27,26 @@ struct TrajectoryReference4
 end
 
 TrajectoryReference = TrajectoryReference4
+
+## For strategy pattern
+
+abstract type TrajectoryGen end
+abstract type PosController end
+abstract type AttitudeController end
+abstract type ControlAllocator end
+
+
+struct Circle_TrajectoryGen <: TrajectoryGen end
+
+struct SimplePid_PosController <: PosController end
+struct ConvexMpc_PosController <: PosController end
+
+struct SimplePid_AttitudeController <: AttitudeController end
+
+struct SimpleClipping_ControlAllocator <: ControlAllocator end
+
+
+function load_type_name_from_yaml(name::String)
+    a = Symbol(name)
+    return @eval $a()
+end

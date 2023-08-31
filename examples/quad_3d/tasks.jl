@@ -1,7 +1,7 @@
 
 using FlyingRobots.Computer: get_elapsed_time
 
-function position_controller(computer, rate_hz)
+function position_controller(strategy::SimplePid_PosController, computer, rate_hz)
 
     g = 9.81
     dt = 1 / rate_hz
@@ -36,7 +36,7 @@ function position_controller(computer, rate_hz)
 end
 
 
-function attitude_controller(computer, rate_hz)
+function attitude_controller(strategy::SimplePid_AttitudeController, computer, rate_hz)
 
     dt = 1 / rate_hz
 
@@ -58,7 +58,7 @@ function attitude_controller(computer, rate_hz)
 end
 
 
-function control_allocator(computer, rate_hz)
+function control_allocator(strategy::SimpleClipping_ControlAllocator, computer, rate_hz)
 
     ctrl_cmd = computer.ram_memory[:ctrl_cmd]
 
@@ -69,7 +69,7 @@ function control_allocator(computer, rate_hz)
     # return motor_thrusts
 end
 
-function reference_generator(computer, rate_hz)
+function reference_generator(strategy::Circle_TrajectoryGen, computer::OnboardComputer, rate_hz::Int)
 
     t = get_elapsed_time(flight_controller)
 

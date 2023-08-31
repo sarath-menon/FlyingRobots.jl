@@ -15,17 +15,17 @@ end
 
 ComputerClock = ComputerClock6
 
-struct OnboardComputer6 <: AbstractComputer
+struct OnboardComputer7 <: AbstractComputer
     name::String
     main_clock::ComputerClock
     ram_memory::Dict
     rom_memory::NamedTuple
     tasks::Vector{NamedTuple}
 
-    OnboardComputer6(name; main_clock, ram_memory, rom_memory, tasks) =
+    OnboardComputer7(name; main_clock, ram_memory, rom_memory, tasks) =
         new(name, main_clock, ram_memory, rom_memory, tasks)
 end
 
-OnboardComputer = OnboardComputer6
+OnboardComputer = OnboardComputer7
 
 # convenience constructor
