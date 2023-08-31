@@ -69,6 +69,7 @@ function control_allocator(strategy::SimpleClipping_ControlAllocator, computer, 
     # return motor_thrusts
 end
 
+
 function reference_generator(strategy::Circle_TrajectoryGen, computer::OnboardComputer, rate_hz::Int)
 
     t = get_elapsed_time(flight_controller)
@@ -88,12 +89,12 @@ end
 function get_circle_trajectory(t)
 
     r = 0.5    # circle radius 
-    ω = 0.2    # angular velocity
+    ω = 0.5    # angular velocity
 
     z_0 = 1
 
     # circular trajectory 
-    x_ref = r * sin(ω * t)
+    x_ref = r * cos(ω * t)
     y_ref = r * sin(ω * t)
     z_ref = 1.0
 
