@@ -24,39 +24,46 @@ function show_visualizer()
     # add grids
     # Top level
     g_top = fig[0, 1:2] = GridLayout()
-    g_planner = fig[1, 1] = GridLayout(alignmode=Outside(50))
-    g_controller = fig[1, 2] = GridLayout()
+    g_left = fig[0:1, 1] = GridLayout(alignmode=Outside(50))
+    g_right = fig[1, 2] = GridLayout()
 
     # Right Grid 
-    g_controller_plots = g_controller[1, 1] = GridLayout()
-    g_state_plots = g_controller_plots[1, 1] = GridLayout()
-    g_control_plots = g_controller_plots[2, 1] = GridLayout()
+    g_right_plots = g_right[1, 1] = GridLayout()
+    g_state_plots = g_right_plots[1, 1] = GridLayout()
+    g_control_plots = g_right_plots[2, 1] = GridLayout()
 
-    g_controller_widgets = g_controller[2, 1] = GridLayout()
+    g_right_widgets = g_right[2, 1] = GridLayout()
 
     # Left Grid 
-    g_planner_plots = g_planner[1, 1] = GridLayout()
-    g_planner_widgets = g_planner[2, 1] = GridLayout(tellwidth=false)
+    g_left_plots = g_left[0:2, 1] = GridLayout()
+    g_left_widgets = g_left[3, 1] = GridLayout(tellwidth=false)
+
+    # Box(g_left_plots[0, 1], color=(:red, 0.2), strokewidth=0)
+    # Box(g_left_plots[1, 1], color=(:green, 0.2), strokewidth=0)
+    rowgap!(g_left_plots, 1)
 
     # # Column size adjust
-    colsize!(g_planner, 1, Auto(1))
-    colsize!(g_controller, 1, Auto(1))
+    colsize!(g_left, 1, Auto(1))
+    colsize!(g_right, 1, Auto(1))
 
     # how much to shrink control plots grid
-    rowsize!(g_controller_plots, 2, Auto(0.6))
+    rowsize!(g_right_plots, 2, Auto(0.6))
+    rowsize!(g_left_widgets, 1, Auto(0.6))
 
     # add titles
     add_titles(elements, g_top, "Jarvis")
 
-    add_3d_visualizer(elements, g_planner, g_planner_plots)
+    add_3d_visualizer(elements, g_left, g_left_plots)
+
+    add_3d_visualizer_2(elements, g_left, g_left_plots)
 
     add_3d_model(elements, crazyflie_stl)
 
     add_2d_plots(elements, g_state_plots, g_control_plots)
 
-    add_widgets(elements, g_planner_widgets, g_controller_widgets)
+    add_widgets(elements, g_left_widgets, g_right_widgets)
 
-    g_controller[2, 1] = g_controller_widgets
+    g_right[2, 1] = g_right_widgets
 
     plot_initialize(elements)
 
@@ -77,23 +84,66 @@ function add_titles(elements, g_top, title)
 
     titles = Dict()
 
-    titles[:super_title] = Label(g_top[1, 1:2], title, fontsize=60)
-    titles[:time_title] = Label(g_top[2, 1:2], "Time = " * string(0.0) * " s", fontsize=40)
+    titles[:super_title] = Label(g_top[0, 1], title, fontsize=60)
+    titles[:time_title] = Label(g_top[1, 1], "Time = " * string(0.0) * " s", fontsize=40)
 
     elements[:titles] = titles
 end
 
-function add_3d_visualizer(elements, g_planner, g_planner_plots)
+function add_3d_visualizer(elements, g_left, g_left_plots)
 
     fig = elements[:fig]
     # vis_3d_params = elements[:vis_3d_params]
     vis_3d_params = elements[:params][:visualizer_3d]
 
     # 3d axis for airplane visualization
-    vis_ax = Axis3(g_planner_plots[1, 1],
-        title=vis_3d_params.title,
+    vis_ax = Axis3(g_left_plots[1, 1],
+        # title=vis_3d_params.title,
         limits=(vis_3d_params.axis.low, vis_3d_params.axis.high, vis_3d_params.axis.low, vis_3d_params.axis.high, vis_3d_params.axis.low, vis_3d_params.axis.high),
         aspect=(vis_3d_params.axis.aspect_x, vis_3d_params.axis.aspect_y, vis_3d_params.axis.aspect_z),
+        xlabel=vis_3d_params.axis.labels.x, xlabelsize=vis_3d_params.axis.label_size,
+        ylabel=vis_3d_params.axis.labels.y, ylabelsize=vis_3d_params.axis.label_size,
+        zlabel=vis_3d_params.axis.labels.z, zlabelsize=vis_3d_params.axis.label_size,
+        halign=:left,
+        xspinecolor_1=:white,
+        xspinecolor_3=:white,
+        yspinecolor_1=:white,
+        yspinecolor_3=:white,
+        zspinecolor_1=:white,
+        zspinecolor_3=:white,
+        xspinewidth=vis_3d_params.axis.spine_width,
+        yspinewidth=vis_3d_params.axis.spine_width,
+        zspinewidth=vis_3d_params.axis.spine_width,
+        xlabeloffset=vis_3d_params.axis.label_offset,
+        ylabeloffset=vis_3d_params.axis.label_offset,
+        zlabeloffset=vis_3d_params.axis.label_offset,
+        xgridwidth=vis_3d_params.axis.grid_width,
+        ygridwidth=vis_3d_params.axis.grid_width,
+        zgridwidth=vis_3d_params.axis.grid_width,
+        xtickwidth=0.1,
+        ytickwidth=0.1,
+        ztickwidth=0.1,
+    )
+
+    # force 3d visualizer to have an aspect ratio of 1
+    rowsize!(g_left_plots, 1, Auto(1.0))
+
+    elements[:visualizer_3d] = Dict{Symbol,Any}(:axis => vis_ax)
+end
+
+function add_3d_visualizer_2(elements, g_left, g_left_plots)
+
+    fig = elements[:fig]
+    # vis_3d_params = elements[:vis_3d_params]
+    vis_3d_params = elements[:params][:visualizer_3d]
+
+    # 3d axis for airplane visualization
+    vis_ax = Axis3(g_left_plots[2, 1],
+        # title=vis_3d_params.title,
+        limits=(0, 10, 0, 20, 0, 2),
+        aspect=(1, 2, 0.2),
+        elevation=0.15 * pi,
+        azimuth=0.2 * pi,
         xlabel=vis_3d_params.axis.labels.x, xlabelsize=vis_3d_params.axis.label_size,
         ylabel=vis_3d_params.axis.labels.y, ylabelsize=vis_3d_params.axis.label_size,
         zlabel=vis_3d_params.axis.labels.z, zlabelsize=vis_3d_params.axis.label_size,
@@ -116,9 +166,9 @@ function add_3d_visualizer(elements, g_planner, g_planner_plots)
     )
 
     # force 3d visualizer to have an aspect ratio of 1
-    rowsize!(g_planner, 1, Aspect(1, 1.0))
+    # rowsize!(g_left, 1, Aspect(1, 1.0))
 
-    elements[:visualizer_3d] = Dict{Symbol,Any}(:axis => vis_ax)
+    elements[:visualizer_3d_2] = Dict{Symbol,Any}(:axis => vis_ax)
 end
 
 function add_3d_model(elements, stl_file)
@@ -156,7 +206,7 @@ function add_2d_plots(elements, g_state_plots, g_control_plots)
         plot = Axis(fig)
         push!(state_plots, plot)
 
-        # g_controller_plots[i,1] = state_plots[i]
+        # g_right_plots[i,1] = state_plots[i]
         g_state_plots[i, 1] = state_plots[i]
     end
 
@@ -168,7 +218,7 @@ function add_2d_plots(elements, g_state_plots, g_control_plots)
         )
         push!(control_plots, plot)
 
-        # g_controller_plots[i,1] = state_plots[i]
+        # g_right_plots[i,1] = state_plots[i]
         g_control_plots[i, 1] = control_plots[i]
     end
 
@@ -180,7 +230,7 @@ end
 
 
 
-function add_widgets(elements, g_planner_widgets, g_controller_widgets)
+function add_widgets(elements, g_left_widgets, g_right_widgets)
 
     fig = elements[:fig]
 
@@ -193,25 +243,25 @@ function add_widgets(elements, g_planner_widgets, g_controller_widgets)
     timeline_left_label = Label(fig, "0.0 s", justification=:left)
     timeline_right_label = Label(fig, "10.0 s", justification=:left)
 
-    g_planner_widgets[1, 1] = timeline_left_label
-    g_planner_widgets[1, 2] = timeline_slider
-    g_planner_widgets[1, 3] = timeline_right_label
+    g_left_widgets[1, 1] = timeline_left_label
+    g_left_widgets[1, 2] = timeline_slider
+    g_left_widgets[1, 3] = timeline_right_label
 
-    g_planner_widgets[2, :] = timeline_btn
+    g_left_widgets[2, :] = timeline_btn
 
     # shrink right widgets grid to make space for plots
-    # rowsize!(g_controller, 2,  Auto(0.2))
+    # rowsize!(g_right, 2,  Auto(0.2))
 
     # attitude reset button
     attitude_reset_btn = Button(fig, label="Reset Attitude", tellwidth=false)
-    g_controller_widgets[1, 1] = attitude_reset_btn
+    g_right_widgets[1, 1] = attitude_reset_btn
 
     # dropdown menu
     config_menu = Menu(fig,
         options=elements[:configs_vec],
         default="positions")
 
-    g_controller_widgets[1, 2] = config_menu
+    g_right_widgets[1, 2] = config_menu
 
     widgets = Dict()
 
@@ -219,11 +269,11 @@ function add_widgets(elements, g_planner_widgets, g_controller_widgets)
     # toggles = [Toggle(fig, active=active) for active in [true, true, true]]
     # labels = [Label(fig, label) for label in ["y", "z", "θ"]]
 
-    # g_controller_toggles = g_controller_widgets[1, 3] = GridLayout()
+    # g_right_toggles = g_right_widgets[1, 3] = GridLayout()
 
-    # g_controller_toggles[1, 1] = grid!(hcat(toggles[1], labels[1]), tellheight=false, tellwidth=false)
-    # g_controller_toggles[1, 2] = grid!(hcat(toggles[2], labels[2]), tellheight=false, tellwidth=false)
-    # g_controller_toggles[1, 3] = grid!(hcat(toggles[3], labels[3]), tellheight=false, tellwidth=false)
+    # g_right_toggles[1, 1] = grid!(hcat(toggles[1], labels[1]), tellheight=false, tellwidth=false)
+    # g_right_toggles[1, 2] = grid!(hcat(toggles[2], labels[2]), tellheight=false, tellwidth=false)
+    # g_right_toggles[1, 3] = grid!(hcat(toggles[3], labels[3]), tellheight=false, tellwidth=false)
 
     widgets[:timeline_slider] = timeline_slider
     widgets[:timeline_btn] = timeline_btn

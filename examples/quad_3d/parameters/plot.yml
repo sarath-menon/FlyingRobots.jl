@@ -4,19 +4,20 @@ title:
 visualizer:
   title: Crazyflie
   axis:
-    low: -0.2
-    high: 0.2
+    low: -0.05
+    high: 0.05
+    
     aspect_x: 1
     aspect_y: 1
     aspect_z: 1
-    label_size: 40
+    label_size: 30
     labels:
       x: X Axis
       y: Y Axis
       z: Z Axis
-    spine_width: 2
+    spine_width: 1
     label_offset: 60
-    grid_width: 1.5
+    grid_width: 1.0
   mesh:
     scale: 1.0
     initial_translation: [0.0, 0.0, 0.0]
