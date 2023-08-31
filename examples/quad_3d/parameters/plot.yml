@@ -1,7 +1,7 @@
 title:
   name: Jarvis
 
-visualizer:
+close_up_visualizer:
   title: Crazyflie
   axis:
     low: -0.05
@@ -16,6 +16,29 @@ visualizer:
       y: Y Axis
       z: Z Axis
     spine_width: 1
+    label_offset: 60
+    grid_width: 1.0
+  mesh:
+    scale: 1.0
+    initial_translation: [0.0, 0.0, 0.0]
+
+full_scene_visualizer:
+  title: Crazyflie
+  axis:
+    low: -0.05
+    high: 0.05
+
+    elevation: 0.15
+    azimuth: 0.2 
+    
+    aspect_x: 1
+    aspect_y: 2
+    aspect_z: 0.2
+    label_size: 30
+    labels:
+      x: X Axis
+      y: Y Axis
+      z: Z Axis
     label_offset: 60
     grid_width: 1.0
   mesh:
