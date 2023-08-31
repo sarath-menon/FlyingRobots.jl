@@ -14,8 +14,8 @@ function show_visualizer()
 
     elements[:configs_vec] = get_configs_vec(plot_params.graph.axis.configs)
 
-    params = Dict(:close_up_visualizer => plot_params.close_up_visualizer,
-        :full_scene_visualizer => plot_params.full_scene_visualizer,
+    params = Dict(:closeup_visualizer => plot_params.closeup_visualizer,
+        :fullscene_visualizer => plot_params.fullscene_visualizer,
         :plot_2d => plot_params.graph)
 
     elements[:params] = params
@@ -55,11 +55,13 @@ function show_visualizer()
     # add titles
     add_titles(elements, g_top, "Jarvis")
 
-    add_close_up_visualizer(elements, g_left, g_left_plots)
+    add_closeup_visualizer(elements, g_left, g_left_plots)
 
-    add_full_scene_visualizer(elements, g_left, g_left_plots)
+    add_fullscene_visualizer(elements, g_left, g_left_plots)
 
-    add_3d_model(elements, crazyflie_stl)
+    add_3d_model_closeup_visualizer(elements, crazyflie_stl)
+
+    add_3d_model_fullscene_visualizer(elements, crazyflie_stl)
 
     add_2d_plots(elements, g_state_plots, g_control_plots)
 
@@ -92,11 +94,11 @@ function add_titles(elements, g_top, title)
     elements[:titles] = titles
 end
 
-function add_close_up_visualizer(elements, g_left, g_left_plots)
+function add_closeup_visualizer(elements, g_left, g_left_plots)
 
     fig = elements[:fig]
 
-    params = elements[:params][:close_up_visualizer]
+    params = elements[:params][:closeup_visualizer]
 
     # 3d axis for airplane visualization
     vis_ax = Axis3(g_left_plots[1, 1],
@@ -130,20 +132,22 @@ function add_close_up_visualizer(elements, g_left, g_left_plots)
     # force 3d visualizer to have an aspect ratio of 1
     rowsize!(g_left_plots, 1, Auto(1.0))
 
-    elements[:close_up_visualizer] = Dict{Symbol,Any}(:axis => vis_ax)
+    elements[:closeup_visualizer] = Dict{Symbol,Any}(:axis => vis_ax)
 end
 
-function add_full_scene_visualizer(elements, g_left, g_left_plots)
+function add_fullscene_visualizer(elements, g_left, g_left_plots)
 
     fig = elements[:fig]
     # params = elements[:params]
-    params = elements[:params][:full_scene_visualizer]
+    params = elements[:params][:fullscene_visualizer]
 
     # 3d axis for airplane visualization
     vis_ax = Axis3(g_left_plots[2, 1],
         # title=params.title,
-        limits=(-5, 5, -10, 10, 0, 2),
-        aspect=(1, 2, 0.2),
+        limits=(params.axis.x_low, params.axis.x_high,
+            params.axis.y_low, params.axis.y_high,
+            params.axis.z_low, params.axis.z_high),
+        aspect=(params.axis.aspect_x, params.axis.aspect_y, params.axis.aspect_z),
         elevation=params.axis.elevation * pi,
         azimuth=params.axis.azimuth * pi,
         xlabel=params.axis.labels.x, xlabelsize=params.axis.label_size,
@@ -162,9 +166,9 @@ function add_full_scene_visualizer(elements, g_left, g_left_plots)
     )
 
     # plot cube volume 
-    bbox_length = 10
-    bbox_width = 20
-    bbox_height = 3
+    bbox_length = params.axis.x_high - params.axis.x_low
+    bbox_width = params.axis.y_high - params.axis.y_low
+    bbox_height = params.axis.z_high - params.axis.z_low
 
     mr = Rect3f(Vec3f(0.0), Vec3f(bbox_length, bbox_width, bbox_height))
     bbox_volume = mesh!(vis_ax, mr; color=(:white, 0.25), transparency=true)
@@ -175,15 +179,14 @@ function add_full_scene_visualizer(elements, g_left, g_left_plots)
     translate!(bbox_volume, Vec3f(-bbox_length / 2, -bbox_width / 2, 0))
     translate!(bbox_wireframe, Vec3f(-bbox_length / 2, -bbox_width / 2, 0))
 
-    elements[:full_scene_visualizer] = Dict{Symbol,Any}(:axis => vis_ax)
+    elements[:fullscene_visualizer] = Dict{Symbol,Any}(:axis => vis_ax)
 end
 
-function add_3d_model(elements, stl_file)
+function add_3d_model_closeup_visualizer(elements, stl_file)
 
-    # params = elements[:params]
-    params = elements[:params][:close_up_visualizer]
+    params = elements[:params][:closeup_visualizer]
 
-    vis_ax = elements[:close_up_visualizer][:axis]
+    vis_ax = elements[:closeup_visualizer][:axis]
 
     model = mesh!(vis_ax, stl_file, color=:red)
 
@@ -195,7 +198,26 @@ function add_3d_model(elements, stl_file)
     # apply initial orientation
     rotate_mesh(model, QuatRotation(1, 0, 0, 0))
 
-    elements[:close_up_visualizer][:model] = model
+    elements[:closeup_visualizer][:model] = model
+end
+
+function add_3d_model_fullscene_visualizer(elements, stl_file)
+
+    params = elements[:params][:fullscene_visualizer]
+
+    vis_ax = elements[:fullscene_visualizer][:axis]
+
+    model = mesh!(vis_ax, stl_file, color=:red)
+
+    scale!(model, params.mesh.scale, params.mesh.scale, params.mesh.scale)
+
+    # center mesh at the origin
+    translate!(model, Vec3f(params.mesh.initial_translation[1], params.mesh.initial_translation[2], params.mesh.initial_translation[3]))
+
+    # apply initial orientation
+    rotate_mesh(model, QuatRotation(1, 0, 0, 0))
+
+    elements[:fullscene_visualizer][:model] = model
 end
 
 
