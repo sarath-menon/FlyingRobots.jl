@@ -1,5 +1,7 @@
 function show_visualizer()
 
+    set_theme!(backgroundcolor=:black, textcolor=:white)
+
     sim_time = Observable{Float64}(0.0)
     sim_state = Observable{Bool}(false)
 
@@ -240,7 +242,15 @@ function add_2d_plots(elements, g_state_plots, g_control_plots)
     control_plots = Axis[]
 
     for i in 1:plot_2d_params.n_state
-        plot = Axis(fig)
+        plot = Axis(fig,
+            backgroundcolor=RGBAf(17, 34, 40, 0.1),
+            xgridcolor=RGBAf(0, 200, 0, 0.5),
+            ygridcolor=RGBAf(0, 200, 0, 0.5),
+            xgridwidth=0.6,
+            ygridwidth=0.6,
+            xticklabelcolor=RGBf(220, 220, 220),
+            yticklabelcolor=RGBf(220, 220, 220),)
+
         push!(state_plots, plot)
 
         # g_right_plots[i,1] = state_plots[i]
@@ -249,9 +259,12 @@ function add_2d_plots(elements, g_state_plots, g_control_plots)
 
 
     for i in 1:plot_2d_params.n_control
-        plot = Axis(
-            fig,
-            # ylabel=plot_2d_params.ylabels[i] 
+        plot = Axis(fig,
+            backgroundcolor=RGBAf(17, 34, 40, 0.1),
+            xgridcolor=RGBAf(0, 200, 0, 0.5),
+            ygridcolor=RGBAf(0, 200, 0, 0.5),
+            xgridwidth=0.6,
+            ygridwidth=0.6,
         )
         push!(control_plots, plot)
 
@@ -334,12 +347,12 @@ function plot_initialize(elements)
 
     # Intial plot data 
     # Plot initial data (zeros)
-    lines!(state_plots[1], time_vec, data_1, color=:black)
-    lines!(state_plots[2], time_vec, data_2, color=:black)
-    lines!(state_plots[3], time_vec, data_3, color=:black)
+    lines!(state_plots[1], time_vec, data_1, color=:white)
+    lines!(state_plots[2], time_vec, data_2, color=:white)
+    lines!(state_plots[3], time_vec, data_3, color=:white)
 
-    lines!(control_plots[1], time_vec, data_4, color=:black)
-    lines!(control_plots[2], time_vec, data_5, color=:black)
+    lines!(control_plots[1], time_vec, data_4, color=:white)
+    lines!(control_plots[2], time_vec, data_5, color=:white)
 
     plots_2d_data = PlotData(time_vec, data_1, data_2, data_3, data_4, data_5)
 
