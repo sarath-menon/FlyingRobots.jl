@@ -127,10 +127,16 @@ function add_closeup_visualizer(elements, g_left, g_left_plots)
         xtickwidth=0.1,
         ytickwidth=0.1,
         ztickwidth=0.1,
+        xticks=WilkinsonTicks(3; k_min=1, k_max=3),
+        yticks=WilkinsonTicks(3; k_min=1, k_max=3),
+        zticks=WilkinsonTicks(3; k_min=1, k_max=3),
+        xticklabelsize=25,
+        yticklabelsize=25,
+        zticklabelsize=25,
     )
 
     # force 3d visualizer to have an aspect ratio of 1
-    rowsize!(g_left_plots, 1, Auto(1.0))
+    rowsize!(g_left_plots, 1, Auto(0.8))
 
     elements[:closeup_visualizer] = Dict{Symbol,Any}(:axis => vis_ax)
 end

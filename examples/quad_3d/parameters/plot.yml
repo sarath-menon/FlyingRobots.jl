@@ -16,7 +16,7 @@ closeup_visualizer:
       y: Y Axis
       z: Z Axis
     spine_width: 1
-    label_offset: 60
+    label_offset: 80
     grid_width: 1.0
   mesh:
     scale: 1.0
@@ -32,14 +32,14 @@ fullscene_visualizer:
     y_high: 2
 
     z_low: 0
-    z_high: 0.5
+    z_high: 1.5
     
     elevation: 0.15
     azimuth: 0.2 
     
     aspect_x: 1
     aspect_y: 2
-    aspect_z: 0.2
+    aspect_z: 0.4
     label_size: 30
     labels:
       x: X Axis

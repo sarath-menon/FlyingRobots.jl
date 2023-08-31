@@ -79,7 +79,7 @@ end
 
 # function plot_3d_trajectory(x_pos, y_pos, z_pos; sim_time_obs::Observable, sim_state_obs::Observable, duration=10.0, dt=0.01, frame_rate=25)
 
-function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=25)
+function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=30)
 
     df = elements[:df]
 
@@ -89,8 +89,8 @@ function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=25)
     timeline_slider = elements[:widgets][:timeline_slider]
     timeline_btn = elements[:widgets][:timeline_btn]
 
-    step_count = convert(Int, duration / dt)
-    n_skip_frames = convert(Int, 100 / frame_rate)
+    step_count = floor(Int, duration / dt)
+    n_skip_frames = floor(Int, 100 / frame_rate)
 
     @show sim_state
 
@@ -116,7 +116,11 @@ function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=25)
             position = Vec3d(df[!, 2][i], df[!, 3][i], df[!, 4][i])
             orientation = QuatRotation(df[!, 8][i], df[!, 9][i], df[!, 10][i], df[!, 11][i])
 
-            model_set_pose(elements, position, orientation)
+            if i % floor(n_skip_frames / 2) == 0
+                model_set_pose_closeup_visualizer(elements, position, orientation)
+            end
+
+            model_set_pose_fullscene_visualizer(elements, position, orientation)
 
             # set the time 
             sim_time[] = round(df[!, "timestamp"][i], digits=2)
@@ -156,10 +160,10 @@ end
 
 PlotData = PlotData5
 
-function model_set_pose(elements, position, orientation)
+function model_set_pose_closeup_visualizer(elements, position, orientation)
 
     # plot_params = elements[:plot_params]
-    vis_3d_params = elements[:params][:visualizer_3d]
+    vis_3d_params = elements[:params][:closeup_visualizer]
 
     max_range = vis_3d_params.axis.high - vis_3d_params.axis.low
     dist = max_range / 2
@@ -172,12 +176,22 @@ function model_set_pose(elements, position, orientation)
     y_high = position.y + dist
     z_high = position.z + dist
 
-    model = elements[:visualizer_3d][:model]
+    closeup_model = elements[:closeup_visualizer][:model]
 
-    elements[:visualizer_3d][:axis].limits = (x_low, x_high, y_low, y_high, z_low, z_high)
-    translate!(model, Vec3f(position.x, position.y, position.z))
+    # set pose in closeup visualizer 
+    elements[:closeup_visualizer][:axis].limits = (x_low, x_high, y_low, y_high, z_low, z_high)
 
-    rotate!(model, to_makie_quaternion(orientation))
+    translate!(closeup_model, Vec3f(position.x, position.y, position.z))
+    rotate!(closeup_model, to_makie_quaternion(orientation))
+end
+
+function model_set_pose_fullscene_visualizer(elements, position, orientation)
+
+    fullscene_model = elements[:fullscene_visualizer][:model]
+
+    # set pose in fullscale visualizer 
+    translate!(fullscene_model, Vec3f(position.x, position.y, position.z))
+    rotate!(fullscene_model, to_makie_quaternion(orientation))
 end
 
 
