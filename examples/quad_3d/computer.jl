@@ -3,12 +3,6 @@ using FlyingRobots.Computer: OnboardComputer, ComputerClock
 using FlyingRobots.Computer: increment_clock!
 
 function create_computer(name)
-
-    folder_path = pwd() * "/examples/quad_3d"
-
-    vehicle_params_path = "/parameters/vehicle.yml"
-    ctrl_yaml_path = "/parameters/controller.yml"
-
     # SharedMemory objects ----------------------------------------------------
 
     # parameters
@@ -56,10 +50,11 @@ function scheduler(computer)
     for task in computer.tasks
         # run task if it's time
         if computer.main_clock.count % task.rate_per_tick == 0
-            task.func(computer, task.rate)
+            task.func(task.strategy, computer, task.rate)
         end
     end
 
     ctrl_cmd = computer.ram_memory[:ctrl_cmd]
     return ctrl_cmd.motor_thrusts
 end
+
