@@ -5,11 +5,17 @@ function plot_position(elements)
     plots = elements[:plots_2d][:state_plots]
     plots_2d_data = elements[:plots_2d_data]
 
+    @show typeof(plots_2d_data)
+
     plots_2d_data.time_vec[] = df[!, "timestamp"]
 
-    plots_2d_data.axis_1[] = df[!, "(quad1.rb.r(t), 1)"]
-    plots_2d_data.axis_2[] = df[!, "(quad1.rb.r(t), 2)"]
-    plots_2d_data.axis_3[] = df[!, "(quad1.rb.r(t), 3)"]
+    plots_2d_data.state[1][] = df[!, "(quad1.rb.r(t), 1)"]
+    plots_2d_data.state[2][] = df[!, "(quad1.rb.r(t), 2)"]
+    plots_2d_data.state[3][] = df[!, "(quad1.rb.r(t), 3)"]
+
+    plots_2d_data.reference[1][] = df[!, "(controller.R(t), 1)"]
+    plots_2d_data.reference[2][] = df[!, "(controller.R(t), 2)"]
+    plots_2d_data.reference[3][] = df[!, "(controller.R(t), 3)"]
 
     autolimits!(plots[1])
     autolimits!(plots[2])
@@ -51,9 +57,9 @@ function plot_orientation(elements)
     q_vec = res_matrix[2, :]
     p_vec = res_matrix[3, :]
 
-    plots_2d_data.axis_1[] = rad2deg.(p_vec)
-    plots_2d_data.axis_2[] = rad2deg.(q_vec)
-    plots_2d_data.axis_3[] = rad2deg.(r_vec)
+    plots_2d_data.state[1][] = rad2deg.(p_vec)
+    plots_2d_data.state[2][] = rad2deg.(q_vec)
+    plots_2d_data.state[3][] = rad2deg.(r_vec)
 
     autolimits!(plots[1])
     autolimits!(plots[2])
@@ -102,8 +108,8 @@ function plot_control_input(elements, motor_thrust_to_body_thrust)
     f_net = result[1, :]
     τ_x = result[2, :]
 
-    plots_2d_data.axis_4[] = f_net
-    plots_2d_data.axis_5[] = τ_x
+    plots_2d_data.control[1][] = f_net
+    plots_2d_data.control[2][] = τ_x
     # plots_2d_data.axis_3[] = r_vec
 
     autolimits!(plots[1])

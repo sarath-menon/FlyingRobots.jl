@@ -148,18 +148,17 @@ function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=30)
 end
 
 
-struct PlotData5
+struct PlotData9
     time_vec::Observable{Vector{Float64}}
 
-    axis_1::Observable{Vector{Float64}}
-    axis_2::Observable{Vector{Float64}}
-    axis_3::Observable{Vector{Float64}}
+    state::Vector{Observable{Vector{Float64}}}
+    reference::Vector{Observable{Vector{Float64}}}
+    control::Vector{Observable{Vector{Float64}}}
 
-    axis_4::Observable{Vector{Float64}}
-    axis_5::Observable{Vector{Float64}}
+    PlotData9(; time_vec, state, reference, control) = new(time_vec, state, reference, control)
 end
 
-PlotData = PlotData5
+PlotData = PlotData9
 
 function model_set_pose_closeup_visualizer(elements, position, orientation)
 

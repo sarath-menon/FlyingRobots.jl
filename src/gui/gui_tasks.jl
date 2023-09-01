@@ -380,8 +380,8 @@ function plot_initialize(elements)
         # state plots - state data
         lines!(state_plots[i], time_vec, state_data[i], color=:white)
 
-        # # state plots - reference data
-        # lines!(state_plots[i], time_vec, reference_data[i], color=:white)
+        # state plots - reference data
+        lines!(state_plots[i], time_vec, reference_data[i], color=:red, linestyle=:dash, linewidth=4)
     end
 
     for i = 1:plot_2d_params.n_control
@@ -390,7 +390,10 @@ function plot_initialize(elements)
         lines!(control_plots[1], time_vec, control_data[i], color=:white)
     end
 
-    plots_2d_data = PlotData(time_vec, state_data[1], state_data[2], state_data[3], control_data[1], control_data[2])
+    plots_2d_data = PlotData(; time_vec=time_vec,
+        state=state_data,
+        reference=reference_data,
+        control=control_data)
 
     elements[:plots_2d_data] = plots_2d_data
     # return plots_2d_data
