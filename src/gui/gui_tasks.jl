@@ -262,7 +262,6 @@ function add_2d_plots(elements, g_state_plots, g_control_plots)
     fig = elements[:fig]
     plot_2d_params = elements[:params][:plot_2d]
 
-
     plots_2d = Dict()
 
     state_plots = Axis[]
@@ -364,24 +363,34 @@ function plot_initialize(elements)
     state_plots = elements[:plots_2d][:state_plots]
     control_plots = elements[:plots_2d][:control_plots]
 
-    data_1 = Observable{Vector{Float64}}(zeros(1))
-    data_2 = Observable{Vector{Float64}}(zeros(1))
-    data_3 = Observable{Vector{Float64}}(zeros(1))
-    data_4 = Observable{Vector{Float64}}(zeros(1))
-    data_5 = Observable{Vector{Float64}}(zeros(1))
+    plot_2d_params = elements[:params][:plot_2d]
+
+    state_data = [Observable{Vector{Float64}}(zeros(1)) for i = 1:plot_2d_params.n_state]
+    reference_data = [Observable{Vector{Float64}}(zeros(1)) for i = 1:plot_2d_params.n_state]
+
+    control_data = [Observable{Vector{Float64}}(zeros(1)) for i = 1:plot_2d_params.n_control]
+
 
     time_vec = Observable{Vector{Float64}}(zeros(1))
 
-    # Intial plot data 
-    # Plot initial data (zeros)
-    lines!(state_plots[1], time_vec, data_1, color=:white)
-    lines!(state_plots[2], time_vec, data_2, color=:white)
-    lines!(state_plots[3], time_vec, data_3, color=:white)
+    # Intial plot data
 
-    lines!(control_plots[1], time_vec, data_4, color=:white)
-    lines!(control_plots[2], time_vec, data_5, color=:white)
+    for i = 1:plot_2d_params.n_state
 
-    plots_2d_data = PlotData(time_vec, data_1, data_2, data_3, data_4, data_5)
+        # state plots - state data
+        lines!(state_plots[i], time_vec, state_data[i], color=:white)
+
+        # # state plots - reference data
+        # lines!(state_plots[i], time_vec, reference_data[i], color=:white)
+    end
+
+    for i = 1:plot_2d_params.n_control
+
+        # control plots 
+        lines!(control_plots[1], time_vec, control_data[i], color=:white)
+    end
+
+    plots_2d_data = PlotData(time_vec, state_data[1], state_data[2], state_data[3], control_data[1], control_data[2])
 
     elements[:plots_2d_data] = plots_2d_data
     # return plots_2d_data
