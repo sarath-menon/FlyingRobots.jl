@@ -54,7 +54,10 @@ function scheduler(computer)
         end
     end
 
+    # return the  trajectory_reference and motor thrusts
+    trajectory_reference = computer.ram_memory[:trajectory_reference]
     ctrl_cmd = computer.ram_memory[:ctrl_cmd]
-    return ctrl_cmd.motor_thrusts
+
+    return ctrl_cmd.motor_thrusts, trajectory_reference
 end
 
