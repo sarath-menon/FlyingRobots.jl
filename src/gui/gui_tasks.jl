@@ -42,7 +42,7 @@ function show_visualizer()
     g_left_plots = g_left[0:2, 1] = GridLayout()
     g_left_widgets = g_left[3, 1] = GridLayout(tellwidth=false)
 
-    # Box(g_left_plots[0, 1], color=(:red, 0.2), strokewidth=0)
+    #Box(g_left_plots[1, 1], color=(:red, 0.2), strokewidth=0)
     # Box(g_left_plots[1, 1], color=(:green, 0.2), strokewidth=0)
 
     # # Column size adjust
@@ -95,82 +95,36 @@ function add_titles(elements, g_top, title)
     elements[:titles] = titles
 end
 
-function add_closeup_visualizer(elements, g_left, g_left_plots)
-
-    fig = elements[:fig]
-
-    params = elements[:params][:closeup_visualizer]
-
-    # 3d axis for airplane visualization
-    vis_ax = Axis3(g_left_plots[1, 1],
-        # title=params.title,
-        limits=(params.axis.low, params.axis.high, params.axis.low, params.axis.high, params.axis.low, params.axis.high),
-        aspect=(params.axis.aspect_x, params.axis.aspect_y, params.axis.aspect_z),
-        # xlabel=params.axis.labels.x, xlabelsize=params.axis.label_size,
-        # ylabel=params.axis.labels.y, ylabelsize=params.axis.label_size,
-        # zlabel=params.axis.labels.z, zlabelsize=params.axis.label_size,
-        halign=:left,
-        xspinecolor_1=:black,
-        xspinecolor_3=:black,
-        yspinecolor_1=:black,
-        yspinecolor_3=:black,
-        zspinecolor_1=:black,
-        zspinecolor_3=:black,
-        xspinecolor_2=:white,
-        yspinecolor_2=:white,
-        zspinecolor_2=:white,
-        xticklabelcolor=RGBf(220, 220, 220),
-        yticklabelcolor=RGBf(220, 220, 220),
-        zticklabelcolor=RGBf(220, 220, 220),
-        # zgridcolor=RGBAf(220, 220, 220, 0.12);
-        xspinewidth=params.axis.spine_width,
-        yspinewidth=params.axis.spine_width,
-        zspinewidth=params.axis.spine_width,
-        xlabeloffset=params.axis.label_offset,
-        ylabeloffset=params.axis.label_offset,
-        zlabeloffset=params.axis.label_offset,
-        xgridwidth=params.axis.grid_width,
-        ygridwidth=params.axis.grid_width,
-        zgridwidth=params.axis.grid_width,
-        xtickwidth=0.1,
-        ytickwidth=0.1,
-        ztickwidth=0.1,
-        xticks=WilkinsonTicks(3; k_min=1, k_max=3),
-        yticks=WilkinsonTicks(3; k_min=1, k_max=3),
-        zticks=WilkinsonTicks(3; k_min=1, k_max=3),
-        xticklabelsize=25,
-        yticklabelsize=25,
-        zticklabelsize=25
-    )
-
-    # force 3d visualizer to have an aspect ratio of 1
-    rowsize!(g_left_plots, 1, Auto(0.8))
-
-    elements[:closeup_visualizer] = Dict{Symbol,Any}(:axis => vis_ax)
-end
-
 function add_closeup_visualizer_attitude(elements, g_left, g_left_plots)
 
     fig = elements[:fig]
 
     params = elements[:params][:closeup_visualizer]
 
-    # 3d axis for airplane visualization
-    vis_ax = Axis3(g_left_plots[1, 1],
-        # title=params.title,
-        limits=(params.axis.low, params.axis.high, params.axis.low, params.axis.high, params.axis.low, params.axis.high),
-        aspect=(params.axis.aspect_x, params.axis.aspect_y, params.axis.aspect_z),
-        # xlabel=params.axis.labels.x, xlabelsize=params.axis.label_size,
-        # ylabel=params.axis.labels.y, ylabelsize=params.axis.label_size,
-        # zlabel=params.axis.labels.z, zlabelsize=params.axis.label_size,
-        halign=:left,
-        xlabelvisible=false,
-        ylabelvisible=false,
-        zlabelvisible=false,
-        xticklabelsvisible=false,
-        yticklabelsvisible=false,
-        zticklabelsvisible=false,
-    )
+    # # 3d axis for airplane visualization
+    # vis_ax = Axis3(g_left_plots[1, 1],
+    #     # title=params.title,
+    #     limits=(params.axis.low, params.axis.high, params.axis.low, params.axis.high, params.axis.low, params.axis.high),
+    #     aspect=(params.axis.aspect_x, params.axis.aspect_y, params.axis.aspect_z),
+    #     halign=:left,
+    #     xlabelvisible=false,
+    #     ylabelvisible=false,
+    #     zlabelvisible=false,
+    #     xticklabelsvisible=false,
+    #     yticklabelsvisible=false,
+    #     zticklabelsvisible=false,
+    # )
+
+    pl = PointLight(Point3f(0), RGBf(20, 20, 20))
+    al = AmbientLight(RGBf(0.2, 0.2, 0.2))
+
+    vis_ax = LScene(g_left_plots[1, 1], show_axis=false, scenekw=(lights=[pl, al], backgroundcolor=:black, clear=true))
+
+    cam3d!(vis_ax.scene)
+
+    camera_height = 1.5
+    camc = cameracontrols(vis_ax.scene)
+    update_cam!(vis_ax.scene, camc, Vec3f(0, 0, 0), Vec3f(-4.0, camera_height, -2))
 
     # force 3d visualizer to have an aspect ratio of 1
     rowsize!(g_left_plots, 1, Auto(0.5))
@@ -208,7 +162,8 @@ function add_fullscene_visualizer(elements, g_left, g_left_plots)
         zgridwidth=params.axis.grid_width,
         xticklabelsvisible=:false,
         yticklabelsvisible=:false,
-        zticklabelsvisible=:false
+        zticklabelsvisible=:false,
+        alignmode=Outside(-50)
     )
 
     # plot cube volume 
@@ -272,9 +227,9 @@ function add_3d_model_closeup_visualizer(elements, stl_file)
     # x-line
     lines!(vis_ax, line_p, zeros(2), zeros(2), color=:white, linewidth=1)
 
-    scatter!(vis_ax, Point3f(ld, 0.0, 0.0), marker='r', markersize=50)
-    scatter!(vis_ax, Point3f(0.0, ld, 0.0), marker='p', markersize=50)
-    scatter!(vis_ax, Point3f(0.0, 0.0, ld), marker='y', markersize=50)
+    scatter!(vis_ax, Point3f(md, 0.0, 0.0), marker='r', markersize=50, color=:white)
+    scatter!(vis_ax, Point3f(0.0, md, 0.0), marker='p', markersize=50, color=:white)
+    scatter!(vis_ax, Point3f(0.0, 0.0, md), marker='y', markersize=50, color=:white)
 
     # apply initial orientation
     rotate_mesh(model, QuatRotation(1, 0, 0, 0))
