@@ -51,9 +51,9 @@ function plot_orientation(elements)
     q_vec = res_matrix[2, :]
     p_vec = res_matrix[3, :]
 
-    plots_2d_data.axis_1[] = p_vec
-    plots_2d_data.axis_2[] = q_vec
-    plots_2d_data.axis_3[] = r_vec
+    plots_2d_data.axis_1[] = rad2deg.(p_vec)
+    plots_2d_data.axis_2[] = rad2deg.(q_vec)
+    plots_2d_data.axis_3[] = rad2deg.(r_vec)
 
     autolimits!(plots[1])
     autolimits!(plots[2])

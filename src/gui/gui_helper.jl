@@ -1,9 +1,9 @@
 # # convert standrard quaternion, euler angle to makie quaternin type
-function to_makie_quaternion(q)::Quaternionf
-    return Quaternionf(q.q.s, q.q.v1, q.q.v2, q.q.v3)
+function to_makie_quaternion(q::QuatRotation)
+    return Quaternionf(q.q.v1, q.q.v2, q.q.v3, q.q.s)
 end
 
-function to_std_quaternion(q)
+function to_std_quaternion(q::Quaternion)
     return QuatRotation(q.q_w, q.q_x, q.q_y, q.q_z)
 end
 
@@ -117,7 +117,8 @@ function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=30)
             orientation = QuatRotation(df[!, 8][i], df[!, 9][i], df[!, 10][i], df[!, 11][i])
 
             if i % floor(n_skip_frames / 2) == 0
-                model_set_pose_closeup_visualizer(elements, position, orientation)
+                #model_set_pose_closeup_visualizer(elements, position, orientation)
+                model_set_attitude_closeup_visualizer(elements, orientation)
             end
 
             model_set_pose_fullscene_visualizer(elements, position, orientation)
@@ -182,6 +183,16 @@ function model_set_pose_closeup_visualizer(elements, position, orientation)
     elements[:closeup_visualizer][:axis].limits = (x_low, x_high, y_low, y_high, z_low, z_high)
 
     translate!(closeup_model, Vec3f(position.x, position.y, position.z))
+    rotate!(closeup_model, to_makie_quaternion(orientation))
+end
+
+function model_set_attitude_closeup_visualizer(elements, orientation)
+
+    # plot_params = elements[:plot_params]
+    vis_3d_params = elements[:params][:closeup_visualizer]
+
+    closeup_model = elements[:closeup_visualizer][:model]
+
     rotate!(closeup_model, to_makie_quaternion(orientation))
 end
 

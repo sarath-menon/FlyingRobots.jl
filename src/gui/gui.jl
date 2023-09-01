@@ -19,11 +19,6 @@ include("gui_utilities.jl")
 export show_visualizer, PlotData, plot_reset, plot_3d_trajectory
 export set_sim_instance
 
-set_theme!(
-    #     font = "Arial", # inherited by layoutables if not overridden
-    fontsize=25, # inherited by layoutables if not overridden
-)
-
 # read settings file 
 folder_path = pwd() * "/examples/quad_3d"
 
