@@ -48,9 +48,6 @@ function scheduler(computer)
 
     # execute tasks defined in yaml file in given order 
     for task in computer.tasks
-
-        @show typeof(task.strategy)
-
         # run task if it's time
         if computer.main_clock.count % task.rate_per_tick == 0
             task.func(task.strategy, computer, task.rate)
