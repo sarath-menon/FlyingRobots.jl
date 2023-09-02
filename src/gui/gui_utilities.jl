@@ -112,8 +112,8 @@ function plot_control_input(elements, motor_thrust_to_body_thrust)
     plots_2d_data.control[2][] = τ_x
     # plots_2d_data.axis_3[] = r_vec
 
-    autolimits!(plots[1])
-    autolimits!(plots[2])
+    # autolimits!(plots[1])
+    # autolimits!(plots[2])
     # autolimits!(plots[3])
 
     # set axis titles

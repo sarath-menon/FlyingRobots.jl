@@ -1,4 +1,18 @@
 
+function plot_axis_setup(elements; x_low, x_high, y_max)
+
+    state_plots = elements[:plots_2d][:state_plots]
+    control_plots = elements[:plots_2d][:state_plots]
+
+    for i = 1:3
+        state_plots[i].limits = (x_low, x_high, -y_max, y_max)
+    end
+
+    for i = 1:2
+        control_plots[i].limits = (x_low, x_high, -y_max, y_max)
+    end
+end
+
 function plot_position_dynamic(elements, df)
 
     plots = elements[:plots_2d][:state_plots]
@@ -14,7 +28,9 @@ function plot_position_dynamic(elements, df)
     plots_2d_data.reference[2][] = df[!, "(controller.R(t), 2)"]
     plots_2d_data.reference[3][] = df[!, "(controller.R(t), 3)"]
 
-    # set axis limits
+    # for i = 1:3
+    #     state_plots[i].limits = (x_low, x_high, -10, 10)
+    # end
 
     # autolimits!(plots[1])
     # autolimits!(plots[2])
