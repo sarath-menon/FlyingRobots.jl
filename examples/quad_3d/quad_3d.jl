@@ -61,7 +61,7 @@ flag = Observable{Bool}(true)
 # integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 # df_empty = sim_logging(integrator.sol)
 
-@async receiver_task1(flag, c1, plot_elements, df_empty)
+receiver_task_ = @async receiver_task(flag, c1, plot_elements, df_empty)
 
 # # empty DataFrame
 # deleteat!(df_empty, :)
@@ -73,22 +73,43 @@ df = fetch(sim_task)
 
 flag[] = false
 
+FlyingRobots.Gui.plot_axis_setup(plot_elements; x_low=0, x_high=40, y_max=2)
 FlyingRobots.Gui.plot_reset(plot_elements)
 
-function receiver_task1(flag, c1, elements, df_empty)
-    deleteat!(df_empty, :)
-    # Core.println("Waiting for sol data")
-    while true
 
-        if flag[] == false
-            Core.println("Receiver task done")
-            break
-        end
+function receiver_task(flag, c1, elements, df_empty)
+    deleteat!(df_empty, :)
+
+    # axis limits
+    x_low = 0
+    x_high = 40
+
+    y_max = 0.1
+
+    FlyingRobots.Gui.plot_axis_setup(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max)
+
+    #Core.println("Waiting for sol data")
+    while flag[] == true
 
         sol = take!(c1)
 
         df = sim_logging(sol)
         append!(df_empty, df)
+
+        #compute dynamic axis limits 
+        y_local_max = maximum(df[!, "(quad1.rb.r(t), 1)"])
+
+        if y_local_max > y_max
+            y_max = y_local_max
+            FlyingRobots.Gui.plot_axis_setup(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max)
+        end
+
+        if df[end, "timestamp"] > 40
+            FlyingRobots.Gui.plot_axis_setup(elements; x_low=40, x_high=80, y_max=y_max)
+
+            deleteat!(df_empty, 1:40)
+        end
+
 
         FlyingRobots.Gui.plot_position_dynamic(elements, df_empty)
         # break
@@ -98,8 +119,9 @@ function receiver_task1(flag, c1, elements, df_empty)
         # ## @show sol.t[end]
         # Core.println(df[!, "timestamp"])
     end
-end
 
+    Core.println("Receiver task done")
+end
 
 FlyingRobots.Gui.plot_position_dynamic(plot_elements, df_empty)
 
