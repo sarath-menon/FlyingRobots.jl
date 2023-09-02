@@ -55,6 +55,7 @@ sys, subsystems = fetch(system_build_task)
 ## Testing
 c1 = Channel{ODESolution}(10)
 # condition = Threads.Condition()
+
 flag = Observable{Bool}(true)
 
 # prob = sim_setup(sys, subsystems)
@@ -84,9 +85,12 @@ function receiver_task(flag, c1, elements, df_empty)
     x_low = 0
     x_high = 40
 
-    y_max = 0.1
+    y_max = ones(3) * 0.1
+    y_local_max = zeros(3)
 
-    FlyingRobots.Gui.plot_axis_setup(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max)
+    FlyingRobots.Gui.plot_axis_setup(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max[1])
+
+    state_plots = elements[:plots_2d][:state_plots]
 
     #Core.println("Waiting for sol data")
     while flag[] == true
@@ -97,15 +101,20 @@ function receiver_task(flag, c1, elements, df_empty)
         append!(df_empty, df)
 
         #compute dynamic axis limits 
-        y_local_max = maximum(df[!, "(quad1.rb.r(t), 1)"])
 
-        if y_local_max > y_max
-            y_max = y_local_max
-            FlyingRobots.Gui.plot_axis_setup(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max)
+        for i = 1:3
+
+            y_local_max[i] = maximum(df[!, "(quad1.rb.r(t), $i)"])
+
+            if y_local_max[i] > y_max[i]
+                y_max[i] = y_local_max[i]
+
+                state_plots[i].limits = (x_low, x_high, -y_max[i], y_max[i])
+            end
         end
 
         if df[end, "timestamp"] > 40
-            FlyingRobots.Gui.plot_axis_setup(elements; x_low=40, x_high=80, y_max=y_max)
+            FlyingRobots.Gui.plot_axis_setup(elements; x_low=40, x_high=80, y_max=y_max[1])
 
             deleteat!(df_empty, 1:40)
         end
@@ -122,6 +131,7 @@ function receiver_task(flag, c1, elements, df_empty)
 
     Core.println("Receiver task done")
 end
+
 
 FlyingRobots.Gui.plot_position_dynamic(plot_elements, df_empty)
 
