@@ -15,6 +15,7 @@ include("../common/utilities/utilities.jl")
 include("gui_helper.jl")
 include("gui_tasks.jl")
 include("gui_utilities.jl")
+include("gui_utilities_dynamic.jl")
 
 export show_visualizer, PlotData, plot_reset, plot_3d_trajectory
 export set_sim_instance
