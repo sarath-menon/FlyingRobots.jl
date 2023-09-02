@@ -92,6 +92,7 @@ function receiver_task(flag, c1, elements, df_empty)
 
     y_max = ones(3) * 0.1
     y_local_max = zeros(3)
+    y_max_padding = 0.1
 
     FlyingRobots.Gui.plot_axis_setup(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max[1])
 
@@ -109,7 +110,7 @@ function receiver_task(flag, c1, elements, df_empty)
 
         for i = 1:3
 
-            y_local_max[i] = maximum(df[!, "(quad1.rb.r(t), $i)"])
+            y_local_max[i] = maximum(df[!, "(quad1.rb.r(t), $i)"]) + y_max_padding
 
             if y_local_max[i] > y_max[i]
                 y_max[i] = y_local_max[i]
