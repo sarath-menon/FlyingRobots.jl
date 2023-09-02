@@ -61,7 +61,7 @@ flag = Observable{Bool}(true)
 # integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 # df_empty = sim_logging(integrator.sol)
 
-@async receiver_task(flag, c1, plot_elements, df_empty)
+@async receiver_task1(flag, c1, plot_elements, df_empty)
 
 # # empty DataFrame
 # deleteat!(df_empty, :)
@@ -75,13 +75,13 @@ flag[] = false
 
 FlyingRobots.Gui.plot_reset(plot_elements)
 
-function receiver_task(flag, c1, elements, df_empty)
+function receiver_task1(flag, c1, elements, df_empty)
     deleteat!(df_empty, :)
-    Core.println("Waiting for sol data")
+    # Core.println("Waiting for sol data")
     while true
 
         if flag[] == false
-            println("Sim flag is set to false")
+            Core.println("Receiver task done")
             break
         end
 
@@ -91,14 +91,17 @@ function receiver_task(flag, c1, elements, df_empty)
         append!(df_empty, df)
 
         FlyingRobots.Gui.plot_position_dynamic(elements, df_empty)
+        # break
 
         sleep(0.01)
 
-        # # @show sol.t[end]
-        # @show df[!, "timestamp"]
+        # ## @show sol.t[end]
+        # Core.println(df[!, "timestamp"])
     end
 end
 
+
+FlyingRobots.Gui.plot_position_dynamic(plot_elements, df_empty)
 
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()
