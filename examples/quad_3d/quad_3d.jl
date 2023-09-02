@@ -16,7 +16,6 @@ using BenchmarkTools
 using YAML
 import Dates
 using ThreadPools
-using LabelledArrays
 
 GLMakie.activate!(inline=false)
 
@@ -74,9 +73,11 @@ df = fetch(sim_task)
 
 flag[] = false
 
-FlyingRobots.Gui.set_2dplot_axislimits(plot_elements; x_low=0, x_high=40, y_max=2)
 FlyingRobots.Gui.plot_reset(plot_elements)
 
+# t_gap_real = t - tprev
+# sleep(t_gap_real)
+# extra_time = @elapsed begin
 
 function receiver_task(flag, c1, elements, df_empty)
 
@@ -87,7 +88,7 @@ function receiver_task(flag, c1, elements, df_empty)
     x_range = 20
 
     x_low = 0
-    x_high = x_range
+    x_high = x_low + x_range
 
     y_max = ones(3) * 0.1
     y_max_padding = 0.1
@@ -128,14 +129,14 @@ function receiver_task(flag, c1, elements, df_empty)
         # check if it's time to change x axis limits
         if df[end, "timestamp"] > x_high
 
+            # delete data from the prev x axis range since it's not being plotted anymore
+            deleteat!(df_empty, 1:20)
+
             # set new x_range
             x_low += x_range
             x_high += x_range
 
             FlyingRobots.Gui.set_2dplot_axislimits(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max)
-
-            # delete data from the prev x axis range since it's not being plotted anymore
-            deleteat!(df_empty, 1:40)
         end
 
         # do the actual plotting
