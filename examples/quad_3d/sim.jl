@@ -44,16 +44,13 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
 
     integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
-    # for (u, t) in tuples(integrator)
-    #     @show t
-    #     @show length(integrator.sol.t)
-    # end
-
     count_prev::Int64 = 0
     buffer_size = 20
 
+    t_start = Dates.now()
+
     # perform the integration
-    for i in integrator
+    for (u, t) in tuples(integrator)
 
         counter = length(integrator.sol.t)
 
@@ -69,11 +66,22 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
 
             count_prev = counter
         end
+
+        t_now = Dates.now()
+        real_time_elapsed = t_now - t_start
+        sim_time_elapsed = t
+
+        t_wait = sim_time_elapsed - (real_time_elapsed.value / 1000.0)
+
+        sleep(maximum([0.0, t_wait]))
+
     end
 
     flag[] = false
 
     df = sim_logging(integrator.sol)
+
+    Core.println("Integration done")
 
     return df
 end

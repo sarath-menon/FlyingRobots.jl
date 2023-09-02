@@ -16,7 +16,7 @@ using BenchmarkTools
 using YAML
 import Dates
 using ThreadPools
-using LabelledArrays
+
 
 GLMakie.activate!(inline=false)
 
@@ -70,6 +70,7 @@ receiver_task_ = @async receiver_task(flag, c1, plot_elements, df_empty)
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
 @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, flag; save=false)
+#@time sim_task = @async run_sim_stepping(sys, subsystems, c1, flag; save=false)
 df = fetch(sim_task)
 
 flag[] = false
@@ -141,18 +142,21 @@ function receiver_task(flag, c1, elements, df_empty)
         # do the actual plotting
         FlyingRobots.Gui.plot_position_dynamic(elements, df_empty)
 
-        sleep(0.01)
+        # sleep(0.01)
 
         # ## @show sol.t[end]
         # Core.println(df[!, "timestamp"])
 
         if flag[] == false
-            break
+            if isempty(c1)
+                break
+            end
         end
     end
 
     Core.println("Receiver task done")
 end
+
 
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()
