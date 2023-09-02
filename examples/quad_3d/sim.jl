@@ -21,16 +21,16 @@ function run_sim(sys, subsystems; save=false)
     return df
 end
 
-
-
 function run_sim_stepping(sys, subsystems; save=false)
 
     prob = sim_setup(sys, subsystems)
 
     integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
-    while floor(integrator.t) <= prob.tspan[2]
-        step!(integrator)
+    counter::Int64 = 0
+
+    # perform the integration
+    for i in integrator
     end
 
     df = sim_logging(integrator.sol)
@@ -38,9 +38,45 @@ function run_sim_stepping(sys, subsystems; save=false)
     return df
 end
 
+function run_sim_stepping(sys, subsystems, c1, flag; save=false)
+
+    prob = sim_setup(sys, subsystems)
+
+    integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
+
+    # for (u, t) in tuples(integrator)
+    #     @show t
+    #     @show length(integrator.sol.t)
+    # end
+
+    count_prev::Int64 = 0
+
+    # perform the integration
+    for i in integrator
+
+        counter = length(integrator.sol.t)
+
+        if flag[] == false
+            println("Sim flag is set to false")
+            break
+        end
+
+        if counter % 10 == 0 && counter > count_prev
+            sol_subset = integrator.sol[end-9:end]
+            put!(c1, sol_subset)
+
+            count_prev = counter
+        end
+    end
+
+    flag[] = false
+
+    df = sim_logging(integrator.sol)
+
+    return df
+end
+
 # pre-sim setup
-
-
 function setup_callbacks(sim_params)
     condition(u, t, integrator) = true
 

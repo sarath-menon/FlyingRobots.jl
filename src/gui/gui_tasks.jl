@@ -400,13 +400,16 @@ function plot_initialize(elements)
 end
 
 
-function plot_reset(plots_2d_data)
-    plots_2d_data.axis_1[] = [0]
-    plots_2d_data.axis_2[] = [0]
-    plots_2d_data.axis_3[] = [0]
+function plot_reset(elements)
 
-    plots_2d_data.axis_4[] = [0]
-    plots_2d_data.axis_5[] = [0]
+    plots_2d_data = elements[:plots_2d_data]
+
+    plots_2d_data.state[1][] = [0]
+    plots_2d_data.state[2][] = [0]
+    plots_2d_data.state[3][] = [0]
+
+    plots_2d_data.reference[1][] = [0]
+    plots_2d_data.reference[2][] = [0]
 
     plots_2d_data.time_vec[] = [0]
 end
