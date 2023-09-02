@@ -50,6 +50,7 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
     # end
 
     count_prev::Int64 = 0
+    buffer_size = 20
 
     # perform the integration
     for i in integrator
@@ -61,8 +62,9 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
             break
         end
 
-        if counter % 10 == 0 && counter > count_prev
-            sol_subset = integrator.sol[end-9:end]
+        if counter % buffer_size == 0 && counter > count_prev
+            # Core.println( integrator.sol.t[end])
+            sol_subset = integrator.sol[end-(buffer_size-1):end]
             put!(c1, sol_subset)
 
             count_prev = counter
