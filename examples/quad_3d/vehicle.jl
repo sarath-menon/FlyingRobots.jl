@@ -9,8 +9,6 @@ function load_vehicle_params(path::String)
         task_rate_hz = task[:rate]
         task[:rate_per_tick] = Int(clock_speed / task_rate_hz)
 
-        @show task
-
         # add strategey
         task[:strategy] = load_type_name_from_yaml(task[:strategy])
 
