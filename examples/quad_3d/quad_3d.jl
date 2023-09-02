@@ -82,8 +82,13 @@ function receiver_task(flag, c1, elements, df_empty)
     deleteat!(df_empty, :)
 
     # axis limits
+
+    x_range = 20
+
     x_low = 0
-    x_high = 40
+    x_high = x_range
+
+    x_reset_flag = false
 
     y_max = ones(3) * 0.1
     y_local_max = zeros(3)
@@ -113,9 +118,17 @@ function receiver_task(flag, c1, elements, df_empty)
             end
         end
 
-        if df[end, "timestamp"] > 40
-            FlyingRobots.Gui.plot_axis_setup(elements; x_low=40, x_high=80, y_max=y_max[1])
+        if df[end, "timestamp"] > x_high
+            # FlyingRobots.Gui.plot_axis_setup(elements; x_low=40, x_high=80, y_max=y_max[1])
+            # set new x_range
+            x_low += x_range
+            x_high += x_range
 
+            for i = 1:3
+                state_plots[i].limits = (x_low, x_high, -y_max[i], y_max[i])
+            end
+
+            # delete prev plotted data
             deleteat!(df_empty, 1:40)
         end
 
