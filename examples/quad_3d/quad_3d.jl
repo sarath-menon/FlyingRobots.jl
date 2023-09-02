@@ -74,7 +74,7 @@ df = fetch(sim_task)
 
 flag[] = false
 
-FlyingRobots.Gui.plot_axis_setup(plot_elements; x_low=0, x_high=40, y_max=2)
+FlyingRobots.Gui.set_2dplot_axislimits(plot_elements; x_low=0, x_high=40, y_max=2)
 FlyingRobots.Gui.plot_reset(plot_elements)
 
 
@@ -82,19 +82,17 @@ function receiver_task(flag, c1, elements, df_empty)
     deleteat!(df_empty, :)
 
     # axis limits
-
     x_range = 20
 
     x_low = 0
     x_high = x_range
 
-    x_reset_flag = false
-
     y_max = ones(3) * 0.1
-    y_local_max = zeros(3)
     y_max_padding = 0.1
 
-    FlyingRobots.Gui.plot_axis_setup(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max[1])
+    y_local_max = zeros(3)
+
+    FlyingRobots.Gui.set_2dplot_axislimits(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max)
 
     state_plots = elements[:plots_2d][:state_plots]
 
@@ -107,7 +105,6 @@ function receiver_task(flag, c1, elements, df_empty)
         append!(df_empty, df)
 
         #compute dynamic axis limits 
-
         for i = 1:3
 
             y_local_max[i] = maximum(df[!, "(quad1.rb.r(t), $i)"]) + y_max_padding
@@ -120,22 +117,18 @@ function receiver_task(flag, c1, elements, df_empty)
         end
 
         if df[end, "timestamp"] > x_high
-            # FlyingRobots.Gui.plot_axis_setup(elements; x_low=40, x_high=80, y_max=y_max[1])
+            # FlyingRobots.Gui.set_2dplot_axislimits(elements; x_low=40, x_high=80, y_max=y_max[1])
             # set new x_range
             x_low += x_range
             x_high += x_range
 
-            for i = 1:3
-                state_plots[i].limits = (x_low, x_high, -y_max[i], y_max[i])
-            end
+            FlyingRobots.Gui.set_2dplot_axislimits(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max)
 
             # delete prev plotted data
             deleteat!(df_empty, 1:40)
         end
 
-
         FlyingRobots.Gui.plot_position_dynamic(elements, df_empty)
-        # break
 
         sleep(0.01)
 

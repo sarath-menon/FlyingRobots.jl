@@ -1,15 +1,11 @@
 
-function plot_axis_setup(elements; x_low, x_high, y_max)
+function set_2dplot_axislimits(elements; x_low, x_high, y_max)
 
     state_plots = elements[:plots_2d][:state_plots]
     control_plots = elements[:plots_2d][:state_plots]
 
     for i = 1:3
-        state_plots[i].limits = (x_low, x_high, -y_max, y_max)
-    end
-
-    for i = 1:2
-        control_plots[i].limits = (x_low, x_high, -y_max, y_max)
+        state_plots[i].limits = (x_low, x_high, -y_max[i], y_max[i])
     end
 end
 
