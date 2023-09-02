@@ -57,14 +57,20 @@ c1 = Channel{ODESolution}(10)
 
 flag = Observable{Bool}(true)
 
-# prob = sim_setup(sys, subsystems)
-# integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
-# df_empty = sim_logging(integrator.sol)
+function get_df_empty(sys, subsystems)
+    prob = sim_setup(sys, subsystems)
+    integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
+    df_empty = sim_logging(integrator.sol)
+
+    # empty DataFrame
+    deleteat!(df_empty, :)
+    return df_empty
+end
+
+df_empty = get_df_empty(sys, subsystems)
 
 receiver_task_ = @async receiver_task(flag, c1, plot_elements, df_empty)
 
-# # empty DataFrame
-# deleteat!(df_empty, :)
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
@@ -75,9 +81,6 @@ flag[] = false
 
 FlyingRobots.Gui.plot_reset(plot_elements)
 
-# t_gap_real = t - tprev
-# sleep(t_gap_real)
-# extra_time = @elapsed begin
 
 function receiver_task(flag, c1, elements, df_empty)
 
@@ -129,8 +132,8 @@ function receiver_task(flag, c1, elements, df_empty)
         # check if it's time to change x axis limits
         if df[end, "timestamp"] > x_high
 
-            # delete data from the prev x axis range since it's not being plotted anymore
-            deleteat!(df_empty, 1:20)
+            # # delete data from the prev x axis range since it's not being plotted anymore
+            # deleteat!(df_empty, 1:20)
 
             # set new x_range
             x_low += x_range
