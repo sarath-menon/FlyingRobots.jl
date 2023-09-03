@@ -404,12 +404,14 @@ function plot_reset(elements)
 
     plots_2d_data = elements[:plots_2d_data]
 
-    plots_2d_data.state[1][] = [0]
-    plots_2d_data.state[2][] = [0]
-    plots_2d_data.state[3][] = [0]
+    for i = 1:3
+        # set state data 
+        plots_2d_data.state[i][] = [0]
 
-    plots_2d_data.reference[1][] = [0]
-    plots_2d_data.reference[2][] = [0]
+        # set reference 
+        plots_2d_data.reference[i][] = [0]
+
+    end
 
     plots_2d_data.time_vec[] = [0]
 end
