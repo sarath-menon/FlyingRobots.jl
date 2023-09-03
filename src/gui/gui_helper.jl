@@ -23,63 +23,7 @@ function get_primary_resolution(index::Int)
     return (height, width)
 end
 
-function plot_axis2d(axis::Axis; x::Vector{Float64}, y::Vector{Float64}, title::String, linestyle=nothing, color=:black, linewidth=3)
-    # set title
-    axis.title = title
-
-    # fraw plot
-    lines!(axis, x, y, linestyle=linestyle, color=color, linewidth=linewidth)
-end
-
-function plot_axis2d_tm(axis::Axis; x::Observable{Float64}, y::Observable{Float64}, color=:black)
-    # fraw plot
-    vlines!(axis, x, color=color, linewidth=2)
-end
-
-function plot_trajectory(config_dict::Dict, config)
-    # diplayed plots
-    for (i, title) in enumerate(config_dict[config])
-        # clear axis
-        empty!(state_plots[i])
-
-        # plot actual trajectory 
-        plot_axis2d(state_plots[i]; x=df.timestamp, y=df[!, title], title=title, linewidth=2)
-
-        # plot desired trajectory 
-        plot_axis2d(state_plots[i]; x=df.timestamp, y=df[!, title*"_req"], title=title, linestyle=:dash, color=:green, linewidth=6)
-
-        # plot time marker
-        plot_axis2d_tm(state_plots[i]; x=time_marker, y=time_marker)
-
-    end
-end
-
-function plot_trajectory(configs_vec::Vector{String}, config::String)
-
-    titles_vec = get_axis_titles(configs_vec, config)
-
-
-    # diplayed plots
-    for (i, title) in enumerate(titles_vec)
-        # clear axis
-        empty!(state_plots[i])
-
-        # plot actual trajectory 
-        plot_axis2d(state_plots[i]; x=df.timestamp, y=df[!, title], title=title, linewidth=2)
-
-        # plot desired trajectory 
-        plot_axis2d(state_plots[i]; x=df.timestamp, y=df[!, title*"_req"], title=title, linestyle=:dash, color=:green, linewidth=6)
-
-        # plot time marker
-        plot_axis2d_tm(state_plots[i]; x=time_marker, y=time_marker)
-
-    end
-end
-
-
-# function plot_3d_trajectory(x_pos, y_pos, z_pos; sim_time_obs::Observable, sim_state_obs::Observable, duration=10.0, dt=0.01, frame_rate=25)
-
-function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=30)
+function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=25)
 
     df = elements[:df]
 
@@ -116,10 +60,7 @@ function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=30)
             position = Vec3d(df[!, 2][i], df[!, 3][i], df[!, 4][i])
             orientation = QuatRotation(df[!, 8][i], df[!, 9][i], df[!, 10][i], df[!, 11][i])
 
-            if i % floor(n_skip_frames / 2) == 0
-                #model_set_pose_closeup_visualizer(elements, position, orientation)
-                model_set_attitude_closeup_visualizer(elements, orientation)
-            end
+            model_set_attitude_closeup_visualizer(elements, orientation)
 
             model_set_pose_fullscene_visualizer(elements, position, orientation)
 
@@ -146,7 +87,6 @@ function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=30)
     return animation_loop
 
 end
-
 
 struct PlotData9
     time_vec::Observable{Vector{Float64}}
