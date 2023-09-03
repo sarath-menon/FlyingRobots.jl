@@ -22,7 +22,6 @@ function plot_position_dynamic(elements, df)
 
         # set reference 
         plots_2d_data.reference[i][] = df[!, "(controller.R(t), $i)"]
-
     end
 end
 

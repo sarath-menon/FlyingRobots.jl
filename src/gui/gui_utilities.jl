@@ -5,8 +5,6 @@ function plot_position(elements)
     plots = elements[:plots_2d][:state_plots]
     plots_2d_data = elements[:plots_2d_data]
 
-    @show typeof(plots_2d_data)
-
     plots_2d_data.time_vec[] = df[!, "timestamp"]
 
     plots_2d_data.state[1][] = df[!, "(quad1.rb.r(t), 1)"]
