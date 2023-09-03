@@ -62,16 +62,15 @@ gui_dynamic_plotter_task = @async gui_dynamic_plotter(flag, c1, plot_elements, d
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
-@time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, flag; save=false)
-#@time sim_task = @async run_sim_stepping(sys, subsystems, c1, flag; save=false)
+#@time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, flag; save=false)
+@time sim_task = @async run_sim_stepping(sys, subsystems, c1, flag; save=false)
 df = fetch(sim_task)
 
 flag[] = false
 
-FlyingRobots.Gui.plot_reset(plot_elements)
-
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()
+FlyingRobots.Gui.plot_reset(plot_elements)
 
 FlyingRobots.Gui.set_sim_instance(plot_elements, df)
 
