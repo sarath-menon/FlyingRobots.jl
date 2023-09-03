@@ -17,7 +17,6 @@ using YAML
 import Dates
 using ThreadPools
 
-
 GLMakie.activate!(inline=false)
 
 using MtkLibrary
@@ -53,19 +52,13 @@ flight_controller = create_computer("stm32")
 sys, subsystems = fetch(system_build_task)
 
 ## Testing
+
 c1 = Channel{ODESolution}(10)
-# condition = Threads.Condition()
+df_empty = get_empty_df(sys, subsystems)
 
 flag = Observable{Bool}(true)
 
-# prob = sim_setup(sys, subsystems)
-# integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
-# df_empty = sim_logging(integrator.sol)
-
 receiver_task_ = @async receiver_task(flag, c1, plot_elements, df_empty)
-
-# # empty DataFrame
-# deleteat!(df_empty, :)
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
@@ -75,12 +68,11 @@ df = fetch(sim_task)
 
 flag[] = false
 
-FlyingRobots.Gui.set_2dplot_axislimits(plot_elements; x_low=0, x_high=40, y_max=2)
 FlyingRobots.Gui.plot_reset(plot_elements)
-
 
 function receiver_task(flag, c1, elements, df_empty)
 
+    # df_empty = DataFrame()
     # delete all existing entries in the dataframe
     deleteat!(df_empty, :)
 
@@ -142,8 +134,6 @@ function receiver_task(flag, c1, elements, df_empty)
         # do the actual plotting
         FlyingRobots.Gui.plot_position_dynamic(elements, df_empty)
 
-        # sleep(0.01)
-
         # ## @show sol.t[end]
         # Core.println(df[!, "timestamp"])
 
@@ -152,9 +142,10 @@ function receiver_task(flag, c1, elements, df_empty)
                 break
             end
         end
+
     end
 
-    Core.println("Receiver task done")
+    Core.println("Receiver task exiting")
 end
 
 
