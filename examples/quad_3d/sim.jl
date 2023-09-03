@@ -54,17 +54,17 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
 
         counter = length(integrator.sol.t)
 
-        if flag[] == false
-            println("Sim flag is set to false")
-            break
-        end
-
         if counter % buffer_size == 0 && counter > count_prev
             # Core.println( integrator.sol.t[end])
             sol_subset = integrator.sol[end-(buffer_size-1):end]
             put!(c1, sol_subset)
 
             count_prev = counter
+
+            if flag[] == false
+                println("Sim flag is set to false")
+                break
+            end
         end
 
         t_now = time_ns()
