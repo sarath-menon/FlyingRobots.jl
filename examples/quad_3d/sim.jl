@@ -21,6 +21,14 @@ function run_sim(sys, subsystems; save=false)
     return df
 end
 
+function get_empty_df(sys, subsystems)
+    prob = sim_setup(sys, subsystems)
+    integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
+    df_empty = sim_logging(integrator.sol)
+
+    return df_empty
+end
+
 function run_sim_stepping(sys, subsystems; save=false)
 
     prob = sim_setup(sys, subsystems)
@@ -62,7 +70,7 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
             count_prev = counter
 
             if flag[] == false
-                println("Sim flag is set to false")
+                Core.println("Terminting integration")
                 break
             end
         end
@@ -79,8 +87,6 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
     flag[] = false
 
     df = sim_logging(integrator.sol)
-
-    Core.println("Integration done")
 
     return df
 end
