@@ -47,7 +47,7 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
     count_prev::Int64 = 0
     buffer_size = 20
 
-    t_start = Dates.now()
+    t_start = time_ns()
 
     # perform the integration
     for (u, t) in tuples(integrator)
@@ -67,14 +67,13 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
             count_prev = counter
         end
 
-        t_now = Dates.now()
-        real_time_elapsed = t_now - t_start
+        t_now = time_ns()
+        real_time_elapsed = (t_now - t_start) * 1e-9
         sim_time_elapsed = t
 
-        t_wait = sim_time_elapsed - (real_time_elapsed.value / 1000.0)
+        t_wait = sim_time_elapsed - real_time_elapsed
 
         sleep(maximum([0.0, t_wait]))
-
     end
 
     flag[] = false
