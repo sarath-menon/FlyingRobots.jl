@@ -68,12 +68,6 @@ df = fetch(sim_task)
 
 flag[] = false
 
-let
-    plots_2d_data = plot_elements[:plots_2d_data]
-    plots_2d_data.state[1][] = [0]
-    plots_2d_data.state[1][]
-end
-
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()
 FlyingRobots.Gui.plot_reset(plot_elements)
