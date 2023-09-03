@@ -54,7 +54,7 @@ sys, subsystems = fetch(system_build_task)
 ## Testing
 
 c1 = Channel{ODESolution}(10)
-df_empty = get_empty_df(sys, subsystems)
+# df_empty = get_empty_df(sys, subsystems)
 
 flag = Observable{Bool}(true)
 
@@ -62,11 +62,16 @@ gui_dynamic_plotter_task = @async gui_dynamic_plotter(flag, c1, plot_elements, d
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
-#@time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, flag; save=false)
-@time sim_task = @async run_sim_stepping(sys, subsystems, c1, flag; save=false)
+@time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, flag; save=false)
+#@time sim_task = @async run_sim_stepping(sys, subsystems, c1, flag; save=false)
 df = fetch(sim_task)
 
 flag[] = false
+
+let
+    # FlyingRobots.Gui.model_set_attitude_closeup_visualizer(plot_elements, QuatRotation(1, 0, 0, 0))
+    FlyingRobots.Gui.model_set_pose_fullscene_visualizer(plot_elements, Vec3d(0, 1, 2), QuatRotation(1, 0, 0, 0))
+end
 
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()

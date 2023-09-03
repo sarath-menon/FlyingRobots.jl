@@ -53,7 +53,7 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
     integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
     count_prev::Int64 = 0
-    buffer_size = 20
+    buffer_size = 10
 
     t_start = time_ns()
 
