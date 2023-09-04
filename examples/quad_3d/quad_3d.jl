@@ -56,14 +56,15 @@ c1 = Channel{ODESolution}(10)
 
 sim_state = Observable{Bool}(true)
 
-on(sim_state) do val
+obs_func = on(sim_state, weak=true) do val
     if sim_state[] == true
-        gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, sim_state, c1, df_empty)
+        gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
         @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state; save=false)
         Core.println("Starting simulation")
     end
 end
 
+obs_func = nothing
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
@@ -85,10 +86,6 @@ FlyingRobots.Gui.plot_reset(plot_elements)
 # connect observables
 connect!(sim_state, plot_elements[:sim_state])
 
-# start stepping sim if start_sim_btn is clicked
-on(start_sim_btn.clicks) do clicks
-
-end
 
 FlyingRobots.Gui.set_sim_instance(plot_elements, df)
 # FlyingRobots.Gui.set_sim_flag(plot_elements, sim_state)
