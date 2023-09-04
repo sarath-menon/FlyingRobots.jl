@@ -3,12 +3,16 @@ function show_visualizer()
     set_theme!(backgroundcolor=:black, textcolor=:white)
 
     sim_time = Observable{Float64}(0.0)
+
     anim_state = Observable{Bool}(false)
+    sim_state = Observable{Bool}(false)
 
     # to store plot elements
     elements = Dict()
 
     elements[:anim_state] = anim_state
+    elements[:sim_state] = sim_state
+
     elements[:sim_time] = sim_time
 
     plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
@@ -429,6 +433,7 @@ function define_interactions(elements, sim_time)
 
     time_title = elements[:titles][:time_title]
     anim_state = elements[:anim_state]
+    sim_state = elements[:sim_state]
 
     # to set time in title
     on(sim_time) do time
@@ -461,13 +466,17 @@ function define_interactions(elements, sim_time)
 
         Core.println("Starting simulation")
 
-        # # if sim is not already running, start sim
-        # if sim_state_state[] == false
+        # if sim is not already running, start sim
+        if sim_state[] == false
 
-        #     start_3d_animation(elements)
-        # else
-        #     stop_3d_animation(elements)
-        # end
+            # start_3d_animation(elements)
+            sim_state[] = true
+            Core.println("Start sim button pressed")
+
+        else
+            sim_state[] = false
+            Core.println("Stop sim button pressed")
+        end
     end
 end
 
@@ -475,3 +484,6 @@ function set_sim_instance(elements, df::DataFrame)
     elements[:df] = df
 end
 
+# function set_sim_flag(elements, sim_state)
+#     elements[:sim_state] = sim_state
+# end

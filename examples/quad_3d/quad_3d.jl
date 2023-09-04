@@ -54,29 +54,51 @@ sys, subsystems = fetch(system_build_task)
 #df_empty = get_empty_df(sys, subsystems)
 c1 = Channel{ODESolution}(10)
 
-flag = Observable{Bool}(true)
+sim_state = Observable{Bool}(true)
 
-gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, flag, c1, df_empty)
+on(sim_state) do val
+    if sim_state[] == true
+        gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, sim_state, c1, df_empty)
+        @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state; save=false)
+        Core.println("Starting simulation")
+    end
+end
+
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
-@time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, flag; save=false)
-#@time sim_task = @async run_sim_stepping(sys, subsystems, c1, flag; save=false)
+# @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state; save=false)
+#@time sim_task = @async run_sim_stepping(sys, subsystems, c1, sim_state; save=false)
 df = fetch(sim_task)
 
-flag[] = false
+sim_state[] = false
+sim_state[] = true
+
+sim_state[]
+
+plot_elements[:sim_state][]
 
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()
 FlyingRobots.Gui.plot_reset(plot_elements)
 
+# connect observables
+connect!(sim_state, plot_elements[:sim_state])
+
+# start stepping sim if start_sim_btn is clicked
+on(start_sim_btn.clicks) do clicks
+
+end
+
 FlyingRobots.Gui.set_sim_instance(plot_elements, df)
+# FlyingRobots.Gui.set_sim_flag(plot_elements, sim_state)
+
 
 FlyingRobots.Gui.plot_position(plot_elements)
 FlyingRobots.Gui.plot_orientation(plot_elements)
 FlyingRobots.Gui.plot_control_input(plot_elements, motor_thrust_to_body_thrust)
 
-@time flag = FlyingRobots.Gui.start_3d_animation(plot_elements)
+@time sim_state = FlyingRobots.Gui.start_3d_animation(plot_elements)
 
 end
 
