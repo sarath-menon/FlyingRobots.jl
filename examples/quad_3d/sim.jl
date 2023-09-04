@@ -67,6 +67,7 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
             sol_subset = integrator.sol[end-(buffer_size-1):end]
             put!(c1, sol_subset)
 
+
             count_prev = counter
 
             if flag[] == false

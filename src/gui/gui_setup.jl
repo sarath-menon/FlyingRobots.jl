@@ -471,19 +471,6 @@ function define_interactions(elements, sim_time)
     end
 end
 
-
-function stop_3d_animation(elements)
-    anim_state = elements[:anim_state]
-    play_btn = elements[:widgets][:play_btn]
-
-    # if sim is currently running, set sim state flag to false
-    anim_state[] = false
-
-    # change button text to show "Stop"
-    play_btn.label = "Play"
-end
-
-
 function set_sim_instance(elements, df::DataFrame)
     elements[:df] = df
 end

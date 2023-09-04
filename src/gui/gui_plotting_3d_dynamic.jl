@@ -1,7 +1,7 @@
 
 
 
-function gui_dynamic_plotter(flag, c1, elements, df_empty)
+function gui_dynamic_plotter(elements, flag, c1, df_empty)
 
     # df_empty = DataFrame()
     # delete all existing entries in the dataframe
@@ -25,7 +25,7 @@ function gui_dynamic_plotter(flag, c1, elements, df_empty)
     y_local_max = zeros(3)
 
     # set the initial axis limits
-    FlyingRobots.Gui.set_2dplot_axislimits(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max)
+    set_2dplot_axislimits(elements; x_low=x_low, x_high=x_high, y_max=y_max)
 
     state_plots = elements[:plots_2d][:state_plots]
 
@@ -99,14 +99,14 @@ function gui_dynamic_plotter(flag, c1, elements, df_empty)
             x_low += x_range
             x_high += x_range
 
-            FlyingRobots.Gui.set_2dplot_axislimits(plot_elements; x_low=x_low, x_high=x_high, y_max=y_max)
+            set_2dplot_axislimits(elements; x_low=x_low, x_high=x_high, y_max=y_max)
 
             # delete data from the prev x axis range since it's not being plotted anymore
             deleteat!(df_empty, :)
         end
 
         # do the actual plotting
-        FlyingRobots.Gui.plot_position_dynamic(elements, df_empty)
+        plot_position_dynamic(elements, df_empty)
 
         if flag[] == false
             break

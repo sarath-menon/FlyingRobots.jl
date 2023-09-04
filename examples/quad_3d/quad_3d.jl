@@ -33,7 +33,6 @@ include("vehicle.jl")
 include("computer.jl")
 include("controller_utilities.jl")
 include("tasks.jl")
-include("gui_tasks.jl")
 
 include("paths.jl")
 
@@ -52,20 +51,18 @@ flight_controller = create_computer("stm32")
 sys, subsystems = fetch(system_build_task)
 
 ## Testing
-
+#df_empty = get_empty_df(sys, subsystems)
 c1 = Channel{ODESolution}(10)
-# df_empty = get_empty_df(sys, subsystems)
 
 flag = Observable{Bool}(true)
 
-gui_dynamic_plotter_task = @async gui_dynamic_plotter(flag, c1, plot_elements, df_empty)
+gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, flag, c1, df_empty)
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
 @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, flag; save=false)
 #@time sim_task = @async run_sim_stepping(sys, subsystems, c1, flag; save=false)
 df = fetch(sim_task)
-
 
 flag[] = false
 
@@ -80,12 +77,6 @@ FlyingRobots.Gui.plot_orientation(plot_elements)
 FlyingRobots.Gui.plot_control_input(plot_elements, motor_thrust_to_body_thrust)
 
 @time flag = FlyingRobots.Gui.start_3d_animation(plot_elements)
-
-reference_generator(Main.quad_3d.Circle_TrajectoryGen(), flight_controller, 10)
-
-scheduler(flight_controller)
-
-Main.quad_3d.Circle_TrajectoryGen == Circle_TrajectoryGen
 
 end
 
