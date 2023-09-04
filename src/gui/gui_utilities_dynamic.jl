@@ -27,12 +27,13 @@ function plot_position_dynamic(elements, df)
 
     # 3d animation
     if nrow(df) != 0
-        position = Vec3d(df[!, 2][end], df[!, 3][end], 2)
+        position = Vec3d(df[!, 2][end], df[!, 3][end], df[!, 4][end])
         orientation = QuatRotation(df[!, 8][end], df[!, 9][end], df[!, 10][end], df[!, 11][end])
 
         model_set_attitude_closeup_visualizer(elements, orientation)
 
         model_set_pose_fullscene_visualizer(elements, position, orientation)
+
     end
 end
 
