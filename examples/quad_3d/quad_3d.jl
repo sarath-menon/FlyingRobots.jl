@@ -15,7 +15,7 @@ using CSV
 using BenchmarkTools
 using YAML
 import Dates
-using ThreadPools
+using DataStructures
 
 GLMakie.activate!(inline=false)
 
@@ -66,12 +66,8 @@ gui_dynamic_plotter_task = @async gui_dynamic_plotter(flag, c1, plot_elements, d
 #@time sim_task = @async run_sim_stepping(sys, subsystems, c1, flag; save=false)
 df = fetch(sim_task)
 
-flag[] = false
 
-let
-    # FlyingRobots.Gui.model_set_attitude_closeup_visualizer(plot_elements, QuatRotation(1, 0, 0, 0))
-    FlyingRobots.Gui.model_set_pose_fullscene_visualizer(plot_elements, Vec3d(0, 1, 2), QuatRotation(1, 0, 0, 0))
-end
+flag[] = false
 
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()
