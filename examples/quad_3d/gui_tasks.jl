@@ -7,6 +7,12 @@ function gui_dynamic_plotter(flag, c1, elements, df_empty)
     # delete all existing entries in the dataframe
     deleteat!(df_empty, :)
 
+    # circular c_buffer
+    c_buffer_len = 10
+    c_buffer = CircularDeque{ODESolution}(c_buffer_len)
+    first_received_flag = false
+    condition = Condition()
+
     # axis limits
     x_range = 20
 
@@ -23,11 +29,47 @@ function gui_dynamic_plotter(flag, c1, elements, df_empty)
 
     state_plots = elements[:plots_2d][:state_plots]
 
+    @async begin
+        while true
+            # take data from the channel
+            sol = take!(c1)
+
+            # Core.println("Received data:")
+            first_received_flag = true
+
+            if length(c_buffer) == c_buffer_len
+                pop!(c_buffer)
+            end
+
+            pushfirst!(c_buffer, sol)
+            # Core.println("Pushed to c_buffer:")
+            # Core.println("Buffer length: receiver", length(c_buffer))
+
+            notify(condition)
+
+            if flag[] == false
+                if isempty(c1)
+                    break
+                end
+            end
+        end
+
+    end
+
     #Core.println("Waiting for sol data")
+    Core.println("Waiting to be notified:")
+    wait(condition)
+
     while true
 
-        # get the latest ODESolution subset from the channel
-        sol = take!(c1)
+        # # get the latest ODESolution subset from the channel
+        # sol = take!(c1)
+
+        sol = pop!(c_buffer)
+
+        while length(c_buffer) == 0
+            sleep(0.01)
+        end
 
         # convert the ODESolution to a dataframe
         df = sim_logging(sol)
@@ -64,6 +106,10 @@ function gui_dynamic_plotter(flag, c1, elements, df_empty)
 
         # do the actual plotting
         FlyingRobots.Gui.plot_position_dynamic(elements, df_empty)
+
+        if flag[] == false
+            break
+        end
 
         # ## @show sol.t[end]
         # Core.println(df[!, "timestamp"])
