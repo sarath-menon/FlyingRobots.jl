@@ -46,7 +46,7 @@ function run_sim_stepping(sys, subsystems; save=false)
     return df
 end
 
-function run_sim_stepping(sys, subsystems, c1, flag; save=false)
+function run_sim_stepping(sys, subsystems, c1, flag, sim_acc_state; save=false, physical_time=false)
 
     prob = sim_setup(sys, subsystems)
 
@@ -60,29 +60,32 @@ function run_sim_stepping(sys, subsystems, c1, flag; save=false)
     # perform the integration
     for (u, t) in tuples(integrator)
 
-        counter = length(integrator.sol.t)
+        if sim_acc_state[] == RealtimeSim()
 
-        if counter % buffer_size == 0 && counter > count_prev
-            # Core.println( integrator.sol.t[end])
-            sol_subset = integrator.sol[end-(buffer_size-1):end]
-            put!(c1, sol_subset)
+            counter = length(integrator.sol.t)
 
+            if counter % buffer_size == 0 && counter > count_prev
+                # Core.println( integrator.sol.t[end])
+                sol_subset = integrator.sol[end-(buffer_size-1):end]
+                put!(c1, sol_subset)
 
-            count_prev = counter
+                count_prev = counter
 
-            if flag[] == false
-                Core.println("Terminting integration")
-                break
+                if flag[] == false
+                    Core.println("Terminting integration")
+                    break
+                end
             end
+
+            t_now = time_ns()
+            real_time_elapsed = (t_now - t_start) * 1e-9
+            sim_time_elapsed = t
+
+            t_wait = sim_time_elapsed - real_time_elapsed
+
+            sleep(maximum([0.0, t_wait]))
+
         end
-
-        t_now = time_ns()
-        real_time_elapsed = (t_now - t_start) * 1e-9
-        sim_time_elapsed = t
-
-        t_wait = sim_time_elapsed - real_time_elapsed
-
-        sleep(maximum([0.0, t_wait]))
     end
 
     flag[] = false

@@ -6,12 +6,14 @@ function show_visualizer()
 
     anim_state = Observable{Bool}(false)
     sim_state = Observable{Bool}(false)
+    sim_acc_state = Observable{SimAccMode}(AcceleratedSim())
 
     # to store plot elements
     elements = Dict()
 
     elements[:anim_state] = anim_state
     elements[:sim_state] = sim_state
+    elements[:sim_acc_state] = sim_acc_state
 
     elements[:sim_time] = sim_time
 
@@ -332,17 +334,15 @@ function add_widgets(elements, g_left_widgets, g_right_widgets)
     lower_left_menu = GridLayout()
 
     # toggle buttons
-    toggles = [Toggle(fig, active=active, width=80, height=35) for active in [true]]
-    labels = [Label(fig, label, fontsize=20) for label in ["Accelerated Sim"]]
+    sim_acc_toggle = Toggle(fig, active=true, width=80, height=35)
+    sim_acc_toggle_label = Label(fig, text="Accelerated Sim", fontsize=25)
 
-    left_toggles = g_right_widgets[1, 1] = GridLayout()
-
-    left_toggles[1, 1] = grid!(hcat(toggles[1], labels[1]), tellheight=false, tellwidth=false)
+    sim_acc_toggle_grid = grid!(hcat(sim_acc_toggle, sim_acc_toggle_label), tellheight=false, tellwidth=false)
     # left_toggles[1, 2] = grid!(hcat(toggles[2], labels[2]), tellheight=false, tellwidth=false)
 
     lower_left_menu[1, 1] = start_sim_btn
     lower_left_menu[1, 2] = play_btn
-    lower_left_menu[1, 3] = left_toggles
+    lower_left_menu[1, 3] = sim_acc_toggle_grid
 
     g_left_widgets[2, 1:3] = lower_left_menu
 
@@ -365,6 +365,8 @@ function add_widgets(elements, g_left_widgets, g_right_widgets)
     widgets[:timeline_slider] = timeline_slider
     widgets[:play_btn] = play_btn
     widgets[:start_sim_btn] = start_sim_btn
+    widgets[:sim_acc_toggle] = sim_acc_toggle
+    widgets[:sim_acc_toggle_label] = sim_acc_toggle_label
 
     widgets[:attitude_reset_btn] = attitude_reset_btn
     widgets[:config_menu] = config_menu
@@ -434,6 +436,7 @@ function define_interactions(elements, sim_time)
     time_title = elements[:titles][:time_title]
     anim_state = elements[:anim_state]
     sim_state = elements[:sim_state]
+    sim_acc_state = elements[:sim_acc_state]
 
     # to set time in title
     on(sim_time) do time
@@ -478,6 +481,24 @@ function define_interactions(elements, sim_time)
             sim_state[] = false
             start_sim_btn.label = "Start Sim"
             Core.println("Stop sim button pressed")
+        end
+    end
+
+    sim_acc_toggle = elements[:widgets][:sim_acc_toggle]
+    sim_acc_toggle_label = elements[:widgets][:sim_acc_toggle_label]
+
+    on(sim_acc_toggle.active) do state
+        if state == true
+            Core.println("Sim mode set to Accelerated")
+            sim_acc_toggle_label.text = "Accelerated Sim"
+
+            sim_acc_state[] = AcceleratedSim()
+
+        else
+            Core.println("Sim mode set to Realtime")
+            sim_acc_toggle_label.text = "Realtime Sim"
+
+            sim_acc_state[] = RealtimeSim()
         end
     end
 end
