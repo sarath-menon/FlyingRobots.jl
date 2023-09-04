@@ -59,21 +59,33 @@ c1 = Channel{ODESolution}(10)
 sim_state = Observable{Bool}(true)
 sim_acc_state = Observable{SimAccMode}()
 
-obs_func = on(sim_state, weak=true) do val
-    if sim_state[] == true
+let
+    obs_func = on(sim_state, weak=true) do val
+        if sim_state[] == true
 
-        if sim_acc_state[] == RealtimeSim()
-            gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
-            @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
-            Core.println("Starting Realtime simulation")
+            if sim_acc_state[] == RealtimeSim()
+                FlyingRobots.Gui.plot_reset(plot_elements)
+                gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
+                @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
+                Core.println("Starting Realtime simulation")
+
+
+            elseif sim_acc_state[] == AcceleratedSim()
+                @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
+                Core.println("Starting Accelerated simulation")
+
+                df = fetch(sim_task)
+                FlyingRobots.Gui.set_sim_instance(plot_elements, df)
+                FlyingRobots.Gui.plot_reset(plot_elements)
+                FlyingRobots.Gui.plot_position(plot_elements)
+            end
         end
 
-    elseif sim_acc_state[] == AcceleratedSim()
-        @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
-        Core.println("Starting Accelerated simulation")
     end
 
 end
+
+
 
 obs_func = nothing
 
