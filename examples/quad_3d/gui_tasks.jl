@@ -48,9 +48,7 @@ function gui_dynamic_plotter(flag, c1, elements, df_empty)
             notify(condition)
 
             if flag[] == false
-                if isempty(c1)
-                    break
-                end
+                break
             end
         end
 
@@ -66,6 +64,9 @@ function gui_dynamic_plotter(flag, c1, elements, df_empty)
         # sol = take!(c1)
 
         sol = pop!(c_buffer)
+
+        # # to demonstrate use of circular buffer
+        # sleep(1.0)
 
         while length(c_buffer) == 0
             sleep(0.01)
@@ -119,7 +120,6 @@ function gui_dynamic_plotter(flag, c1, elements, df_empty)
                 break
             end
         end
-
     end
 
     Core.println("Receiver task exiting")
