@@ -314,8 +314,10 @@ function add_widgets(elements, g_left_widgets, g_right_widgets)
     timeline_slider = Slider(fig, range=0:0.01:10, startvalue=0, linewidth=25.0, tellheight=false,
         halign=:left)
 
-    #timeline button
-    timeline_btn = Button(fig, label="Play", tellwidth=false, halign=:center, fontsize=40, buttoncolor=:yellow, labelcolor=:black)
+    #buttons
+    play_btn = Button(fig, label="Play", tellwidth=false, halign=:center, fontsize=30, buttoncolor=:yellow, labelcolor=:black)
+    start_sim_btn = Button(fig, label="Start Sim", tellwidth=false, halign=:center, fontsize=30, buttoncolor=:yellow, labelcolor=:black)
+
     timeline_left_label = Label(fig, "0.0 s", justification=:left)
     timeline_right_label = Label(fig, "10.0 s", justification=:left)
 
@@ -323,10 +325,25 @@ function add_widgets(elements, g_left_widgets, g_right_widgets)
     g_left_widgets[1, 2] = timeline_slider
     g_left_widgets[1, 3] = timeline_right_label
 
-    g_left_widgets[2, :] = timeline_btn
+    lower_left_menu = GridLayout()
+
+    # toggle buttons
+    toggles = [Toggle(fig, active=active, width=80, height=35) for active in [true]]
+    labels = [Label(fig, label, fontsize=20) for label in ["Accelerated Sim"]]
+
+    left_toggles = g_right_widgets[1, 1] = GridLayout()
+
+    left_toggles[1, 1] = grid!(hcat(toggles[1], labels[1]), tellheight=false, tellwidth=false)
+    # left_toggles[1, 2] = grid!(hcat(toggles[2], labels[2]), tellheight=false, tellwidth=false)
+
+    lower_left_menu[1, 1] = start_sim_btn
+    lower_left_menu[1, 2] = play_btn
+    lower_left_menu[1, 3] = left_toggles
+
+    g_left_widgets[2, 1:3] = lower_left_menu
 
     # shrink right widgets grid to make space for plots
-    # rowsize!(g_right, 2,  Auto(0.2))
+    # rowsize!(lower_left_menu, 1, Auto(0.1))
 
     # attitude reset button
     attitude_reset_btn = Button(fig, label="Reset Attitude", tellwidth=false)
@@ -341,18 +358,8 @@ function add_widgets(elements, g_left_widgets, g_right_widgets)
 
     widgets = Dict()
 
-    # # toggle buttons
-    # toggles = [Toggle(fig, active=active) for active in [true, true, true]]
-    # labels = [Label(fig, label) for label in ["y", "z", "θ"]]
-
-    # g_right_toggles = g_right_widgets[1, 3] = GridLayout()
-
-    # g_right_toggles[1, 1] = grid!(hcat(toggles[1], labels[1]), tellheight=false, tellwidth=false)
-    # g_right_toggles[1, 2] = grid!(hcat(toggles[2], labels[2]), tellheight=false, tellwidth=false)
-    # g_right_toggles[1, 3] = grid!(hcat(toggles[3], labels[3]), tellheight=false, tellwidth=false)
-
     widgets[:timeline_slider] = timeline_slider
-    widgets[:timeline_btn] = timeline_btn
+    widgets[:play_btn] = play_btn
     widgets[:attitude_reset_btn] = attitude_reset_btn
     widgets[:config_menu] = config_menu
 
@@ -428,14 +435,14 @@ function define_interactions(elements, sim_time)
 
     # change displayed time according to slider position
     timeline_slider = elements[:widgets][:timeline_slider]
-    timeline_btn = elements[:widgets][:timeline_btn]
+    play_btn = elements[:widgets][:play_btn]
 
     lift(timeline_slider.value) do val
         sim_time[] = val
     end
 
     # play 3d visualization if 'Play' button is clicked
-    on(timeline_btn.clicks) do clicks
+    on(play_btn.clicks) do clicks
 
         # if sim is not already running, start sim
         if sim_state[] == false
@@ -450,13 +457,13 @@ end
 
 function stop_3d_animation(elements)
     sim_state = elements[:sim_state]
-    timeline_btn = elements[:widgets][:timeline_btn]
+    play_btn = elements[:widgets][:play_btn]
 
     # if sim is currently running, set sim state flag to false
     sim_state[] = false
 
     # change button text to show "Stop"
-    timeline_btn.label = "Play"
+    play_btn.label = "Play"
 end
 
 
