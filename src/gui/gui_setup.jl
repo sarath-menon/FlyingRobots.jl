@@ -471,10 +471,12 @@ function define_interactions(elements, sim_time)
 
             # start_3d_animation(elements)
             sim_state[] = true
+            start_sim_btn.label = "Stop Sim"
             Core.println("Start sim button pressed")
 
         else
             sim_state[] = false
+            start_sim_btn.label = "Start Sim"
             Core.println("Stop sim button pressed")
         end
     end
