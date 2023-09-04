@@ -3,12 +3,12 @@ function show_visualizer()
     set_theme!(backgroundcolor=:black, textcolor=:white)
 
     sim_time = Observable{Float64}(0.0)
-    sim_state = Observable{Bool}(false)
+    anim_state = Observable{Bool}(false)
 
     # to store plot elements
     elements = Dict()
 
-    elements[:sim_state] = sim_state
+    elements[:anim_state] = anim_state
     elements[:sim_time] = sim_time
 
     plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
@@ -360,6 +360,8 @@ function add_widgets(elements, g_left_widgets, g_right_widgets)
 
     widgets[:timeline_slider] = timeline_slider
     widgets[:play_btn] = play_btn
+    widgets[:start_sim_btn] = start_sim_btn
+
     widgets[:attitude_reset_btn] = attitude_reset_btn
     widgets[:config_menu] = config_menu
 
@@ -426,7 +428,7 @@ end
 function define_interactions(elements, sim_time)
 
     time_title = elements[:titles][:time_title]
-    sim_state = elements[:sim_state]
+    anim_state = elements[:anim_state]
 
     # to set time in title
     on(sim_time) do time
@@ -436,6 +438,7 @@ function define_interactions(elements, sim_time)
     # change displayed time according to slider position
     timeline_slider = elements[:widgets][:timeline_slider]
     play_btn = elements[:widgets][:play_btn]
+    start_sim_btn = elements[:widgets][:start_sim_btn]
 
     lift(timeline_slider.value) do val
         sim_time[] = val
@@ -445,22 +448,36 @@ function define_interactions(elements, sim_time)
     on(play_btn.clicks) do clicks
 
         # if sim is not already running, start sim
-        if sim_state[] == false
+        if anim_state[] == false
 
             start_3d_animation(elements)
         else
             stop_3d_animation(elements)
         end
     end
+
+    # start stepping sim if start_sim_btn is clicked
+    on(start_sim_btn.clicks) do clicks
+
+        Core.println("Starting simulation")
+
+        # # if sim is not already running, start sim
+        # if sim_state_state[] == false
+
+        #     start_3d_animation(elements)
+        # else
+        #     stop_3d_animation(elements)
+        # end
+    end
 end
 
 
 function stop_3d_animation(elements)
-    sim_state = elements[:sim_state]
+    anim_state = elements[:anim_state]
     play_btn = elements[:widgets][:play_btn]
 
     # if sim is currently running, set sim state flag to false
-    sim_state[] = false
+    anim_state[] = false
 
     # change button text to show "Stop"
     play_btn.label = "Play"

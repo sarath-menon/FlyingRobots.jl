@@ -27,33 +27,33 @@ function start_3d_animation(elements; duration=10.0, dt=0.01, frame_rate=25)
 
     df = elements[:df]
 
-    sim_state = elements[:sim_state]
+    anim_state = elements[:anim_state]
     sim_time = elements[:sim_time]
 
     timeline_slider = elements[:widgets][:timeline_slider]
-    timeline_btn = elements[:widgets][:timeline_btn]
+    play_btn = elements[:widgets][:play_btn]
 
     step_count = floor(Int, duration / dt)
     n_skip_frames = floor(Int, 100 / frame_rate)
 
-    @show sim_state
+    @show anim_state
 
     # check if simulation is already running
-    if sim_state[] == true
+    if anim_state[] == true
         return false
     end
 
     # set sim state flag to true
-    sim_state[] = true
+    anim_state[] = true
 
     # change button text to show "Stop"
-    timeline_btn.label = "Stop"
+    play_btn.label = "Stop"
 
     animation_loop = @async begin
         for i in 1:n_skip_frames:step_count
 
             # stop simulation is stop button is pressed
-            if sim_state[] == false
+            if anim_state[] == false
                 break
             end
 
