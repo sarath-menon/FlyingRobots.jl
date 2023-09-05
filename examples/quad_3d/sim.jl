@@ -46,7 +46,7 @@ function run_sim_stepping(sys, subsystems; save=false)
     return df
 end
 
-function run_sim_stepping(sys, subsystems, c1, flag, sim_acc_state; save=false, physical_time=false)
+function run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false, physical_time=false)
 
     prob = sim_setup(sys, subsystems)
 
@@ -71,7 +71,7 @@ function run_sim_stepping(sys, subsystems, c1, flag, sim_acc_state; save=false, 
 
                 count_prev = counter
 
-                if flag[] == false
+                if sim_state[] == SimIdle()
                     Core.println("Terminting integration")
                     break
                 end
@@ -88,7 +88,8 @@ function run_sim_stepping(sys, subsystems, c1, flag, sim_acc_state; save=false, 
         end
     end
 
-    flag[] = false
+    # If integration not iterrupted, set to idle condition after completion
+    sim_state[] = SimIdle()
 
     df = sim_logging(integrator.sol)
 

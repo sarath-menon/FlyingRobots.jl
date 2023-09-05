@@ -13,8 +13,8 @@ using OrdinaryDiffEq
 
 include("../common/types.jl")
 include("../common/utilities/utilities.jl")
+include("../simulation/simulation.jl")
 
-include("types.jl")
 include("gui_utilities.jl")
 include("gui_setup.jl")
 include("gui_plotting_2d_static.jl")
@@ -24,7 +24,6 @@ include("gui_plotting_3d_dynamic.jl")
 
 export show_visualizer, PlotData, plot_reset, plot_3d_trajectory
 export set_sim_instance
-export RealtimeSim, AcceleratedSim
 
 # read settings file 
 folder_path = pwd() * "/examples/quad_3d"

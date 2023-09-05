@@ -22,7 +22,8 @@ GLMakie.activate!(inline=false)
 using MtkLibrary
 using FlyingRobots
 
-using FlyingRobots.Gui: SimAccMode, RealtimeSim, AcceleratedSim
+import FlyingRobots.Simulation: SimAccMode, SimState, SimIdle, SimRunning
+import FlyingRobots.Simulation: RealtimeSim, AcceleratedSim
 
 include("mtk_models.jl")
 include("types.jl")
@@ -56,24 +57,28 @@ sys, subsystems = fetch(system_build_task)
 #df_empty = get_empty_df(sys, subsystems)
 c1 = Channel{ODESolution}(10)
 
-sim_state = Observable{Bool}(true)
+# sim_state = Observable{Bool}(true)
+sim_state = Observable{SimState}()
 sim_acc_state = Observable{SimAccMode}()
+
+sim_state[]
+sim_acc_state[]
 
 let
     obs_func = on(sim_state, weak=true) do val
-        if sim_state[] == true
+        if sim_state[] == SimRunning()
 
             if sim_acc_state[] == RealtimeSim()
+                Core.println("Starting Realtime simulation")
+
                 FlyingRobots.Gui.plot_reset(plot_elements)
                 gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
                 @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
-                Core.println("Starting Realtime simulation")
-
 
             elseif sim_acc_state[] == AcceleratedSim()
-                @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
                 Core.println("Starting Accelerated simulation")
 
+                @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
                 df = fetch(sim_task)
                 FlyingRobots.Gui.set_sim_instance(plot_elements, df)
                 FlyingRobots.Gui.plot_reset(plot_elements)
@@ -85,9 +90,10 @@ let
 
 end
 
-
-
 obs_func = nothing
+
+gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
+@time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
@@ -95,8 +101,8 @@ obs_func = nothing
 @time sim_task = @async run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
 df = fetch(sim_task)
 
-sim_state[] = false
-sim_state[] = true
+sim_acc_state[]
+sim_state[]
 
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()

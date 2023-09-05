@@ -20,10 +20,19 @@ end FlyingRobots
 include("common/types.jl")
 include("common/utilities/utilities.jl")
 
-include("control/control.jl")
+include("simulation/simulation.jl")
+using .Simulation
+
 include("gui/gui.jl")
+using .Gui
+
+include("control/control.jl")
+
+
 include("computer/computer.jl")
 include("dynamics/dynamics.jl")
+
+
 
 using .Dynamics
 using .Computer

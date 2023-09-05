@@ -1,3 +1,7 @@
+
+import ..Simulation: SimAccMode, SimState, SimIdle, SimRunning
+import ..Simulation: RealtimeSim, AcceleratedSim
+
 function show_visualizer()
 
     set_theme!(backgroundcolor=:black, textcolor=:white)
@@ -5,7 +9,7 @@ function show_visualizer()
     sim_time = Observable{Float64}(0.0)
 
     anim_state = Observable{Bool}(false)
-    sim_state = Observable{Bool}(false)
+    sim_state = Observable{SimState}(SimIdle())
     sim_acc_state = Observable{SimAccMode}(AcceleratedSim())
 
     # to store plot elements
@@ -466,19 +470,17 @@ function define_interactions(elements, sim_time)
 
     # start stepping sim if start_sim_btn is clicked
     on(start_sim_btn.clicks) do clicks
-
-        Core.println("Starting simulation")
-
         # if sim is not already running, start sim
-        if sim_state[] == false
+        if sim_state[] == SimIdle()
 
             # start_3d_animation(elements)
-            sim_state[] = true
+            sim_state[] = SimRunning()
             start_sim_btn.label = "Stop Sim"
             Core.println("Start sim button pressed")
 
-        else
-            sim_state[] = false
+            # if sim is running, stop sim
+        elseif sim_state[] == SimRunning()
+            sim_state[] = SimIdle()
             start_sim_btn.label = "Start Sim"
             Core.println("Stop sim button pressed")
         end
