@@ -54,7 +54,7 @@ flight_controller = create_computer("stm32")
 sys, subsystems = fetch(system_build_task)
 
 ## Testing
-#df_empty = get_empty_df(sys, subsystems)
+df_empty = get_empty_df(sys, subsystems)
 c1 = Channel{ODESolution}(10)
 
 # sim_cmd = Observable{Bool}(true)
@@ -64,36 +64,52 @@ sim_acc_mode = Observable{SimAccMode}()
 sim_cmd[]
 sim_acc_mode[]
 
-let
-    obs_func = on(sim_cmd, weak=true) do val
-        if sim_cmd[] == SimRunning()
+# let
+#     obs_func = on(sim_cmd, weak=true) do val
+#         if sim_cmd[] == SimRunning()
 
-            if sim_acc_mode[] == RealtimeSim()
-                Core.println("Starting Realtime simulation")
+#             if sim_acc_mode[] == RealtimeSim()
+#                 Core.println("Starting Realtime simulation")
 
-                FlyingRobots.Gui.plot_reset(plot_elements)
-                gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
-                @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+#                 # # clear existing plot data 
+#                 # FlyingRobots.Gui.plot_reset(plot_elements)
 
-            elseif sim_acc_mode[] == AcceleratedSim()
-                Core.println("Starting Accelerated simulation")
+#                 # start the realtime plotter
+#                 gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
 
-                @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
-                df = fetch(sim_task)
-                FlyingRobots.Gui.set_sim_instance(plot_elements, df)
-                FlyingRobots.Gui.plot_reset(plot_elements)
-                FlyingRobots.Gui.plot_position(plot_elements)
-            end
-        end
+#                 # run sim on 2nd thread
+#                 @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
 
-    end
+#             elseif sim_acc_mode[] == AcceleratedSim()
+#                 Core.println("Starting Accelerated simulation")
 
+#                 # clear existing plot data 
+#                 FlyingRobots.Gui.plot_reset(plot_elements)
+
+#                 # run sim on 2nd thread
+#                 @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+#                 df = fetch(sim_task)
+
+#                 # plot the result
+#                 FlyingRobots.Gui.set_sim_instance(plot_elements, df)
+#                 FlyingRobots.Gui.plot_position(plot_elements)
+#             end
+#         end
+#     end
+# end
+
+# obs_func = nothing
+
+if istaskdone(gui_dynamic_plotter_task)
+    gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
+    @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+
+else
+    Core.println("Killing Old Gui 3d plotter is still alive ")
+    schedule(gui_dynamic_plotter_task, 0; error=true)
 end
 
-obs_func = nothing
 
-gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
-@time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
