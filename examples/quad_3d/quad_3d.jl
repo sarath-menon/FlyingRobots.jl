@@ -57,28 +57,28 @@ sys, subsystems = fetch(system_build_task)
 #df_empty = get_empty_df(sys, subsystems)
 c1 = Channel{ODESolution}(10)
 
-# sim_state = Observable{Bool}(true)
-sim_state = Observable{SimState}()
-sim_acc_state = Observable{SimAccMode}()
+# sim_cmd = Observable{Bool}(true)
+sim_cmd = Observable{SimState}()
+sim_acc_mode = Observable{SimAccMode}()
 
-sim_state[]
-sim_acc_state[]
+sim_cmd[]
+sim_acc_mode[]
 
 let
-    obs_func = on(sim_state, weak=true) do val
-        if sim_state[] == SimRunning()
+    obs_func = on(sim_cmd, weak=true) do val
+        if sim_cmd[] == SimRunning()
 
-            if sim_acc_state[] == RealtimeSim()
+            if sim_acc_mode[] == RealtimeSim()
                 Core.println("Starting Realtime simulation")
 
                 FlyingRobots.Gui.plot_reset(plot_elements)
                 gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
-                @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
+                @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
 
-            elseif sim_acc_state[] == AcceleratedSim()
+            elseif sim_acc_mode[] == AcceleratedSim()
                 Core.println("Starting Accelerated simulation")
 
-                @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
+                @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
                 df = fetch(sim_task)
                 FlyingRobots.Gui.set_sim_instance(plot_elements, df)
                 FlyingRobots.Gui.plot_reset(plot_elements)
@@ -93,34 +93,34 @@ end
 obs_func = nothing
 
 gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
-@time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
+@time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
-# @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_state; save=false)
-@time sim_task = @async run_sim_stepping(sys, subsystems, c1, sim_state, sim_acc_state; save=false)
+# @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd; save=false)
+@time sim_task = @async run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
 df = fetch(sim_task)
 
-sim_acc_state[]
-sim_state[]
+sim_acc_mode[]
+sim_cmd[]
 
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()
 FlyingRobots.Gui.plot_reset(plot_elements)
 
 # connect observables
-connect!(sim_state, plot_elements[:sim_state])
-connect!(sim_acc_state, plot_elements[:sim_acc_state])
+connect!(sim_cmd, plot_elements[:sim_cmd])
+connect!(sim_acc_mode, plot_elements[:sim_acc_mode])
 
 FlyingRobots.Gui.set_sim_instance(plot_elements, df)
-# FlyingRobots.Gui.set_sim_flag(plot_elements, sim_state)
+# FlyingRobots.Gui.set_sim_flag(plot_elements, sim_cmd)
 
 
 FlyingRobots.Gui.plot_position(plot_elements)
 FlyingRobots.Gui.plot_orientation(plot_elements)
 FlyingRobots.Gui.plot_control_input(plot_elements, motor_thrust_to_body_thrust)
 
-@time sim_state = FlyingRobots.Gui.start_3d_animation(plot_elements)
+@time sim_cmd = FlyingRobots.Gui.start_3d_animation(plot_elements)
 
 end
 

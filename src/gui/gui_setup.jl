@@ -9,15 +9,15 @@ function show_visualizer()
     sim_time = Observable{Float64}(0.0)
 
     anim_state = Observable{Bool}(false)
-    sim_state = Observable{SimState}(SimIdle())
-    sim_acc_state = Observable{SimAccMode}(AcceleratedSim())
+    sim_cmd = Observable{SimState}(SimIdle())
+    sim_acc_mode = Observable{SimAccMode}(AcceleratedSim())
 
     # to store plot elements
     elements = Dict()
 
     elements[:anim_state] = anim_state
-    elements[:sim_state] = sim_state
-    elements[:sim_acc_state] = sim_acc_state
+    elements[:sim_cmd] = sim_cmd
+    elements[:sim_acc_mode] = sim_acc_mode
 
     elements[:sim_time] = sim_time
 
@@ -439,8 +439,8 @@ function define_interactions(elements, sim_time)
 
     time_title = elements[:titles][:time_title]
     anim_state = elements[:anim_state]
-    sim_state = elements[:sim_state]
-    sim_acc_state = elements[:sim_acc_state]
+    sim_cmd = elements[:sim_cmd]
+    sim_acc_mode = elements[:sim_acc_mode]
 
     # to set time in title
     on(sim_time) do time
@@ -471,16 +471,16 @@ function define_interactions(elements, sim_time)
     # start stepping sim if start_sim_btn is clicked
     on(start_sim_btn.clicks) do clicks
         # if sim is not already running, start sim
-        if sim_state[] == SimIdle()
+        if sim_cmd[] == SimIdle()
 
             # start_3d_animation(elements)
-            sim_state[] = SimRunning()
+            sim_cmd[] = SimRunning()
             start_sim_btn.label = "Stop Sim"
             Core.println("Start sim button pressed")
 
             # if sim is running, stop sim
-        elseif sim_state[] == SimRunning()
-            sim_state[] = SimIdle()
+        elseif sim_cmd[] == SimRunning()
+            sim_cmd[] = SimIdle()
             start_sim_btn.label = "Start Sim"
             Core.println("Stop sim button pressed")
         end
@@ -494,13 +494,13 @@ function define_interactions(elements, sim_time)
             Core.println("Sim mode set to Accelerated")
             sim_acc_toggle_label.text = "Accelerated Sim"
 
-            sim_acc_state[] = AcceleratedSim()
+            sim_acc_mode[] = AcceleratedSim()
 
         else
             Core.println("Sim mode set to Realtime")
             sim_acc_toggle_label.text = "Realtime Sim"
 
-            sim_acc_state[] = RealtimeSim()
+            sim_acc_mode[] = RealtimeSim()
         end
     end
 end
@@ -509,6 +509,6 @@ function set_sim_instance(elements, df::DataFrame)
     elements[:df] = df
 end
 
-# function set_sim_flag(elements, sim_state)
-#     elements[:sim_state] = sim_state
+# function set_sim_flag(elements, sim_cmd)
+#     elements[:sim_cmd] = sim_cmd
 # end

@@ -3,7 +3,7 @@
 
 function gui_dynamic_plotter(elements, c1, df_empty)
 
-    sim_state = elements[:sim_state]
+    sim_cmd = elements[:sim_cmd]
 
     # df_empty = DataFrame()
     # delete all existing entries in the dataframe
@@ -49,7 +49,7 @@ function gui_dynamic_plotter(elements, c1, df_empty)
 
             notify(condition)
 
-            if sim_state[] == false
+            if sim_cmd[] == false
                 break
             end
         end
@@ -110,14 +110,14 @@ function gui_dynamic_plotter(elements, c1, df_empty)
         # do the actual plotting
         plot_position_dynamic(elements, df_empty)
 
-        if sim_state[] == false
+        if sim_cmd[] == false
             break
         end
 
         # ## @show sol.t[end]
         # Core.println(df[!, "timestamp"])
 
-        if sim_state[] == false
+        if sim_cmd[] == false
             if isempty(c1)
                 break
             end
