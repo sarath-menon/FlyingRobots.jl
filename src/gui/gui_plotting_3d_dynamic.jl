@@ -44,12 +44,12 @@ function gui_dynamic_plotter(elements, c1, df_empty)
             end
 
             pushfirst!(c_buffer, sol)
-            # Core.println("Pushed to c_buffer:")
+
             # Core.println("Buffer length: receiver", length(c_buffer))
 
             notify(condition)
 
-            if sim_cmd[] == false
+            if sim_cmd[] == SimIdle()
                 break
             end
         end
@@ -58,14 +58,13 @@ function gui_dynamic_plotter(elements, c1, df_empty)
 
     #Core.println("Waiting for sol data")
     Core.println("Waiting to be notified:")
-    wait(condition)
+    # wait(condition)
+    wait_until(condition; timeout=10)
 
     while true
 
         # # get the latest ODESolution subset from the channel
         # sol = take!(c1)
-
-        sol = pop!(c_buffer)
 
         # # to demonstrate use of circular buffer
         # sleep(1.0)
@@ -73,6 +72,8 @@ function gui_dynamic_plotter(elements, c1, df_empty)
         while length(c_buffer) == 0
             sleep(0.01)
         end
+
+        sol = pop!(c_buffer)
 
         # convert the ODESolution to a dataframe
         df = sim_logging(sol)
@@ -110,14 +111,9 @@ function gui_dynamic_plotter(elements, c1, df_empty)
         # do the actual plotting
         plot_position_dynamic(elements, df_empty)
 
-        if sim_cmd[] == false
-            break
-        end
-
-        # ## @show sol.t[end]
         # Core.println(df[!, "timestamp"])
 
-        if sim_cmd[] == false
+        if sim_cmd[] == SimIdle()
             if isempty(c1)
                 break
             end
@@ -125,4 +121,12 @@ function gui_dynamic_plotter(elements, c1, df_empty)
     end
 
     Core.println("Receiver task exiting")
+end
+
+function wait_until(c::Condition; timeout::Real)
+    timer = Timer(timeout) do t
+        notify(c)
+    end
+
+    return wait(c)
 end
