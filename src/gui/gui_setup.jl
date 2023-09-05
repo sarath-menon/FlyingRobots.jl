@@ -19,6 +19,8 @@ function show_visualizer()
     elements[:sim_cmd] = sim_cmd
     elements[:sim_acc_mode] = sim_acc_mode
 
+    elements[:plotter_3d_running] = false
+
     elements[:sim_time] = sim_time
 
     plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})

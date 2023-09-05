@@ -5,6 +5,15 @@ function gui_dynamic_plotter(elements, c1, df_empty)
 
     sim_cmd = elements[:sim_cmd]
 
+    if elements[:plotter_3d_running] == true
+        Core.println("An instance of 3D plotter is already running")
+        return 0
+
+    else
+        elements[:plotter_3d_running] = true
+    end
+
+
     # df_empty = DataFrame()
     # delete all existing entries in the dataframe
     deleteat!(df_empty, :)
@@ -58,8 +67,17 @@ function gui_dynamic_plotter(elements, c1, df_empty)
 
     #Core.println("Waiting for sol data")
     Core.println("Waiting to be notified:")
-    # wait(condition)
-    wait_until(condition; timeout=10)
+
+    # to  shit down receiver if sim data not received within timeout
+    timeout = 10
+    Timer(timeout) do t
+        Core.println("Shutting down GUI plotter - no data received from sim ")
+        elements[:plotter_3d_running] = false
+        return 0
+    end
+
+    wait(condition)
+
 
     while true
 
@@ -121,12 +139,23 @@ function gui_dynamic_plotter(elements, c1, df_empty)
     end
 
     Core.println("Receiver task exiting")
+    elements[:plotter_3d_running] = false
 end
 
-function wait_until(c::Condition; timeout::Real)
-    timer = Timer(timeout) do t
-        notify(c)
-    end
+# function wait_until(c::Condition; timeout::Real)
+#     timer = Timer(timeout) do t
+#         notify(c)
+#     end
 
-    return wait(c)
+#     return wait(c)
+# end
+
+function wait_until(c::Condition; timeout::Real)
+    # timer = Timer(timeout) do t
+
+    #     Core.println("Shutting down GUI plotter - no data received from sim ")
+    #     return 0
+    # end
+
+    # return wait(c)
 end
