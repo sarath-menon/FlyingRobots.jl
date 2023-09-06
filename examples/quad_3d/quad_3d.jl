@@ -105,30 +105,30 @@ plot_elements[:receiver_buffer] = c_buffer
 
 # obs_func = nothing
 
-# sim_gui_channel_lock = ReentrantLock()
-# gui_recv_buffer_lock = ReentrantLock()
+function start_realtime_sim(plot_elements, c1, df_empty)
 
-sim_gui_channel_lock = Threads.SpinLock()
-gui_recv_buffer_lock = Threads.SpinLock()
+    sim_cmd = plot_elements[:sim_cmd]
+    sim_acc_mode = plot_elements[:sim_acc_mode]
 
-gui_receiver_task = @async FlyingRobots.Gui.gui_receiver(plot_elements, c1, sim_gui_channel_lock)
+    sim_gui_channel_lock = plot_elements[:locks][:sim_channel] = Threads.SpinLock()
+    gui_recv_buffer_lock = plot_elements[:locks][:recv_buffer] = Threads.SpinLock()
 
-gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, df_empty, gui_recv_buffer_lock)
+    @async FlyingRobots.Gui.gui_receiver(plot_elements, c1, sim_gui_channel_lock)
 
-sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+    @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, df_empty, gui_recv_buffer_lock)
+
+    sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+
+    return sim_task
+end
+
+start_realtime_sim(plot_elements, c1, df_empty)
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
 # @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd; save=false)
 @time sim_task = @async run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
 df = fetch(sim_task)
-
-sim_acc_mode[]
-sim_cmd[]
-
-#plot_elements[:plotter_3d_running] = false
-
-plot_elements[:receiver_buffer]
 
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()
