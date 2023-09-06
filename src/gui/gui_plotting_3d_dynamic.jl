@@ -63,19 +63,16 @@ function gui_receiver(elements, c1, lock_handle)
 
     finally
         # elements[:plotter_3d_running] = false
+        delete!(elements, :receiver_buffer)
         unlock(lock_handle)
-
         Core.println("Gui receiver terminated")
     end
-
 end
 
 
 function gui_dynamic_plotter(elements, df_empty, lock_handle)
 
     sim_cmd = elements[:sim_cmd]
-
-    lock(lock_handle)
 
     # if elements[:plotter_3d_running] == true
     #     Core.println("An instance of 3D plotter is already running")
@@ -103,8 +100,13 @@ function gui_dynamic_plotter(elements, df_empty, lock_handle)
 
     state_plots = elements[:plots_2d][:state_plots]
 
-    c_buffer = elements[:receiver_buffer]
+    if haskey(elements, :receiver_buffer)
+        c_buffer = elements[:receiver_buffer]
+    else
+        throw("Gui receiver must be running to used 3d plotter")
+    end
 
+    lock(lock_handle)
 
     # #Core.println("Waiting for sol data")
     # Core.println("Waiting to be notified:")
