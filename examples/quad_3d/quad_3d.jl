@@ -105,8 +105,12 @@ plot_elements[:receiver_buffer] = c_buffer
 
 # obs_func = nothing
 
-sim_gui_channel_lock = ReentrantLock()
-gui_recv_buffer_lock = ReentrantLock()
+# sim_gui_channel_lock = ReentrantLock()
+# gui_recv_buffer_lock = ReentrantLock()
+
+sim_gui_channel_lock = Threads.SpinLock()
+gui_recv_buffer_lock = Threads.SpinLock()
+
 
 gui_receiver_task = begin
 
@@ -132,7 +136,6 @@ gui_dynamic_plotter_task = begin
         @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, df_empty, gui_recv_buffer_lock)
     end
 end
-
 
 sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
 
