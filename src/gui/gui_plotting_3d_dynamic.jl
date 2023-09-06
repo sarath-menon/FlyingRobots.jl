@@ -7,13 +7,15 @@ function gui_receiver(elements, c1)
 
     sim_cmd = elements[:sim_cmd]
 
-    if elements[:plotter_3d_running] == true
-        Core.println("An instance of 3D plotter is already running")
-        return
+    # if elements[:plotter_3d_running] == true
+    #     Core.println("An instance of 3D plotter is already running")
+    #     return
 
-    else
-        elements[:plotter_3d_running] = true
-    end
+    # else
+    #     elements[:plotter_3d_running] = true
+    # end
+
+    elements[:plotter_3d_running] = true
 
 
     # df_empty = DataFrame()
@@ -48,8 +50,6 @@ function gui_receiver(elements, c1)
 
             if sim_cmd[] == SimIdle()
                 if isempty(c1)
-                    Core.println("Terminting gui receiver")
-                    elements[:plotter_3d_running] = false
                     break
                 end
             end
@@ -60,9 +60,12 @@ function gui_receiver(elements, c1)
         end
 
     catch e
-        println("Exception: Terminting gui receiver")
+        println("Exception: Killing gui receiver")
+
+    finally
         elements[:plotter_3d_running] = false
-        return nothing
+
+        Core.println("Gui receiver terminated")
     end
 
 end
