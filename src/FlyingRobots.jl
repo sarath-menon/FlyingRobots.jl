@@ -10,6 +10,8 @@ using MtkLibrary
 using StaticArrays
 using Rotations
 
+import PrecompileTools
+
 # Use the README as the module docs
 @doc let
     path = joinpath(dirname(@__DIR__), "README.md")
@@ -28,13 +30,20 @@ using .Gui
 
 include("control/control.jl")
 
-
 include("computer/computer.jl")
 include("dynamics/dynamics.jl")
 
-
-
 using .Dynamics
 using .Computer
+
+PrecompileTools.@setup_workload begin
+
+    PrecompileTools.@compile_workload begin
+
+        # show visualizer (Thread 1)
+        Gui.show_visualizer()
+
+    end
+end
 
 end
