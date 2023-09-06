@@ -5,25 +5,22 @@
 
 function gui_receiver(elements, c1, lock_handle)
 
-    sim_cmd = elements[:sim_cmd]
-
-    lock(lock_handle)
-
-    # circular c_buffer
-    c_buffer_len = 10
-    c_buffer = CircularDeque{ODESolution}(c_buffer_len)
-
-    elements[:receiver_buffer] = c_buffer
-
-    Core.println("Waiting for sim data")
-
     try
+        sim_cmd = elements[:sim_cmd]
+
+        lock(lock_handle)
+
+        # circular c_buffer
+        c_buffer_len = 10
+        c_buffer = CircularDeque{ODESolution}(c_buffer_len)
+
+        elements[:receiver_buffer] = c_buffer
+
+        Core.println("Waiting for sim data")
+
         while true
             # take data from the channel
             sol = take!(c1)
-
-            # Core.println("Received data:")
-            first_received_flag = true
 
             if length(c_buffer) == c_buffer_len
                 pop!(c_buffer)
@@ -38,7 +35,7 @@ function gui_receiver(elements, c1, lock_handle)
             end
         end
 
-    catch e
+    catch
         println("Exception: Killing gui receiver")
 
     finally
@@ -51,35 +48,36 @@ end
 
 function gui_dynamic_plotter(elements, df_empty, lock_handle)
 
-    sim_cmd = elements[:sim_cmd]
-
-    deleteat!(df_empty, :)
-
-    # axis limits
-    x_range = 20
-
-    x_low = 0
-    x_high = x_range
-
-    y_max = ones(3) * 0.1
-    y_max_padding = 0.1
-
-    y_local_max = zeros(3)
-
-    # set the initial axis limits
-    set_2dplot_axislimits(elements; x_low=x_low, x_high=x_high, y_max=y_max)
-
-    state_plots = elements[:plots_2d][:state_plots]
-
-    if haskey(elements, :receiver_buffer)
-        c_buffer = elements[:receiver_buffer]
-    else
-        throw("Gui receiver must be running to used 3d plotter")
-    end
-
-    lock(lock_handle)
-
     try
+
+        sim_cmd = elements[:sim_cmd]
+
+        deleteat!(df_empty, :)
+
+        # axis limits
+        x_range = 20
+
+        x_low = 0
+        x_high = x_range
+
+        y_max = ones(3) * 0.1
+        y_max_padding = 0.1
+
+        y_local_max = zeros(3)
+
+        # set the initial axis limits
+        set_2dplot_axislimits(elements; x_low=x_low, x_high=x_high, y_max=y_max)
+
+        state_plots = elements[:plots_2d][:state_plots]
+
+        if haskey(elements, :receiver_buffer)
+            c_buffer = elements[:receiver_buffer]
+        else
+            throw("Gui receiver must be running to used 3d plotter")
+        end
+
+        lock(lock_handle)
+
         while true
 
             while length(c_buffer) == 0
