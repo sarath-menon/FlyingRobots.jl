@@ -7,13 +7,13 @@ function gui_receiver(elements, c1)
 
     sim_cmd = elements[:sim_cmd]
 
-    # if elements[:plotter_3d_running] == true
-    #     Core.println("An instance of 3D plotter is already running")
-    #     return 0
+    if elements[:plotter_3d_running] == true
+        Core.println("An instance of 3D plotter is already running")
+        return
 
-    # else
-    #     elements[:plotter_3d_running] = true
-    # end
+    else
+        elements[:plotter_3d_running] = true
+    end
 
 
     # df_empty = DataFrame()
@@ -30,31 +30,39 @@ function gui_receiver(elements, c1)
 
     Core.println("Waiting for sim data")
 
-    while true
-        # take data from the channel
-        sol = take!(c1)
+    try
+        while true
+            # take data from the channel
+            sol = take!(c1)
 
-        Core.println("took data from channel")
+            Core.println("took data from channel")
 
-        # Core.println("Received data:")
-        first_received_flag = true
+            # Core.println("Received data:")
+            first_received_flag = true
 
-        if length(c_buffer) == c_buffer_len
-            pop!(c_buffer)
-        end
-
-        pushfirst!(c_buffer, sol)
-
-        if sim_cmd[] == SimIdle()
-            if isempty(c1)
-                Core.println("Terminting gui receiver")
-                break
+            if length(c_buffer) == c_buffer_len
+                pop!(c_buffer)
             end
+
+            pushfirst!(c_buffer, sol)
+
+            if sim_cmd[] == SimIdle()
+                if isempty(c1)
+                    Core.println("Terminting gui receiver")
+                    elements[:plotter_3d_running] = false
+                    break
+                end
+            end
+
+            # Core.println("Buffer length: receiver", length(c_buffer))
+
+            # notify(condition)
         end
 
-        # Core.println("Buffer length: receiver", length(c_buffer))
-
-        # notify(condition)
+    catch e
+        println("Exception: Terminting gui receiver")
+        elements[:plotter_3d_running] = false
+        return nothing
     end
 
 end
@@ -153,7 +161,7 @@ function gui_dynamic_plotter(elements, df_empty)
         # do the actual plotting
         plot_position_dynamic(elements, df_empty)
 
-        Core.println(df[!, "timestamp"])
+        # Core.println(df[!, "timestamp"])
 
         if sim_cmd[] == SimIdle()
             break
