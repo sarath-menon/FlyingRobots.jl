@@ -1,28 +1,78 @@
 
 
 
-function gui_dynamic_plotter(elements, c1, df_empty)
+
+
+function gui_receiver(elements, c1)
 
     sim_cmd = elements[:sim_cmd]
 
-    if elements[:plotter_3d_running] == true
-        Core.println("An instance of 3D plotter is already running")
-        return 0
+    # if elements[:plotter_3d_running] == true
+    #     Core.println("An instance of 3D plotter is already running")
+    #     return 0
 
-    else
-        elements[:plotter_3d_running] = true
-    end
+    # else
+    #     elements[:plotter_3d_running] = true
+    # end
 
 
     # df_empty = DataFrame()
     # delete all existing entries in the dataframe
-    deleteat!(df_empty, :)
+    # deleteat!(df_empty, :)
 
-    # circular c_buffer
+    # # circular c_buffer
     c_buffer_len = 10
     c_buffer = CircularDeque{ODESolution}(c_buffer_len)
-    first_received_flag = false
-    condition = Condition()
+    # first_received_flag = false
+    # condition = Condition()
+
+    elements[:receiver_buffer] = c_buffer
+
+    Core.println("Waiting for sim data")
+
+    while true
+        # take data from the channel
+        sol = take!(c1)
+
+        Core.println("took data from channel")
+
+        # Core.println("Received data:")
+        first_received_flag = true
+
+        if length(c_buffer) == c_buffer_len
+            pop!(c_buffer)
+        end
+
+        pushfirst!(c_buffer, sol)
+
+        if sim_cmd[] == SimIdle()
+            if isempty(c1)
+                Core.println("Terminting gui receiver")
+                break
+            end
+        end
+
+        # Core.println("Buffer length: receiver", length(c_buffer))
+
+        # notify(condition)
+    end
+
+end
+
+
+function gui_dynamic_plotter(elements, df_empty)
+
+    sim_cmd = elements[:sim_cmd]
+
+    # if elements[:plotter_3d_running] == true
+    #     Core.println("An instance of 3D plotter is already running")
+    #     return 0
+
+    # else
+    #     elements[:plotter_3d_running] = true
+    # end
+
+    deleteat!(df_empty, :)
 
     # axis limits
     x_range = 20
@@ -40,58 +90,32 @@ function gui_dynamic_plotter(elements, c1, df_empty)
 
     state_plots = elements[:plots_2d][:state_plots]
 
-    @async begin
-        while true
-            # take data from the channel
-            sol = take!(c1)
+    c_buffer = elements[:receiver_buffer]
 
-            # Core.println("Received data:")
-            first_received_flag = true
 
-            if length(c_buffer) == c_buffer_len
-                pop!(c_buffer)
-            end
+    # #Core.println("Waiting for sol data")
+    # Core.println("Waiting to be notified:")
 
-            pushfirst!(c_buffer, sol)
+    # # to  shit down receiver if sim data not received within timeout
+    # timeout = 10
+    # Timer(timeout) do t
+    #     Core.println("Shutting down GUI plotter - no data received from sim ")
+    #     elements[:plotter_3d_running] = false
+    #     return 0
+    # end
 
-            # Core.println("Buffer length: receiver", length(c_buffer))
-
-            notify(condition)
-
-            if sim_cmd[] == SimIdle()
-                break
-            end
-        end
-
-    end
-
-    #Core.println("Waiting for sol data")
-    Core.println("Waiting to be notified:")
-
-    # to  shit down receiver if sim data not received within timeout
-    timeout = 10
-    Timer(timeout) do t
-        Core.println("Shutting down GUI plotter - no data received from sim ")
-        elements[:plotter_3d_running] = false
-        return 0
-    end
-
-    wait(condition)
+    # wait(condition)
 
 
     while true
-
-        # # get the latest ODESolution subset from the channel
-        # sol = take!(c1)
-
-        # # to demonstrate use of circular buffer
-        # sleep(1.0)
 
         while length(c_buffer) == 0
             sleep(0.01)
         end
 
         sol = pop!(c_buffer)
+
+        Core.println("Took data from buffer")
 
         # convert the ODESolution to a dataframe
         df = sim_logging(sol)
@@ -129,17 +153,14 @@ function gui_dynamic_plotter(elements, c1, df_empty)
         # do the actual plotting
         plot_position_dynamic(elements, df_empty)
 
-        # Core.println(df[!, "timestamp"])
+        Core.println(df[!, "timestamp"])
 
         if sim_cmd[] == SimIdle()
-            if isempty(c1)
-                break
-            end
+            break
         end
     end
 
-    Core.println("Receiver task exiting")
-    elements[:plotter_3d_running] = false
+    Core.println("Gui 3d plotter task exiting")
 end
 
 # function wait_until(c::Condition; timeout::Real)
@@ -151,11 +172,11 @@ end
 # end
 
 function wait_until(c::Condition; timeout::Real)
-    # timer = Timer(timeout) do t
+    timer = Timer(timeout) do t
 
-    #     Core.println("Shutting down GUI plotter - no data received from sim ")
-    #     return 0
-    # end
+        Core.println("Shutting down GUI plotter - no data received from sim ")
+        return 0
+    end
 
-    # return wait(c)
+    return wait(c)
 end
