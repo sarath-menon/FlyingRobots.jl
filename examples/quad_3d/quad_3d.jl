@@ -24,6 +24,7 @@ using FlyingRobots
 
 import FlyingRobots.Simulation: SimAccMode, SimState, SimIdle, SimRunning
 import FlyingRobots.Simulation: RealtimeSim, AcceleratedSim
+import FlyingRobots.Models: QuadcopterSystem
 
 include("mtk_models.jl")
 include("types.jl")
@@ -41,7 +42,7 @@ include("integrator_callback.jl")
 include("gui_helper.jl")
 
 # build system model (Thread 2 )
-system_build_task = @tspawnat 2 build_system_model()
+system_build_task = @tspawnat 2 QuadcopterSystem()
 
 # show visualizer (Thread 1)
 gui_setup_task = @tspawnat 1 FlyingRobots.Gui.show_visualizer()

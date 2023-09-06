@@ -32,16 +32,20 @@ include("control/control.jl")
 
 include("computer/computer.jl")
 include("dynamics/dynamics.jl")
+include("models/models.jl")
 
 using .Dynamics
 using .Computer
+using .Models
 
 PrecompileTools.@setup_workload begin
 
     PrecompileTools.@compile_workload begin
 
-        # show visualizer (Thread 1)
+
         Gui.show_visualizer()
+
+        Models.QuadcopterSystem()
 
     end
 end
