@@ -3,7 +3,7 @@
 
 
 
-function gui_receiver(elements, c1, lock_)
+function gui_receiver(elements, c1, lock_handle)
 
     sim_cmd = elements[:sim_cmd]
 
@@ -16,7 +16,7 @@ function gui_receiver(elements, c1, lock_)
     # end
 
     # elements[:plotter_3d_running] = true
-    lock(lock_)
+    lock(lock_handle)
 
 
     # df_empty = DataFrame()
@@ -37,8 +37,6 @@ function gui_receiver(elements, c1, lock_)
         while true
             # take data from the channel
             sol = take!(c1)
-
-            Core.println("took data from channel")
 
             # Core.println("Received data:")
             first_received_flag = true
@@ -65,7 +63,7 @@ function gui_receiver(elements, c1, lock_)
 
     finally
         # elements[:plotter_3d_running] = false
-        unlock(lock_)
+        unlock(lock_handle)
 
         Core.println("Gui receiver terminated")
     end
@@ -73,9 +71,11 @@ function gui_receiver(elements, c1, lock_)
 end
 
 
-function gui_dynamic_plotter(elements, df_empty)
+function gui_dynamic_plotter(elements, df_empty, lock_handle)
 
     sim_cmd = elements[:sim_cmd]
+
+    lock(lock_handle)
 
     # if elements[:plotter_3d_running] == true
     #     Core.println("An instance of 3D plotter is already running")
@@ -119,61 +119,66 @@ function gui_dynamic_plotter(elements, df_empty)
 
     # wait(condition)
 
+    try
+        while true
 
-    while true
+            while length(c_buffer) == 0
+                sleep(0.01)
+            end
 
-        while length(c_buffer) == 0
-            sleep(0.01)
-        end
+            sol = pop!(c_buffer)
 
-        sol = pop!(c_buffer)
+            # convert the ODESolution to a dataframe
+            df = sim_logging(sol)
 
-        Core.println("Took data from buffer")
+            # append it to the main dataframr
+            append!(df_empty, df)
 
-        # convert the ODESolution to a dataframe
-        df = sim_logging(sol)
+            #compute dynamic axis limits 
+            for i = 1:3
 
-        # append it to the main dataframr
-        append!(df_empty, df)
+                # check the maximum value in the data to be plotted
+                y_local_max[i] = maximum(df[!, "(quad1.rb.r(t), $i)"]) + y_max_padding
 
-        #compute dynamic axis limits 
-        for i = 1:3
+                # it's it's higher than the current y axis limits, increase the y axis limits
+                if y_local_max[i] > y_max[i]
+                    y_max[i] = y_local_max[i]
 
-            # check the maximum value in the data to be plotted
-            y_local_max[i] = maximum(df[!, "(quad1.rb.r(t), $i)"]) + y_max_padding
+                    state_plots[i].limits = (x_low, x_high, -y_max[i], y_max[i])
+                end
+            end
 
-            # it's it's higher than the current y axis limits, increase the y axis limits
-            if y_local_max[i] > y_max[i]
-                y_max[i] = y_local_max[i]
+            # check if it's time to change x axis limits
+            if df[end, "timestamp"] > x_high
 
-                state_plots[i].limits = (x_low, x_high, -y_max[i], y_max[i])
+                # set new x_range
+                x_low += x_range
+                x_high += x_range
+
+                set_2dplot_axislimits(elements; x_low=x_low, x_high=x_high, y_max=y_max)
+
+                # delete data from the prev x axis range since it's not being plotted anymore
+                deleteat!(df_empty, :)
+            end
+
+            # do the actual plotting
+            plot_position_dynamic(elements, df_empty)
+
+            # Core.println(df[!, "timestamp"])
+
+            if sim_cmd[] == SimIdle()
+                break
             end
         end
 
-        # check if it's time to change x axis limits
-        if df[end, "timestamp"] > x_high
+    catch e
+        println("Exception: Killing gui 3d plotter")
 
-            # set new x_range
-            x_low += x_range
-            x_high += x_range
+    finally
+        unlock(lock_handle)
 
-            set_2dplot_axislimits(elements; x_low=x_low, x_high=x_high, y_max=y_max)
-
-            # delete data from the prev x axis range since it's not being plotted anymore
-            deleteat!(df_empty, :)
-        end
-
-        # do the actual plotting
-        plot_position_dynamic(elements, df_empty)
-
-        # Core.println(df[!, "timestamp"])
-
-        if sim_cmd[] == SimIdle()
-            break
-        end
+        Core.println("Gui 3d plotter terminated")
     end
-
-    Core.println("Gui 3d plotter task exiting")
 end
 
 # function wait_until(c::Condition; timeout::Real)
