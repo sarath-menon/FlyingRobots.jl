@@ -7,27 +7,11 @@ function gui_receiver(elements, c1, lock_handle)
 
     sim_cmd = elements[:sim_cmd]
 
-    # if elements[:plotter_3d_running] == true
-    #     Core.println("An instance of 3D plotter is already running")
-    #     return
-
-    # else
-    #     elements[:plotter_3d_running] = true
-    # end
-
-    # elements[:plotter_3d_running] = true
     lock(lock_handle)
 
-
-    # df_empty = DataFrame()
-    # delete all existing entries in the dataframe
-    # deleteat!(df_empty, :)
-
-    # # circular c_buffer
+    # circular c_buffer
     c_buffer_len = 10
     c_buffer = CircularDeque{ODESolution}(c_buffer_len)
-    # first_received_flag = false
-    # condition = Condition()
 
     elements[:receiver_buffer] = c_buffer
 
@@ -52,17 +36,12 @@ function gui_receiver(elements, c1, lock_handle)
                     break
                 end
             end
-
-            # Core.println("Buffer length: receiver", length(c_buffer))
-
-            # notify(condition)
         end
 
     catch e
         println("Exception: Killing gui receiver")
 
     finally
-        # elements[:plotter_3d_running] = false
         delete!(elements, :receiver_buffer)
         unlock(lock_handle)
         Core.println("Gui receiver terminated")
@@ -73,14 +52,6 @@ end
 function gui_dynamic_plotter(elements, df_empty, lock_handle)
 
     sim_cmd = elements[:sim_cmd]
-
-    # if elements[:plotter_3d_running] == true
-    #     Core.println("An instance of 3D plotter is already running")
-    #     return 0
-
-    # else
-    #     elements[:plotter_3d_running] = true
-    # end
 
     deleteat!(df_empty, :)
 
@@ -107,19 +78,6 @@ function gui_dynamic_plotter(elements, df_empty, lock_handle)
     end
 
     lock(lock_handle)
-
-    # #Core.println("Waiting for sol data")
-    # Core.println("Waiting to be notified:")
-
-    # # to  shit down receiver if sim data not received within timeout
-    # timeout = 10
-    # Timer(timeout) do t
-    #     Core.println("Shutting down GUI plotter - no data received from sim ")
-    #     elements[:plotter_3d_running] = false
-    #     return 0
-    # end
-
-    # wait(condition)
 
     try
         while true
@@ -183,13 +141,7 @@ function gui_dynamic_plotter(elements, df_empty, lock_handle)
     end
 end
 
-# function wait_until(c::Condition; timeout::Real)
-#     timer = Timer(timeout) do t
-#         notify(c)
-#     end
 
-#     return wait(c)
-# end
 
 function wait_until(c::Condition; timeout::Real)
     timer = Timer(timeout) do t
