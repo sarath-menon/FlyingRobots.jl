@@ -50,24 +50,28 @@ include("integrator_callback.jl")
 # create computer 
 flight_controller = create_computer("stm32")
 
+# plotting ----------------------------------------------------
+gui_setup_task = @tspawnat 1 FlyingRobots.Gui.show_visualizer()
+
 #  get result from system build task 
 sys, subsystems = fetch(system_build_task)
+plot_elements = fetch(gui_setup_task)
 
 ## Testing
 # df_empty = get_empty_df(sys, subsystems)
 df_empty = get_empty_df(sys, subsystems)
-c1 = Channel{ODESolution}(10)
+sim_gui_ch = Channel{ODESolution}(10)
 
-# sim_cmd = Observable{Bool}(true)
-sim_cmd = Observable{SimState}()
-sim_acc_mode = Observable{SimAccMode}()
+# # sim_cmd = Observable{Bool}(true)
+# sim_cmd = Observable{SimState}()
+# sim_acc_mode = Observable{SimAccMode}()
 
-sim_cmd[]
-sim_acc_mode[]
+# sim_cmd[]
+# sim_acc_mode[]
 
-c_buffer_len = 10
-c_buffer = CircularDeque{ODESolution}(c_buffer_len)
-plot_elements[:receiver_buffer] = c_buffer
+# c_buffer_len = 10
+# c_buffer = CircularDeque{ODESolution}(c_buffer_len)
+# plot_elements[:receiver_buffer] = c_buffer
 
 # let
 #     obs_func = on(sim_cmd, weak=true) do val
@@ -80,10 +84,10 @@ plot_elements[:receiver_buffer] = c_buffer
 #                 # FlyingRobots.Gui.plot_reset(plot_elements)
 
 #                 # start the realtime plotter
-#                 gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
+#                 gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, sim_gui_ch, df_empty)
 
 #                 # run sim on 2nd thread
-#                 @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+#                 @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, sim_gui_ch, sim_cmd, sim_acc_mode; save=false)
 
 #             elseif sim_acc_mode[] == AcceleratedSim()
 #                 Core.println("Starting Accelerated simulation")
@@ -92,7 +96,7 @@ plot_elements[:receiver_buffer] = c_buffer
 #                 FlyingRobots.Gui.plot_reset(plot_elements)
 
 #                 # run sim on 2nd thread
-#                 @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+#                 @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, sim_gui_ch, sim_cmd, sim_acc_mode; save=false)
 #                 df = fetch(sim_task)
 
 #                 # plot the result
@@ -105,29 +109,29 @@ plot_elements[:receiver_buffer] = c_buffer
 
 # obs_func = nothing
 
-function start_realtime_sim(plot_elements, c1, df_empty)
+function start_realtime_sim(plot_elements, sim_gui_ch, df_empty)
 
     sim_cmd = plot_elements[:sim_cmd]
     sim_acc_mode = plot_elements[:sim_acc_mode]
 
-    sim_gui_channel_lock = plot_elements[:locks][:sim_channel] = Threads.SpinLock()
-    gui_recv_buffer_lock = plot_elements[:locks][:recv_buffer] = Threads.SpinLock()
+    sim_gui_channel_lock = plot_elements[:locks][:sim_channel]
+    gui_recv_buffer_lock = plot_elements[:locks][:recv_buffer]
 
-    @async FlyingRobots.Gui.gui_receiver(plot_elements, c1, sim_gui_channel_lock)
-
+    @async FlyingRobots.Gui.gui_receiver(plot_elements, sim_gui_ch, sim_gui_channel_lock)
     @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, df_empty, gui_recv_buffer_lock)
 
-    sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+    sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, sim_gui_ch, sim_cmd, sim_acc_mode; save=false)
 
     return sim_task
 end
 
-start_realtime_sim(plot_elements, c1, df_empty)
+start_realtime_sim(plot_elements, sim_gui_ch, df_empty)
+
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
-# @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd; save=false)
-@time sim_task = @async run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+# @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, sim_gui_ch, sim_cmd; save=false)
+@time sim_task = @async run_sim_stepping(sys, subsystems, sim_gui_ch, sim_cmd, sim_acc_mode; save=false)
 df = fetch(sim_task)
 
 # plotting ----------------------------------------------------
