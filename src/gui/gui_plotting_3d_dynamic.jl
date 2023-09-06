@@ -136,6 +136,7 @@ function gui_dynamic_plotter(elements, df_empty, lock_handle)
 
     catch e
         println("Exception: Killing gui 3d plotter")
+        println(e)
 
     finally
         unlock(lock_handle)
