@@ -54,6 +54,7 @@ flight_controller = create_computer("stm32")
 sys, subsystems = fetch(system_build_task)
 
 ## Testing
+# df_empty = get_empty_df(sys, subsystems)
 df_empty = get_empty_df(sys, subsystems)
 c1 = Channel{ODESolution}(10)
 
@@ -63,6 +64,10 @@ sim_acc_mode = Observable{SimAccMode}()
 
 sim_cmd[]
 sim_acc_mode[]
+
+c_buffer_len = 10
+c_buffer = CircularDeque{ODESolution}(c_buffer_len)
+plot_elements[:receiver_buffer] = c_buffer
 
 # let
 #     obs_func = on(sim_cmd, weak=true) do val
@@ -100,16 +105,24 @@ sim_acc_mode[]
 
 # obs_func = nothing
 
-if istaskdone(gui_dynamic_plotter_task)
-    gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
-    @time sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+sim_gui_channel_lock = ReentrantLock()
 
-else
-    Core.println("Killing Old Gui 3d plotter is still alive ")
-    schedule(gui_dynamic_plotter_task, 0; error=true)
+gui_receiver_task = begin
+
+    # if plot_elements[:plotter_3d_running] == true
+    if islocked(sim_gui_channel_lock) == true
+        Core.println("An instance of 3D plotter is already running")
+        return
+    else
+        @async FlyingRobots.Gui.gui_receiver(plot_elements, c1, sim_gui_channel_lock)
+    end
 end
 
 
+# gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
+sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
+
+gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, df_empty)
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
@@ -119,6 +132,10 @@ df = fetch(sim_task)
 
 sim_acc_mode[]
 sim_cmd[]
+
+#plot_elements[:plotter_3d_running] = false
+
+plot_elements[:receiver_buffer]
 
 # plotting ----------------------------------------------------
 plot_elements = FlyingRobots.Gui.show_visualizer()

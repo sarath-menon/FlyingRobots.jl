@@ -3,7 +3,7 @@
 
 
 
-function gui_receiver(elements, c1)
+function gui_receiver(elements, c1, lock_)
 
     sim_cmd = elements[:sim_cmd]
 
@@ -15,7 +15,8 @@ function gui_receiver(elements, c1)
     #     elements[:plotter_3d_running] = true
     # end
 
-    elements[:plotter_3d_running] = true
+    # elements[:plotter_3d_running] = true
+    lock(lock_)
 
 
     # df_empty = DataFrame()
@@ -63,7 +64,8 @@ function gui_receiver(elements, c1)
         println("Exception: Killing gui receiver")
 
     finally
-        elements[:plotter_3d_running] = false
+        # elements[:plotter_3d_running] = false
+        unlock(lock_)
 
         Core.println("Gui receiver terminated")
     end
