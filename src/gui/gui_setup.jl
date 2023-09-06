@@ -19,7 +19,9 @@ function show_visualizer()
     elements[:sim_cmd] = sim_cmd
     elements[:sim_acc_mode] = sim_acc_mode
 
-    elements[:plotter_3d_running] = false
+    elements[:locks] = Dict{Symbol,Base.AbstractLock}()
+    elements[:locks][:sim_channel] = Threads.SpinLock()
+    elements[:locks][:recv_buffer] = Threads.SpinLock()
 
     elements[:sim_time] = sim_time
 
