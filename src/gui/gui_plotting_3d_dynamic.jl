@@ -5,10 +5,13 @@
 
 function gui_receiver(elements, c1, lock_handle)
 
+    if trylock(lock_handle) == false
+        println("Already locked")
+        return
+    end
+
     try
         sim_cmd = elements[:sim_cmd]
-
-        lock(lock_handle)
 
         # circular c_buffer
         c_buffer_len = 10
@@ -48,8 +51,12 @@ end
 
 function gui_dynamic_plotter(elements, df_empty, lock_handle)
 
-    try
+    if trylock(lock_handle) == false
+        println("Already locked")
+        return
+    end
 
+    try
         sim_cmd = elements[:sim_cmd]
 
         deleteat!(df_empty, :)
@@ -75,8 +82,6 @@ function gui_dynamic_plotter(elements, df_empty, lock_handle)
         else
             throw("Gui receiver must be running to used 3d plotter")
         end
-
-        lock(lock_handle)
 
         while true
 

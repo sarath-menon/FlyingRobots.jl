@@ -111,34 +111,11 @@ plot_elements[:receiver_buffer] = c_buffer
 sim_gui_channel_lock = Threads.SpinLock()
 gui_recv_buffer_lock = Threads.SpinLock()
 
+gui_receiver_task = @async FlyingRobots.Gui.gui_receiver(plot_elements, c1, sim_gui_channel_lock)
 
-gui_receiver_task = begin
-
-    # if plot_elements[:plotter_3d_running] == true
-    if islocked(sim_gui_channel_lock) == true
-        Core.println("Sim-Gui Channel is in use by another task")
-        return
-    else
-        @async FlyingRobots.Gui.gui_receiver(plot_elements, c1, sim_gui_channel_lock)
-    end
-end
-
-
-# gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, c1, df_empty)
-
-gui_dynamic_plotter_task = begin
-
-    # if plot_elements[:plotter_3d_running] == true
-    if islocked(gui_recv_buffer_lock) == true
-        Core.println("Gui receiver buffer is in use by another task")
-        return
-    else
-        @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, df_empty, gui_recv_buffer_lock)
-    end
-end
+gui_dynamic_plotter_task = @async FlyingRobots.Gui.gui_dynamic_plotter(plot_elements, df_empty, gui_recv_buffer_lock)
 
 sim_task = @tspawnat 2 run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
-
 
 #Simulation ----------------------------------------------------
 # running vizulizer on 1st thread,(simulator+onboard computer) on 2nd thread
