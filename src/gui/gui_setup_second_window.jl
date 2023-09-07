@@ -1,7 +1,7 @@
 
 
 
-function gui_second_window_setup(path)
+function gui_second_window_setup(elements, path)
 
     config_yaml = YAML.load_file(path; dicttype=Dict{Symbol,Any})
     config_params = recursive_dict_to_namedtuple(config_yaml)
@@ -133,5 +133,9 @@ function gui_second_window_setup(path)
 
     # GLMakie.set_screen_visibility!(screen2, true)
 
-    return fig
+    elements[:second_window] = Dict()
+
+    elements[:second_window][:shown] = false
+
+    elements[:second_window][:fig] = fig
 end

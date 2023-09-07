@@ -93,11 +93,6 @@ function define_interactions(elements, sim_time)
             sim_acc_mode[] = RealtimeSim()
         end
     end
-
-
-    # interactions for second window
-    second_window_interactions(elements)
-
 end
 
 

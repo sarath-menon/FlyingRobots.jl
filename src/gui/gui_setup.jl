@@ -88,6 +88,11 @@ function show_visualizer()
 
     define_interactions(elements, sim_time)
 
+    # second window setup
+    gui_second_window_setup(elements, folder_path * config_params_path)
+
+    define_interactions_second_window(elements)
+
     return elements
 end
 
