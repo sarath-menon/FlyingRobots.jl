@@ -20,14 +20,20 @@ function create_computer(name)
     roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll])
     pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch])
 
+    # joystick
+    js = Joystick.connect_joystick()
+
     # ROM memory
     params = (; vehicle=vehicle_params)
     pid = (; x_pos=x_pos_pid, y_pos=y_pos_pid, z_pos=z_pos_pid,
         roll=roll_pid, pitch=pitch_pid)
 
+    sensors = (; joystick=js)
+
     allocation_matrix = ctrl_yaml[:allocation_matrix]
 
-    rom_memory = (; params=params, pid=pid, allocation_matrix=allocation_matrix)
+    rom_memory = (; params=params, pid=pid,
+        allocation_matrix=allocation_matrix, sensors=sensors)
 
     # RAM memory
     ram_memory = Dict{Symbol,Any}()

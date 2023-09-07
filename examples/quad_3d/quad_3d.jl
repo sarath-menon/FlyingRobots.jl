@@ -40,6 +40,9 @@ include("tasks.jl")
 include("paths.jl")
 include("integrator_callback.jl")
 include("gui_helper.jl")
+include("joystick.jl")
+
+import .Joystick
 
 # build system model (Thread 2 )
 system_build_task = @tspawnat 2 QuadcopterSystem()
@@ -50,9 +53,10 @@ plot_elements = FlyingRobots.Gui.show_visualizer()
 # get output from  async tasks
 sys, subsystems = fetch(system_build_task)
 
-
 # create computer 
 flight_controller = create_computer("stm32")
+
+flight_controller.rom_memory.sensors.joystick
 
 # gui, sim setup ----------------------------------------------------
 df_empty = get_empty_df(sys, subsystems)
@@ -63,6 +67,11 @@ obs_func = define_gui_sim_interactions(plot_elements, sim_gui_ch, df_empty)
 # Manual testing ----------------------------------------------------
 start_realtime_sim(plot_elements, sim_gui_ch, df_empty)
 start_accelerated_sim(plot_elements, sim_gui_ch)
+
+# Joystick
+js = Joystick.connect_joystick()
+js_state = Joystick.get_joystick_state(js)
+
 
 # plotting ----------------------------------------------------
 FlyingRobots.Gui.plot_reset(plot_elements)

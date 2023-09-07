@@ -13,6 +13,11 @@ function position_controller(strategy::SimplePid_PosController, computer, rate_h
     vehicle_params = computer.rom_memory.params.vehicle
     m::Float64 = vehicle_params.mass
 
+    # joystick
+    js = computer.rom_memory.sensors.joystick
+    js_state = Joystick.get_joystick_state(js)
+    # Core.println(js_state)
+
     x_pos_pid = computer.rom_memory.pid.x_pos
     y_pos_pid = computer.rom_memory.pid.y_pos
     z_pos_pid = computer.rom_memory.pid.z_pos
