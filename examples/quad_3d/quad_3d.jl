@@ -45,11 +45,11 @@ include("gui_helper.jl")
 system_build_task = @tspawnat 2 QuadcopterSystem()
 
 # show visualizer (Thread 1)
-gui_setup_task = @tspawnat 1 FlyingRobots.Gui.show_visualizer()
+plot_elements = FlyingRobots.Gui.show_visualizer()
 
 # get output from  async tasks
 sys, subsystems = fetch(system_build_task)
-plot_elements = fetch(gui_setup_task)
+
 
 # create computer 
 flight_controller = create_computer("stm32")
@@ -66,6 +66,8 @@ start_accelerated_sim(plot_elements, sim_gui_ch)
 
 # plotting ----------------------------------------------------
 FlyingRobots.Gui.plot_reset(plot_elements)
+
+FlyingRobots.Gui.open_second_window()
 
 # # connect observables
 # connect!(sim_cmd, plot_elements[:sim_cmd])

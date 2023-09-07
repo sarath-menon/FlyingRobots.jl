@@ -1,0 +1,44 @@
+title:
+  name: Jarvis
+
+tabs:
+  - name: Planner
+    Menu:
+      - name: Type
+        options: ["sampling based","search based", "optimal"]
+      - name: Method
+        options: ["A-Star","RRT-star"]
+    TextBox:
+      - name: textbox_1
+        placeholder: "Enter a value"
+    Slider:
+      - name: Slider1
+        min: 0
+        max: 10
+        startvalue: 0
+
+  - name: Controller
+    Menu:
+      - name: Type
+        options: ["PID","LQR"]
+      - name: Method
+        options: ["A-Star","RRT-star"]
+    TextBox:
+      - name: textbox_1
+        placeholder: "Enter a value"
+    Slider:
+      - name: Slider1
+        min: 0
+        max: 10
+        startvalue: 0
+  - name: Joystick
+    Button:
+      - name: joytick_connect_btn
+        label: "Connect"
+  
+
+        
+      
+
+
+

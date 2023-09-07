@@ -331,6 +331,7 @@ function add_widgets(elements, g_left_widgets, g_right_widgets)
     #buttons
     play_btn = Button(fig, label="Play", tellwidth=false, halign=:center, fontsize=30, buttoncolor=:yellow, labelcolor=:black)
     start_sim_btn = Button(fig, label="Start Sim", tellwidth=false, halign=:center, fontsize=30, buttoncolor=:yellow, labelcolor=:black)
+    open_menu_btn = Button(fig, label="Open menu", tellwidth=false, halign=:center, fontsize=30, buttoncolor=:yellow, labelcolor=:black)
 
     timeline_left_label = Label(fig, "0.0 s", justification=:left)
     timeline_right_label = Label(fig, "10.0 s", justification=:left)
@@ -351,6 +352,7 @@ function add_widgets(elements, g_left_widgets, g_right_widgets)
     lower_left_menu[1, 1] = start_sim_btn
     lower_left_menu[1, 2] = play_btn
     lower_left_menu[1, 3] = sim_acc_toggle_grid
+    lower_left_menu[1, 4] = open_menu_btn
 
     g_left_widgets[2, 1:3] = lower_left_menu
 
@@ -373,6 +375,8 @@ function add_widgets(elements, g_left_widgets, g_right_widgets)
     widgets[:timeline_slider] = timeline_slider
     widgets[:play_btn] = play_btn
     widgets[:start_sim_btn] = start_sim_btn
+    widgets[:open_menu_btn] = open_menu_btn
+
     widgets[:sim_acc_toggle] = sim_acc_toggle
     widgets[:sim_acc_toggle_label] = sim_acc_toggle_label
 
@@ -439,101 +443,6 @@ function plot_reset(elements)
     plots_2d_data.time_vec[] = [0]
 end
 
-function define_interactions(elements, sim_time)
-
-    time_title = elements[:titles][:time_title]
-    anim_state = elements[:anim_state]
-    sim_cmd = elements[:sim_cmd]
-    sim_acc_mode = elements[:sim_acc_mode]
-
-    # to set time in title
-    on(sim_time) do time
-        time_title.text[] = "Time: " * string(time) * " s"
-    end
-
-    # change displayed time according to slider position
-    timeline_slider = elements[:widgets][:timeline_slider]
-    play_btn = elements[:widgets][:play_btn]
-    start_sim_btn = elements[:widgets][:start_sim_btn]
-
-    lift(timeline_slider.value) do val
-        sim_time[] = val
-    end
-
-    # play 3d visualization if 'Play' button is clicked
-    on(play_btn.clicks) do clicks
-
-        # if sim is not already running, start sim
-        if anim_state[] == false
-
-            start_3d_animation(elements)
-        else
-            stop_3d_animation(elements)
-        end
-    end
-
-    # start stepping sim if start_sim_btn is clicked
-    on(start_sim_btn.clicks) do clicks
-
-        # if sim is not already running, start sim
-        if sim_cmd[] == SimIdle()
-
-            # start_3d_animation(elements)
-            sim_cmd[] = SimRunning()
-
-            Core.println("Start sim button pressed")
-
-            # stop func reqd only for realtime sim
-            if sim_acc_mode[] == RealtimeSim()
-                start_sim_btn.label = "Stop Sim"
-            end
-
-            # if sim is running, stop sim
-        elseif sim_cmd[] == SimRunning()
-
-            # in relatime mode, press during sim running means stop.
-
-            if sim_acc_mode[] == RealtimeSim()
-                sim_cmd[] = SimIdle()
-
-                start_sim_btn.label = "Start Sim"
-                Core.println("Stop sim button pressed")
-
-                # In accelerated mode, it means start nex sim
-            elseif sim_acc_mode[] == AcceleratedSim()
-
-                sim_cmd[] = SimRunning()
-
-                Core.println("Starting next accelerated sim")
-            end
-        end
-
-
-    end
-
-    sim_acc_toggle = elements[:widgets][:sim_acc_toggle]
-    sim_acc_toggle_label = elements[:widgets][:sim_acc_toggle_label]
-
-    on(sim_acc_toggle.active) do state
-
-        # stop current sim  and set button to "Start" if sim mode is changed 
-        start_sim_btn.label = "Start Sim"
-        sim_cmd[] = SimIdle()
-
-        if state == true
-            Core.println("Sim mode set to Accelerated")
-            sim_acc_toggle_label.text = "Accelerated Sim"
-
-            sim_acc_mode[] = AcceleratedSim()
-
-        else
-            Core.println("Sim mode set to Realtime")
-            sim_acc_toggle_label.text = "Realtime Sim"
-
-            sim_acc_mode[] = RealtimeSim()
-        end
-    end
-end
 
 function set_sim_instance(elements, df::DataFrame)
     elements[:df] = df
@@ -542,3 +451,119 @@ end
 # function set_sim_flag(elements, sim_cmd)
 #     elements[:sim_cmd] = sim_cmd
 # end
+
+function open_second_window()
+    set_theme!(backgroundcolor=:white, textcolor=:black, fontsize=25)
+
+    fig = Figure(resolution=(1920, 1080))
+
+    g_left = fig[1, 1] = GridLayout(valign=:top, halign=:left)
+
+    g_planner = fig[1, 2] = GridLayout(valign=:top, halign=:left)
+    g_controller = fig[1, 2] = GridLayout(valign=:top, halign=:left)
+
+    # hidden layouts
+    hiddenlayout_left = GridLayout(bbox=BBox(-1000, -1000, 0, 0))
+
+    # Right Grids
+    g_left_menu = g_left[1, 1] = GridLayout(halign=:left, valign=:top)
+
+    # Left menu -----------------------------------------------------------------------------
+
+    buttongrid = g_left_menu[1, 1] = GridLayout(tellwidth=false, halign=:left, valign=:top)
+    colsize!(fig.layout, 1, Aspect(1, 0.55))
+    # colsize!(g_left, 1,  Relative(1/3))
+
+    buttonlabels = ["Planner", "controller", "estimator", "simulation"]
+    buttons = buttongrid[1:length(buttonlabels), 1] = [Button(fig, label=l, halign=:left, width=200, height=80) for l in buttonlabels]
+
+    # Planner --------------------------------------------------------
+    menu1 = Menu(fig, options=["Polynomial", "Dubin's"], tellwidth=false)
+    menu2 = Menu(fig, options=["Circle", "Lemniscate"], tellwidth=false)
+
+    g_planner[1, 1] = hgrid!(
+        Label(fig, "Trajectory generator: "), menu1)
+
+    g_planner[2, 1] = hgrid!(
+        Label(fig, "Type : "), menu2)
+
+
+    button1 = Button(g_planner[3, 1], label="Open file", tellwidth=false)
+    button2 = Button(g_planner[4, 1], label="Open folder", tellwidth=false)
+
+    # Controller --------------------------------------------------------
+
+    menu1 = Menu(fig, options=["Cascaded (position, attitude, attitude rate) ",
+            "Cascaded (position, attitude ",
+            "Monolithic"],
+        tellwidth=false)
+
+    menu2 = Menu(fig, options=["PID", "LQR"], tellwidth=false)
+
+    menu3 = Menu(fig, options=["PID", "LQR"], tellwidth=false)
+
+    menu4 = Menu(fig, options=["PID", "LQR"], tellwidth=false)
+
+    g_controller[1, 1] = hgrid!(
+        Label(fig, "Controller Architecture: "), menu1)
+
+    g_controller[2, 1] = hgrid!(
+        Label(fig, "Position Controller : "), menu2)
+
+    g_controller[3, 1] = hgrid!(
+        Label(fig, "Attitude Controller : ", halign=:center), menu3)
+
+    g_controller[4, 1] = hgrid!(
+        Label(fig, "Attitude rate Controller : "), menu4)
+
+
+    button1 = Button(g_controller[5, 1], label="Open file", tellwidth=false)
+    button2 = Button(g_controller[5, 2], label="Open folder", tellwidth=false)
+    #  --------------------------------------------------------
+
+    hiddenlayout_left[1, 1] = g_controller
+
+    on(button1.clicks) do n
+        @async begin
+            f = pick_file()
+            @show f
+        end
+
+    end
+
+    on(button2.clicks) do n
+        @async begin
+            f = pick_folder()
+            @show f
+        end
+    end
+
+    for i in 1:length(buttonlabels)
+        on(buttons[i].clicks) do n
+            if i == 1
+                fig[1, 2] = g_planner
+                hiddenlayout_left[1, 1] = g_controller
+            elseif i == 2
+                fig[1, 2] = g_controller
+                hiddenlayout_left[1, 1] = g_planner
+            end
+        end
+    end
+
+    # on(events(fig).window_area) do event
+    #     resize_to_layout!(fig)
+    # end
+    # resize_to_layout!(fig)
+
+    # ---------------------------------------------
+    # screen properties   
+    flag = @isdefined screen2
+    if flag == true
+        GLMakie.destroy!(screen2)
+    end
+
+    screen2 = GLMakie.Screen()
+    display(screen2, fig)
+    GLMakie.set_screen_visibility!(screen2, true)
+
+end
