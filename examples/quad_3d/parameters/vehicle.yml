@@ -43,7 +43,15 @@ computer:
       rate: 100 #Hz
 
     - name: position_controller
-      strategy: SimplePid_PosController
+      strategy: P_PosController
+      rate: 50 #Hz
+
+    - name: velocity_controller
+      strategy: Pid_VelController
+      rate: 50 #Hz
+
+    - name: acceleration_controller
+      strategy: Linear_AccController
       rate: 50 #Hz
 
     - name: attitude_controller

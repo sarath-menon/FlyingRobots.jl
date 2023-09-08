@@ -1,5 +1,24 @@
 position_controller:
   pid_x:
+    k_p: 10
+    k_i: 0
+    k_d: 0
+    k_aw: 0
+
+  pid_y:
+    k_p: 10
+    k_i: 0
+    k_d: 0
+    k_aw: 0
+
+  pid_z:
+    k_p: 10
+    k_i: 0
+    k_d: 0
+    k_aw: 0
+
+velocity_controller:
+  pid_x:
     k_p: 3.5
     k_i: 0
     k_d: 7

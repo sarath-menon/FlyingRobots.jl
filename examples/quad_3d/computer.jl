@@ -17,6 +17,10 @@ function create_computer(name)
     y_pos_pid = PID(ctrl_yaml[:position_controller][:pid_y])
     z_pos_pid = PID(ctrl_yaml[:position_controller][:pid_z])
 
+    x_vel_pid = PID(ctrl_yaml[:velocity_controller][:pid_x])
+    y_vel_pid = PID(ctrl_yaml[:velocity_controller][:pid_y])
+    z_vel_pid = PID(ctrl_yaml[:velocity_controller][:pid_z])
+
     roll_pid = PID(ctrl_yaml[:attitude_controller][:pid_roll])
     pitch_pid = PID(ctrl_yaml[:attitude_controller][:pid_pitch])
 
@@ -26,6 +30,7 @@ function create_computer(name)
     # ROM memory
     params = (; vehicle=vehicle_params)
     pid = (; x_pos=x_pos_pid, y_pos=y_pos_pid, z_pos=z_pos_pid,
+        x_vel=x_vel_pid, y_vel=y_vel_pid, z_vel=z_vel_pid,
         roll=roll_pid, pitch=pitch_pid)
 
     sensors = (; joystick=js)
