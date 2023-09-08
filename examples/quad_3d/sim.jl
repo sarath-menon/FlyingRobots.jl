@@ -46,9 +46,12 @@ function run_sim_stepping(sys, subsystems; save=false)
     return df
 end
 
-function run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false, physical_time=false)
+function run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false)
 
     prob = sim_setup(sys, subsystems)
+
+    # reset computer
+    FlyingRobots.reset!(flight_controller)
 
     integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 

@@ -1,6 +1,7 @@
 
 using FlyingRobots.Computer: OnboardComputer, ComputerClock
 using FlyingRobots.Computer: increment_clock!
+import FlyingRobots.Computer: reset_clock!
 
 function create_computer(name)
     # SharedMemory objects ----------------------------------------------------
@@ -33,7 +34,8 @@ function create_computer(name)
         x_vel=x_vel_pid, y_vel=y_vel_pid, z_vel=z_vel_pid,
         roll=roll_pid, pitch=pitch_pid)
 
-    sensors = (; joystick=js)
+    funcs =
+        sensors = (; joystick=js)
 
     allocation_matrix = ctrl_yaml[:allocation_matrix]
 
@@ -46,11 +48,25 @@ function create_computer(name)
     ram_memory[:vehicle_pose] = Pose3d()
     ram_memory[:trajectory_reference] = TrajectoryReference()
 
-
     return OnboardComputer(name; main_clock=main_clock, ram_memory=ram_memory,
         rom_memory=rom_memory, tasks=vehicle_params.computer.tasks)
 end
 
+function reset_controllers!(computer::OnboardComputer)
+    for ctrl in computer.rom_memory[:pid]
+        FlyingRobots.reset!(ctrl)
+    end
+end
+
+function FlyingRobots.reset!(computer::OnboardComputer)
+    reset_clock!(computer.main_clock)
+    reset_controllers!(computer)
+
+    # reset RAM
+    computer.ram_memory[:ctrl_cmd] = CascadedPidCtrlCmd()
+    computer.ram_memory[:vehicle_pose] = Pose3d()
+    computer.ram_memory[:trajectory_reference] = TrajectoryReference()
+end
 
 function scheduler(computer)
 
