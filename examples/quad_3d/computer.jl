@@ -8,10 +8,27 @@ function create_computer(name)
 
     # parameters
     vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
-    ctrl_yaml = load_controller_params(folder_path * ctrl_yaml_path, vehicle_params)
 
     # clock
     main_clock = ComputerClock(; speed=vehicle_params.computer.clock_speed)
+
+    # initialization
+    (rom_memory, ram_memory) = initialize!(vehicle_params)
+
+    return OnboardComputer(name; main_clock=main_clock, ram_memory=ram_memory,
+        rom_memory=rom_memory, tasks=vehicle_params.computer.tasks)
+end
+
+function reset_controllers!(computer::OnboardComputer)
+    for ctrl in computer.rom_memory[:pid]
+        FlyingRobots.reset!(ctrl)
+    end
+end
+
+function initialize!(vehicle_params)
+
+    # parameters
+    ctrl_yaml = load_controller_params(folder_path * ctrl_yaml_path, vehicle_params)
 
     # create pid objects
     x_pos_pid = PID(ctrl_yaml[:position_controller][:pid_x])
@@ -34,8 +51,7 @@ function create_computer(name)
         x_vel=x_vel_pid, y_vel=y_vel_pid, z_vel=z_vel_pid,
         roll=roll_pid, pitch=pitch_pid)
 
-    funcs =
-        sensors = (; joystick=js)
+    sensors = (; joystick=js)
 
     allocation_matrix = ctrl_yaml[:allocation_matrix]
 
@@ -48,14 +64,7 @@ function create_computer(name)
     ram_memory[:vehicle_pose] = Pose3d()
     ram_memory[:trajectory_reference] = TrajectoryReference()
 
-    return OnboardComputer(name; main_clock=main_clock, ram_memory=ram_memory,
-        rom_memory=rom_memory, tasks=vehicle_params.computer.tasks)
-end
-
-function reset_controllers!(computer::OnboardComputer)
-    for ctrl in computer.rom_memory[:pid]
-        FlyingRobots.reset!(ctrl)
-    end
+    return (rom_memory, ram_memory)
 end
 
 function FlyingRobots.reset!(computer::OnboardComputer)
