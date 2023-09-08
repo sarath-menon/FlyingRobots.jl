@@ -50,9 +50,6 @@ function run_sim_stepping(sys, subsystems, c1, sim_cmd, sim_acc_mode; save=false
 
     prob = sim_setup(sys, subsystems)
 
-    # reset computer
-    FlyingRobots.reset!(flight_controller)
-
     integrator = init(prob, Tsit5(), abstol=1e-8, reltol=1e-8, save_everystep=false)
 
     count_prev::Int64 = 0
@@ -115,9 +112,16 @@ function setup_callbacks(sim_params)
 end
 
 function sim_setup(sys, subsystems)
+
     # load params
-    vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
-    sim_params = load_sim_params(folder_path * sim_params_path, vehicle_params)
+    #vehicle_params = load_vehicle_params(folder_path * vehicle_params_path)
+    vehicle_params = params_dict[:vehicle]
+
+    # sim_params = load_sim_params(folder_path * sim_params_path, vehicle_params)
+    sim_params = params_dict[:sim]
+
+    # reset computer
+    FlyingRobots.reset!(flight_controller)
 
     cb_set = setup_callbacks(sim_params)
 

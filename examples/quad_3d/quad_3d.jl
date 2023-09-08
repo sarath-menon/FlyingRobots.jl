@@ -25,6 +25,7 @@ using FlyingRobots
 import FlyingRobots.Simulation: SimAccMode, SimState, SimIdle, SimRunning
 import FlyingRobots.Simulation: RealtimeSim, AcceleratedSim
 import FlyingRobots.Models: QuadcopterSystem
+import FlyingRobots: update!
 
 include("mtk_models.jl")
 include("types.jl")
@@ -44,6 +45,14 @@ include("joystick.jl")
 
 import .Joystick
 
+params_dict = Dict{Symbol,Union{NamedTuple,Dict}}()
+params_task = @tspawnat 2 @async params_auto_updater(params_dict)
+
+# to load params manually for initialization
+load_params!(params_dict)
+
+params_dict
+
 # build system model (Thread 2 )
 system_build_task = @tspawnat 2 QuadcopterSystem()
 
@@ -54,14 +63,15 @@ plot_elements = FlyingRobots.Gui.show_visualizer()
 sys, subsystems = fetch(system_build_task)
 
 # create computer 
-flight_controller = create_computer("stm32")
+flight_controller = create_computer("stm32", params_dict)
 
-flight_controller.rom_memory.sensors.joystick
+# @code_warntype create_computer("stm32", folder_path * vehicle_params_path)
 
 # gui, sim setup ----------------------------------------------------
 df_empty = get_empty_df(sys, subsystems)
 sim_gui_ch = Channel{ODESolution}(10)
 
+# don't run more than once
 obs_func = define_gui_sim_interactions(plot_elements, sim_gui_ch, df_empty)
 
 # Manual testing ----------------------------------------------------
@@ -72,6 +82,8 @@ start_accelerated_sim(plot_elements, sim_gui_ch)
 js = Joystick.connect_joystick()
 js_state = Joystick.get_joystick_state(js)
 
+flight_controller.rom_memory.params[:controller][:position]
+flight_controller.rom_memory.pid.x_pos
 
 # plotting ----------------------------------------------------
 FlyingRobots.Gui.plot_reset(plot_elements)

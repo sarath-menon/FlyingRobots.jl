@@ -10,7 +10,7 @@ function position_controller(strategy::SimplePid_PosController, computer, rate_h
     ctrl_cmd = computer.ram_memory[:ctrl_cmd]
     vehicle_pose = computer.ram_memory[:vehicle_pose]
 
-    vehicle_params = computer.rom_memory.params.vehicle
+    vehicle_params = computer.rom_memory.params[:vehicle]
     m::Float64 = vehicle_params.mass
 
     # joystick
@@ -108,7 +108,7 @@ function acceleration_controller(strategy::Linear_AccController, computer, rate_
     ref = computer.ram_memory[:trajectory_reference]
     ctrl_cmd = computer.ram_memory[:ctrl_cmd]
 
-    vehicle_params = computer.rom_memory.params.vehicle
+    vehicle_params = computer.rom_memory.params[:vehicle]
     m::Float64 = vehicle_params.mass
 
     # max thrust, attitude, hardcoded for now
