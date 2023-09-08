@@ -37,11 +37,12 @@ include("vehicle.jl")
 
 include("computer.jl")
 include("controller_utilities.jl")
-include("tasks.jl")
+include("tasks/tasks.jl")
 include("paths.jl")
 include("integrator_callback.jl")
 include("gui_helper.jl")
 include("joystick.jl")
+
 
 import .Joystick
 

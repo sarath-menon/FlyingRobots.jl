@@ -1,6 +1,4 @@
 
-using FlyingRobots.Computer: get_elapsed_time
-
 function position_controller(strategy::SimplePid_PosController, computer, rate_hz)
 
     g = 9.81
@@ -36,6 +34,7 @@ function position_controller(strategy::SimplePid_PosController, computer, rate_h
     # y position controller
     ctrl_cmd.orientation_euler.p = ÿ_cmd + -pid_controller!(y_pos_pid; e=e_y, dt=dt, umin=-0.5, umax=0.5) / g
 end
+
 
 function position_controller(strategy::P_PosController, computer, rate_hz)
 
@@ -136,74 +135,4 @@ function acceleration_controller(strategy::Linear_AccController, computer, rate_
 
     # z position controller
     ctrl_cmd.f_net.z = f_cmd_saturated
-end
-
-
-function attitude_controller(strategy::SimplePid_AttitudeController, computer, rate_hz)
-
-    dt = 1 / rate_hz
-
-    ctrl_cmd = computer.ram_memory[:ctrl_cmd]
-    vehicle_pose = computer.ram_memory[:vehicle_pose]
-
-    roll_pid = computer.rom_memory.pid.roll
-    pitch_pid = computer.rom_memory.pid.pitch
-
-    # convert quaternion attitude representation to euler angles 
-    r::Float64, q::Float64, p::Float64 = Rotations.params(RotZYX(vehicle_pose.orientation))
-
-    e_p::Float64 = ctrl_cmd.orientation_euler.p - p
-    e_q::Float64 = ctrl_cmd.orientation_euler.q - q
-
-    ctrl_cmd.τ.x = pid_controller!(roll_pid; e=e_p, dt=dt, umin=-25, umax=25)
-    ctrl_cmd.τ.y = pid_controller!(pitch_pid; e=e_q, dt=dt, umin=-25, umax=25)
-    ctrl_cmd.τ.z = 0
-end
-
-
-function control_allocator(strategy::SimpleClipping_ControlAllocator, computer, rate_hz)
-
-    ctrl_cmd = computer.ram_memory[:ctrl_cmd]
-
-    allocation_matrix::Matrix{Float64} = computer.rom_memory.allocation_matrix
-
-    ctrl_cmd.motor_thrusts = allocation_matrix * @SVector Float64[ctrl_cmd.f_net.z; ctrl_cmd.τ.x; ctrl_cmd.τ.y; ctrl_cmd.τ.z]
-
-    # return motor_thrusts
-end
-
-
-function reference_generator(strategy::Circle_TrajectoryGen, computer::OnboardComputer, rate_hz::Int)
-
-    t = get_elapsed_time(computer)
-
-    # get trajectory reference command
-    ref = get_circle_trajectory(t)
-
-    # to set the trajectory reference
-    ref_cmd = computer.ram_memory[:trajectory_reference]
-
-    ref_cmd.pos.x = ref[1]
-    ref_cmd.pos.y = ref[2]
-    ref_cmd.pos.z = ref[3]
-
-end
-
-function get_circle_trajectory(t)
-
-    r = 0.5    # circle radius 
-    ω = 0.5    # angular velocity
-
-    z_0 = 1
-
-    # circular trajectory 
-    x_ref = r * cos(ω * t)
-    y_ref = r * sin(ω * t)
-    z_ref = 1.0
-
-    # x_ref = 0.0
-    # y_ref = 0.0
-    # z_ref = 1.0
-
-    return [x_ref, y_ref, z_ref]
 end
