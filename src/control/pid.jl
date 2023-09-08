@@ -1,4 +1,4 @@
-export pid_controller!, pid_reset!, pd_tuning
+export pid_controller!, reset!, pd_tuning
 export PID
 
 mutable struct PID1
@@ -48,7 +48,7 @@ function pid_controller!(pid::PID; e, dt, umin, umax)
     return u_sat
 end
 
-function pid_reset!(pid::PID)
+function reset!(pid::PID)
     pid.error_integral = 0
     pid.prev_error = 0
 end
