@@ -175,7 +175,7 @@ end
 
 function reference_generator(strategy::Circle_TrajectoryGen, computer::OnboardComputer, rate_hz::Int)
 
-    t = get_elapsed_time(flight_controller)
+    t = get_elapsed_time(computer)
 
     # get trajectory reference command
     ref = get_circle_trajectory(t)
