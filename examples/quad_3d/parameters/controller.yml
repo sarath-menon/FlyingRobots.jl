@@ -1,10 +1,10 @@
-position_controller:
+position:
   pid_x:
-    k_p: 10
-    k_i: 0
-    k_d: 0
+    k_p: 10 
+    k_i: 0  
+    k_d: 0  
     k_aw: 0
-
+  
   pid_y:
     k_p: 10
     k_i: 0
@@ -17,7 +17,7 @@ position_controller:
     k_d: 0
     k_aw: 0
 
-velocity_controller:
+velocity:
   pid_x:
     k_p: 3.5
     k_i: 0
@@ -36,7 +36,7 @@ velocity_controller:
     k_d: 4.5
     k_aw: 0
 
-attitude_controller:
+attitude:
   pid_roll:
     k_p: 0.05
     k_i: 0
