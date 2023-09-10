@@ -1,39 +1,39 @@
 
-function position_controller(strategy::SimplePid_PosController, computer, rate_hz)
+# function position_controller(strategy::SimplePid_PosController, computer, rate_hz)
 
-    g = 9.81
-    dt = 1 / rate_hz
+#     g = 9.81
+#     dt = 1 / rate_hz
 
-    trajectory_reference = computer.ram_memory[:trajectory_reference]
-    ctrl_cmd = computer.ram_memory[:ctrl_cmd]
-    vehicle_pose = computer.ram_memory[:vehicle_pose]
+#     trajectory_reference = computer.ram_memory[:trajectory_reference]
+#     ctrl_cmd = computer.ram_memory[:ctrl_cmd]
+#     vehicle_pose = computer.ram_memory[:vehicle_pose]
 
-    vehicle_params = computer.rom_memory.params[:vehicle]
-    m::Float64 = vehicle_params.mass
+#     vehicle_params = computer.rom_memory.params[:vehicle]
+#     m::Float64 = vehicle_params.mass
 
-    # joystick
-    js = computer.rom_memory.sensors.joystick
-    js_state = Joystick.get_joystick_state(js)
-    # Core.println(js_state)
+#     # joystick
+#     js = computer.rom_memory.sensors.joystick
+#     js_state = Joystick.get_joystick_state(js)
+#     # Core.println(js_state)
 
-    x_pos_pid = computer.rom_memory.pid.x_pos
-    y_pos_pid = computer.rom_memory.pid.y_pos
-    z_pos_pid = computer.rom_memory.pid.z_pos
+#     x_pos_pid = computer.rom_memory.pid.x_pos
+#     y_pos_pid = computer.rom_memory.pid.y_pos
+#     z_pos_pid = computer.rom_memory.pid.z_pos
 
-    e_x::Float64 = trajectory_reference.pos.x - vehicle_pose.pos.x
-    e_y::Float64 = trajectory_reference.pos.y - vehicle_pose.pos.y
-    e_z::Float64 = trajectory_reference.pos.z - vehicle_pose.pos.z
+#     e_x::Float64 = trajectory_reference.pos.x - vehicle_pose.pos.x
+#     e_y::Float64 = trajectory_reference.pos.y - vehicle_pose.pos.y
+#     e_z::Float64 = trajectory_reference.pos.z - vehicle_pose.pos.z
 
-    ẍ_cmd = trajectory_reference.acc.x
-    ÿ_cmd = trajectory_reference.acc.y
-    z̈_cmd = trajectory_reference.acc.z
+#     ẍ_cmd = trajectory_reference.acc.x
+#     ÿ_cmd = trajectory_reference.acc.y
+#     z̈_cmd = trajectory_reference.acc.z
 
-    # x position controller
-    ctrl_cmd.orientation_euler.q = ẍ_cmd + pid_controller!(x_pos_pid; e=e_x, dt=dt, umin=-0.5, umax=0.5) / g
+#     # x position controller
+#     ctrl_cmd.orientation_euler.q = ẍ_cmd + pid_controller!(x_pos_pid; e=e_x, dt=dt, umin=-0.5, umax=0.5) / g
 
-    # y position controller
-    ctrl_cmd.orientation_euler.p = ÿ_cmd + -pid_controller!(y_pos_pid; e=e_y, dt=dt, umin=-0.5, umax=0.5) / g
-end
+#     # y position controller
+#     ctrl_cmd.orientation_euler.p = ÿ_cmd + -pid_controller!(y_pos_pid; e=e_y, dt=dt, umin=-0.5, umax=0.5) / g
+# end
 
 
 function position_controller(strategy::P_PosController, computer, rate_hz)
@@ -44,9 +44,7 @@ function position_controller(strategy::P_PosController, computer, rate_hz)
     ref = computer.ram_memory[:trajectory_reference]
     vehicle_pose = computer.ram_memory[:vehicle_pose]
 
-    x_pos_pid = computer.rom_memory.pid.x_pos
-    y_pos_pid = computer.rom_memory.pid.y_pos
-    z_pos_pid = computer.rom_memory.pid.z_pos
+    pos_pid = computer.ram_memory[:pos_pid]
 
     e_x::Float64 = ref.pos.x - vehicle_pose.pos.x
     e_y::Float64 = ref.pos.y - vehicle_pose.pos.y
@@ -56,14 +54,30 @@ function position_controller(strategy::P_PosController, computer, rate_hz)
     vel_max = 10 #m/s
 
     # x position controller
-    ref.vel.x = pid_controller!(x_pos_pid; e=e_x, dt=dt, umin=-vel_max, umax=vel_max)
+    ref.vel.x = pid_controller!(pos_pid[:x]; e=e_x, dt=dt, umin=-vel_max, umax=vel_max)
 
     # y position controller
-    ref.vel.y = pid_controller!(y_pos_pid; e=e_y, dt=dt, umin=-vel_max, umax=vel_max)
+    ref.vel.y = pid_controller!(pos_pid[:y]; e=e_y, dt=dt, umin=-vel_max, umax=vel_max)
 
     # z position controller
-    ref.vel.z = pid_controller!(z_pos_pid; e=e_z, dt=dt, umin=-vel_max, umax=vel_max)
+    ref.vel.z = pid_controller!(pos_pid[:z]; e=e_z, dt=dt, umin=-vel_max, umax=vel_max)
 end
+
+function initialize!(strategy::P_PosController, computer)
+
+    params_dict = computer.rom_memory.params
+    ctrl_params = params_dict[:controller]
+
+    x_pos_pid = PID(ctrl_params[:position][:pid_x])
+    y_pos_pid = PID(ctrl_params[:position][:pid_y])
+    z_pos_pid = PID(ctrl_params[:position][:pid_z])
+
+    pos_pid = (; x=x_pos_pid, y=y_pos_pid, z=z_pos_pid)
+
+    computer.ram_memory[:pos_pid] = pos_pid
+
+end
+
 
 function velocity_controller(strategy::Pid_VelController, computer, rate_hz)
 
@@ -77,9 +91,7 @@ function velocity_controller(strategy::Pid_VelController, computer, rate_hz)
     # js_state = Joystick.get_joystick_state(js)
     # # Core.println(js_state)
 
-    x_vel_pid = computer.rom_memory.pid.x_vel
-    y_vel_pid = computer.rom_memory.pid.y_vel
-    z_vel_pid = computer.rom_memory.pid.z_vel
+    vel_pid = computer.ram_memory[:vel_pid]
 
     e_x::Float64 = ref.vel.x - vehicle_pose.vel.x
     e_y::Float64 = ref.vel.y - vehicle_pose.vel.y
@@ -89,13 +101,26 @@ function velocity_controller(strategy::Pid_VelController, computer, rate_hz)
     acc_max = 10 #m/s^2
 
     # x velocity controller
-    ref.acc.x = pid_controller!(x_vel_pid; e=e_x, dt=dt, umin=-acc_max, umax=acc_max)
+    ref.acc.x = pid_controller!(vel_pid[:x]; e=e_x, dt=dt, umin=-acc_max, umax=acc_max)
 
     # y velocity controller
-    ref.acc.y = pid_controller!(y_vel_pid; e=e_y, dt=dt, umin=-acc_max, umax=acc_max)
+    ref.acc.y = pid_controller!(vel_pid[:y]; e=e_y, dt=dt, umin=-acc_max, umax=acc_max)
 
     # z velocity controller
-    ref.acc.z = pid_controller!(z_vel_pid; e=e_z, dt=dt, umin=-acc_max, umax=acc_max)
+    ref.acc.z = pid_controller!(vel_pid[:z]; e=e_z, dt=dt, umin=-acc_max, umax=acc_max)
+end
+
+function initialize!(strategy::Pid_VelController, computer)
+    params_dict = computer.rom_memory.params
+    ctrl_params = params_dict[:controller]
+
+    x_vel_pid = PID(ctrl_params[:velocity][:pid_x])
+    y_vel_pid = PID(ctrl_params[:velocity][:pid_y])
+    z_vel_pid = PID(ctrl_params[:velocity][:pid_z])
+
+    vel_pid = (x=x_vel_pid, y=y_vel_pid, z=z_vel_pid)
+
+    computer.ram_memory[:vel_pid] = vel_pid
 end
 
 
@@ -136,3 +161,4 @@ function acceleration_controller(strategy::Linear_AccController, computer, rate_
     # z position controller
     ctrl_cmd.f_net.z = f_cmd_saturated
 end
+

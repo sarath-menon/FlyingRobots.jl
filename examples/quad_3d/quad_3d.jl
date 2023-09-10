@@ -84,7 +84,17 @@ js = Joystick.connect_joystick()
 js_state = Joystick.get_joystick_state(js)
 
 flight_controller.rom_memory.params[:controller][:position]
-flight_controller.rom_memory.pid.x_pos
+flight_controller.ram_memory
+
+initialize!(P_PosController(), flight_controller)
+initialize!(Pid_VelController(), flight_controller)
+initialize!(SimplePid_AttitudeController(), flight_controller)
+
+position_controller(P_PosController(), flight_controller, 20)
+velocity_controller(Pid_VelController(), flight_controller, 20)
+
+reset_controllers!(flight_controller)
+update_controller_params(flight_controller)
 
 # plotting ----------------------------------------------------
 FlyingRobots.Gui.plot_reset(plot_elements)
