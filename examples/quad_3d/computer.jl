@@ -59,10 +59,9 @@ function initialize!(params_dict)
     # ROM memory
     sensors = (; joystick=js)
 
-    allocation_matrix = ctrl_params[:allocation_matrix]
+    # allocation_matrix = ctrl_params[:allocation_matrix]
 
-    rom_memory = (; params=params_dict,
-        allocation_matrix=allocation_matrix, sensors=sensors)
+    rom_memory = (; params=params_dict, sensors=sensors)
 
     # RAM memory
     ram_memory = Dict{Symbol,Any}()

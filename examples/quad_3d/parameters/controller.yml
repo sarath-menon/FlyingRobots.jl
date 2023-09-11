@@ -44,6 +44,9 @@ attitude_controller:
 control_allocator:
   SimpleClipping_ControlAllocator:
     init:
+      - type: body_thrust_to_motor_thrust
+        objects:
+          allocation_matrix: {l: 1.,k_τ: 2.}  
 
 reference_generator:
   Circle_TrajectoryGen:
