@@ -9,6 +9,7 @@ vehicle_params_path = "/parameters/vehicle.yml"
 
 sim_params_path = "/parameters/sim.yml"
 ctrl_yaml_path = "/parameters/controller.yml"
+strategies_yaml_path = "/parameters/controller.yml"
 
 # vehicle_yaml = YAML.load_file(folder_path * vehicle_params_path; dicttype=Dict{Symbol,Any})
 
@@ -37,4 +38,5 @@ function load_params!(params_dict)
     params_dict[:vehicle] = load_vehicle_params(folder_path * vehicle_params_path)
     params_dict[:sim] = load_sim_params(folder_path * sim_params_path, params_dict[:vehicle])
     params_dict[:controller] = load_controller_params(folder_path * ctrl_yaml_path, params_dict[:vehicle])
+    params_dict[:strategies] = load_controller_params(folder_path * strategies_yaml_path, params_dict[:vehicle])
 end
