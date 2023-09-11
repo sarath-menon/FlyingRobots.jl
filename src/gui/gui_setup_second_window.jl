@@ -100,7 +100,6 @@ function gui_second_window_setup(elements, path)
 
     end
 
-
     # Interactions --------------------------------------------------------
 
     # initilaization
@@ -128,14 +127,28 @@ function gui_second_window_setup(elements, path)
     end
 
     # display window --------------------------------------------------------
-    # screen2 = GLMakie.Screen()
-    # display(screen2, fig)
+    screen2 = GLMakie.Screen()
+    display(screen2, fig)
 
-    # GLMakie.set_screen_visibility!(screen2, true)
+    # menu shoudn;t be visible initially
+    GLMakie.set_screen_visibility!(screen2, false)
+
+    # get glw window
+    glfw_window = GLMakie.to_native(screen2)
+
+    # callback to disable clow window button
+    function cb(window)
+        Core.println("Menu closing button is disabled")
+        GLMakie.GLFW.SetWindowShouldClose(window, false)
+    end
+
+    GLMakie.GLFW.SetWindowCloseCallback(glfw_window, cb)
 
     elements[:second_window] = Dict()
 
     elements[:second_window][:shown] = false
+    elements[:second_window][:screen] = screen2
+    elements[:second_window][:glfw_window] = glfw_window
 
     elements[:second_window][:fig] = fig
 end

@@ -7,16 +7,18 @@ function define_interactions_second_window(elements)
     on(open_menu_btn.clicks) do state
         Core.println("Menu btn clicked")
 
-        # if elements[:second_window][:shown] == false
+        screen2 = elements[:second_window][:screen]
 
-        # open second window
-        screen2 = GLMakie.Screen()
-        display(screen2, fig_2)
+        if elements[:second_window][:shown] == true
 
-        elements[:second_window][:screen] = screen2
+            GLMakie.set_screen_visibility!(screen2, false)
 
-        elements[:second_window][:shown] = true
-        # end
+            elements[:second_window][:shown] = false
+        else
+            GLMakie.set_screen_visibility!(screen2, true)
+
+            elements[:second_window][:shown] = true
+        end
     end
 end
 
