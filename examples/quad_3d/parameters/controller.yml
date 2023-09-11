@@ -1,50 +1,50 @@
-position:
-  pid_x:
-    k_p: 10 
-    k_i: 0  
-    k_d: 0  
-    k_aw: 0
-  
-  pid_y:
-    k_p: 10
-    k_i: 0
-    k_d: 0
-    k_aw: 0
 
-  pid_z:
-    k_p: 10
-    k_i: 0
-    k_d: 0
-    k_aw: 0
+position_controller:
+  P_PosController:
+    init:
+      - type: PID
+        objects:
+          x: {kp: 10, ki: 0, kd: 0, k_aw: 0}  
+          y: {kp: 10, ki: 0, kd: 0, k_aw: 0}
+          z: {kp: 10, ki: 0, kd: 0, k_aw: 0}
 
-velocity:
-  pid_x:
-    k_p: 3.5
-    k_i: 0
-    k_d: 7
-    k_aw: 0
+# -------------------------------------------------------
 
-  pid_y:
-    k_p: 3.5
-    k_i: 0
-    k_d: 7
-    k_aw: 0
+velocity_controller:
 
-  pid_z:
-    k_p: 10
-    k_i: 1.2
-    k_d: 4.5
-    k_aw: 0
+# PID velocity controller
+  Pid_VelController:
+    init:
+      - type: PID
+        objects:
+          x: {kp: 3.5 , ki: 0 , kd: 7, k_aw: 0 }  
+          y: {kp: 3.5 , ki: 0 , kd: 7, k_aw: 0 }  
+          z: {kp: 10, ki: 1.2, kd: 4.5, k_aw: 0}
 
-attitude:
-  pid_roll:
-    k_p: 0.05
-    k_i: 0
-    k_d: 0.07
-    k_aw: 0
 
-  pid_pitch:
-    k_p: 0.05
-    k_i: 0
-    k_d: 0.07
-    k_aw: 0
+# -------------------------------------------------------
+acceleration_controller:
+
+  Linear_AccController: 
+      init:
+# -------------------------------------------------------
+
+attitude_controller:
+
+# simple PID attitude controller
+  SimplePid_AttitudeController:
+    init:
+      - type: PID
+        objects:
+          roll: {kp: 0.05 , ki: 0 , kd: 0.07, k_aw: 0 }  
+          pitch: {kp: 0.05 , ki: 0 , kd: 0.07, k_aw: 0 }  
+
+# -------------------------------------------------------
+
+control_allocator:
+  SimpleClipping_ControlAllocator:
+    init:
+
+reference_generator:
+  Circle_TrajectoryGen:
+    init:
