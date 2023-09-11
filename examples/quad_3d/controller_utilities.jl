@@ -13,10 +13,10 @@ function load_controller_params(path::String, vehicle_params)
 end
 
 
-function initialize_task_stack!(ram_memory::Dict, params_dict)
+function initialize_task_stack!(computer::OnboardComputer, params_dict)
 
-    ram_memory[:task_mem] = Dict{Symbol,Dict}()
-    task_mem = ram_memory[:task_mem]
+    computer.ram_memory[:task_mem] = Dict{Symbol,Dict}()
+    task_mem = computer.ram_memory[:task_mem]
 
     # iterate over tasks
     for task in flight_controller.tasks
@@ -54,10 +54,5 @@ function initialize_task_stack!(ram_memory::Dict, params_dict)
         # create stack space for task strategy
         task_mem[Symbol(task.name)] = task_stack
     end
-end
-
-
-function initialize_task_stack!(computer::OnboardComputer, params_dict)
-    initialize_task_stack!(computer.ram_memory, params_dict)
 end
 

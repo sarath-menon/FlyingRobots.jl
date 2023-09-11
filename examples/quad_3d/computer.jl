@@ -38,13 +38,14 @@ function initialize!(params_dict)
     ram_memory[:vehicle_pose] = Pose3d()
     ram_memory[:trajectory_reference] = TrajectoryReference()
 
-    initialize_task_stack!(ram_memory, params_dict)
-
     return (rom_memory, ram_memory)
 end
 
 function FlyingRobots.reset!(computer::OnboardComputer, params_dict)
     reset_clock!(computer.main_clock)
+
+    # delete any existing task stack
+    delete!(computer.ram_memory, :task_mem)
 
     initialize_task_stack!(computer, params_dict)
 
