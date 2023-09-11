@@ -53,35 +53,13 @@ function initialize!(params_dict)
 
     ctrl_params = params_dict[:controller]
 
-    # parameters
-
-    # # create pid objects
-    # x_pos_pid = PID(ctrl_params[:position][:pid_x])
-    # y_pos_pid = PID(ctrl_params[:position][:pid_y])
-    # z_pos_pid = PID(ctrl_params[:position][:pid_z])
-
-    # x_vel_pid = PID(ctrl_params[:velocity][:pid_x])
-    # y_vel_pid = PID(ctrl_params[:velocity][:pid_y])
-    # z_vel_pid = PID(ctrl_params[:velocity][:pid_z])
-
-    # roll_pid = PID(ctrl_params[:attitude][:pid_roll])
-    # pitch_pid = PID(ctrl_params[:attitude][:pid_pitch])
-
     # joystick
     js = Joystick.connect_joystick()
 
     # ROM memory
-
-    # pid = (; x_pos=x_pos_pid, y_pos=y_pos_pid, z_pos=z_pos_pid,
-    #     x_vel=x_vel_pid, y_vel=y_vel_pid, z_vel=z_vel_pid,
-    #     roll=roll_pid, pitch=pitch_pid)
-
     sensors = (; joystick=js)
 
     allocation_matrix = ctrl_params[:allocation_matrix]
-
-    # rom_memory = (; params=params_dict, pid=pid,
-    #     allocation_matrix=allocation_matrix, sensors=sensors)
 
     rom_memory = (; params=params_dict,
         allocation_matrix=allocation_matrix, sensors=sensors)
@@ -92,17 +70,15 @@ function initialize!(params_dict)
     ram_memory[:vehicle_pose] = Pose3d()
     ram_memory[:trajectory_reference] = TrajectoryReference()
 
+    initialize_task_stack!(ram_memory, params_dict)
+
     return (rom_memory, ram_memory)
 end
 
-function FlyingRobots.reset!(computer::OnboardComputer)
+function FlyingRobots.reset!(computer::OnboardComputer, params_dict)
     reset_clock!(computer.main_clock)
 
-    # reset controller internal vars (eg. pid integral sum)
-    reset_controllers!(computer)
-
-    # update controller gains
-    update_controller_params(computer)
+    initialize_task_stack!(computer, params_dict)
 
     # reset RAM
     computer.ram_memory[:ctrl_cmd] = CascadedPidCtrlCmd()

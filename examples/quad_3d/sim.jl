@@ -121,7 +121,7 @@ function sim_setup(sys, subsystems)
     sim_params = params_dict[:sim]
 
     # reset computer
-    FlyingRobots.reset!(flight_controller)
+    FlyingRobots.reset!(flight_controller, params_dict)
 
     cb_set = setup_callbacks(sim_params)
 
