@@ -1,6 +1,7 @@
 
 position_controller:
   P_PosController:
+    name: P Position Controller
     init:
       - type: PID
         objects:
@@ -12,8 +13,8 @@ position_controller:
 
 velocity_controller:
 
-# PID velocity controller
   Pid_VelController:
+    name: PID velocity controller
     init:
       - type: PID
         objects:
@@ -26,13 +27,14 @@ velocity_controller:
 acceleration_controller:
 
   Linear_AccController: 
-      init:
+    name: Linear Acceleration controller
+    init:
 # -------------------------------------------------------
 
 attitude_controller:
 
-# simple PID attitude controller
   SimplePid_AttitudeController:
+    name: Simple PID attitude controller
     init:
       - type: PID
         objects:
@@ -42,12 +44,13 @@ attitude_controller:
 # -------------------------------------------------------
 
 control_allocator:
+  
   SimpleClipping_ControlAllocator:
+    name: Simple clipping control allocator
     init:
-      - type: body_thrust_to_motor_thrust
-        objects:
-          allocation_matrix: {l: 1.,k_τ: 2.}  
 
 reference_generator:
+  
   Circle_TrajectoryGen:
+    name: Circle trajectory generator
     init:
