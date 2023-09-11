@@ -15,7 +15,7 @@ using CSV
 using BenchmarkTools
 using YAML
 import Dates
-using DataStructures
+# using DataStructures
 
 GLMakie.activate!(inline=false)
 
@@ -52,8 +52,6 @@ params_task = @tspawnat 2 @async params_auto_updater(params_dict)
 # to load params manually for initialization
 load_params!(params_dict)
 
-params_dict
-
 # build system model (Thread 2 )
 system_build_task = @tspawnat 2 QuadcopterSystem()
 
@@ -83,18 +81,15 @@ start_accelerated_sim(plot_elements, sim_gui_ch)
 js = Joystick.connect_joystick()
 js_state = Joystick.get_joystick_state(js)
 
-flight_controller.rom_memory.params[:controller][:position]
-flight_controller.ram_memory
-
-initialize!(P_PosController(), flight_controller)
-initialize!(Pid_VelController(), flight_controller)
-initialize!(SimplePid_AttitudeController(), flight_controller)
-
 position_controller(P_PosController(), flight_controller, 20)
 velocity_controller(Pid_VelController(), flight_controller, 20)
+attitude_controller(SimplePid_AttitudeController(), flight_controller, 20)
 
-reset_controllers!(flight_controller)
-update_controller_params(flight_controller)
+
+FlyingRobots.reset!(flight_controller, params_dict)
+
+flight_controller.ram_memory[:task_mem][:position_controller]
+
 
 # plotting ----------------------------------------------------
 FlyingRobots.Gui.plot_reset(plot_elements)

@@ -44,7 +44,11 @@ function position_controller(strategy::P_PosController, computer, rate_hz)
     ref = computer.ram_memory[:trajectory_reference]
     vehicle_pose = computer.ram_memory[:vehicle_pose]
 
-    pos_pid = computer.ram_memory[:pos_pid]
+    # get task memory
+    task_mem = computer.ram_memory[:task_mem]
+
+    # PID dict
+    pid = task_mem[:position_controller][:PID]
 
     e_x::Float64 = ref.pos.x - vehicle_pose.pos.x
     e_y::Float64 = ref.pos.y - vehicle_pose.pos.y
@@ -54,30 +58,14 @@ function position_controller(strategy::P_PosController, computer, rate_hz)
     vel_max = 10 #m/s
 
     # x position controller
-    ref.vel.x = pid_controller!(pos_pid[:x]; e=e_x, dt=dt, umin=-vel_max, umax=vel_max)
+    ref.vel.x = pid_controller!(pid[:x]; e=e_x, dt=dt, umin=-vel_max, umax=vel_max)
 
     # y position controller
-    ref.vel.y = pid_controller!(pos_pid[:y]; e=e_y, dt=dt, umin=-vel_max, umax=vel_max)
+    ref.vel.y = pid_controller!(pid[:y]; e=e_y, dt=dt, umin=-vel_max, umax=vel_max)
 
     # z position controller
-    ref.vel.z = pid_controller!(pos_pid[:z]; e=e_z, dt=dt, umin=-vel_max, umax=vel_max)
+    ref.vel.z = pid_controller!(pid[:z]; e=e_z, dt=dt, umin=-vel_max, umax=vel_max)
 end
-
-function initialize!(strategy::P_PosController, computer)
-
-    params_dict = computer.rom_memory.params
-    ctrl_params = params_dict[:controller]
-
-    x_pos_pid = PID(ctrl_params[:position][:pid_x])
-    y_pos_pid = PID(ctrl_params[:position][:pid_y])
-    z_pos_pid = PID(ctrl_params[:position][:pid_z])
-
-    pos_pid = (; x=x_pos_pid, y=y_pos_pid, z=z_pos_pid)
-
-    computer.ram_memory[:pos_pid] = pos_pid
-
-end
-
 
 function velocity_controller(strategy::Pid_VelController, computer, rate_hz)
 
@@ -91,7 +79,11 @@ function velocity_controller(strategy::Pid_VelController, computer, rate_hz)
     # js_state = Joystick.get_joystick_state(js)
     # # Core.println(js_state)
 
-    vel_pid = computer.ram_memory[:vel_pid]
+    # get task memory
+    task_mem = computer.ram_memory[:task_mem]
+
+    # PID dict
+    pid = task_mem[:velocity_controller][:PID]
 
     e_x::Float64 = ref.vel.x - vehicle_pose.vel.x
     e_y::Float64 = ref.vel.y - vehicle_pose.vel.y
@@ -101,26 +93,13 @@ function velocity_controller(strategy::Pid_VelController, computer, rate_hz)
     acc_max = 10 #m/s^2
 
     # x velocity controller
-    ref.acc.x = pid_controller!(vel_pid[:x]; e=e_x, dt=dt, umin=-acc_max, umax=acc_max)
+    ref.acc.x = pid_controller!(pid[:x]; e=e_x, dt=dt, umin=-acc_max, umax=acc_max)
 
     # y velocity controller
-    ref.acc.y = pid_controller!(vel_pid[:y]; e=e_y, dt=dt, umin=-acc_max, umax=acc_max)
+    ref.acc.y = pid_controller!(pid[:y]; e=e_y, dt=dt, umin=-acc_max, umax=acc_max)
 
     # z velocity controller
-    ref.acc.z = pid_controller!(vel_pid[:z]; e=e_z, dt=dt, umin=-acc_max, umax=acc_max)
-end
-
-function initialize!(strategy::Pid_VelController, computer)
-    params_dict = computer.rom_memory.params
-    ctrl_params = params_dict[:controller]
-
-    x_vel_pid = PID(ctrl_params[:velocity][:pid_x])
-    y_vel_pid = PID(ctrl_params[:velocity][:pid_y])
-    z_vel_pid = PID(ctrl_params[:velocity][:pid_z])
-
-    vel_pid = (x=x_vel_pid, y=y_vel_pid, z=z_vel_pid)
-
-    computer.ram_memory[:vel_pid] = vel_pid
+    ref.acc.z = pid_controller!(pid[:z]; e=e_z, dt=dt, umin=-acc_max, umax=acc_max)
 end
 
 
