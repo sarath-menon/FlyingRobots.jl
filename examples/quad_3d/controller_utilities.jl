@@ -6,6 +6,7 @@ motor_thrust_to_body_thrust(; l, k_τ) = [1 1 1 1
 
 body_thrust_to_motor_thrust(; l, k_τ) = inv(motor_thrust_to_body_thrust(; l=l, k_τ=k_τ))
 
+
 function load_controller_params(path::String, vehicle_params)
     ctrl_yaml = YAML.load_file(path; dicttype=Dict{Symbol,Any})
 
@@ -20,12 +21,16 @@ function initialize_task_stack!(computer::OnboardComputer, params_dict)
 
     # iterate over tasks
     for task in flight_controller.tasks
-        # empty stack for task
-        task_stack = Dict{Symbol,Any}()
 
-        # @show Symbol(task.name), Symbol(typeof(P_PosController()))
+        # empty stack for task
+        task_stack = task_mem[Symbol(task.name)] = Dict{Symbol,Any}()
 
         type_blocks = params_dict[:strategies][Symbol(task.name)][Symbol(typeof(task.strategy))][:init]
+
+        # run task initilization function if it's defined
+        if hasmethod(initialize_task!, Tuple{typeof(task.strategy),OnboardComputer})
+            initialize_task!(task.strategy, computer)
+        end
 
         if type_blocks === nothing
             continue
@@ -51,8 +56,8 @@ function initialize_task_stack!(computer::OnboardComputer, params_dict)
             end
         end
 
-        # create stack space for task strategy
-        task_mem[Symbol(task.name)] = task_stack
+        # # create stack space for task strategy
+        # task_mem[Symbol(task.name)] = task_stack
     end
 end
 
