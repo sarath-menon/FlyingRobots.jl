@@ -1,7 +1,5 @@
 
-mutable struct CascadedPidCtrlCmd5
-    vel::Vec3d
-
+mutable struct CascadedPidCtrlCmd6
     orientation_euler::EulerAngleZYX
 
     angular_vel::Vec3d
@@ -12,9 +10,10 @@ mutable struct CascadedPidCtrlCmd5
 
     motor_thrusts::Vector{Float64}
 
-    CascadedPidCtrlCmd5() = new(Vec3d(), EulerAngleZYX(), Vec3d(), Vec3d(), Vec3d(), [0, 0, 0, 0])
+    CascadedPidCtrlCmd6() = new(EulerAngleZYX(), Vec3d(), Vec3d(), Vec3d(), [0, 0, 0, 0])
 end
-CascadedPidCtrlCmd = CascadedPidCtrlCmd5
+CascadedPidCtrlCmd = CascadedPidCtrlCmd6
+
 
 mutable struct TrajectoryReference5
     pos::Vec3d
@@ -34,6 +33,7 @@ abstract type TrajectoryGen end
 abstract type PosController end
 abstract type VelController end
 abstract type AttitudeController end
+abstract type AttitudeRateController end
 abstract type ControlAllocator end
 
 # trajectory generators
@@ -53,6 +53,10 @@ struct Linear_AccController <: VelController end
 # attitude controllers
 struct SimplePid_AttitudeController <: AttitudeController end
 
+# attitude rate controllers
+struct SimplePid_AttitudeRateController <: AttitudeRateController end
+
+# control allocators
 struct SimpleClipping_ControlAllocator <: ControlAllocator end
 
 
