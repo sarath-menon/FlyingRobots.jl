@@ -20,7 +20,7 @@ function create_computer(name, params_dict)
 end
 
 
-function initialize!(params_dict)
+function initialize!(params_dict::Dict)
 
     vehicle_params = params_dict[:vehicle]
 
@@ -72,6 +72,6 @@ function scheduler(computer)
     trajectory_reference = computer.ram_memory[:trajectory_reference]
     ctrl_cmd = computer.ram_memory[:ctrl_cmd]
 
-    return ctrl_cmd.motor_thrusts, trajectory_reference
+    return ctrl_cmd, trajectory_reference
 end
 
