@@ -1,4 +1,4 @@
-function attitude_rate_controller(strategy::SimplePid_AttitudeRateController, computer, rate_hz)
+function attitude_rate_controller(strategy::SimplePid_AttRateCtlr, computer, rate_hz)
 
     dt = 1 / rate_hz
 

@@ -1,5 +1,5 @@
 
-# function position_controller(strategy::SimplePid_PosController, computer, rate_hz)
+# function position_controller(strategy::SimplePid_PosCtlr, computer, rate_hz)
 
 #     g = 9.81
 #     dt = 1 / rate_hz
@@ -36,7 +36,7 @@
 # end
 
 
-function position_controller(strategy::P_PosController, computer, rate_hz)
+function position_controller(strategy::P_PosCtlr, computer, rate_hz)
 
     g = 9.81
     dt = 1 / rate_hz
@@ -67,7 +67,7 @@ function position_controller(strategy::P_PosController, computer, rate_hz)
     ref.vel.z = pid_controller!(pid[:z]; e=e_z, dt=dt, umin=-vel_max, umax=vel_max)
 end
 
-function velocity_controller(strategy::Pid_VelController, computer, rate_hz)
+function velocity_controller(strategy::Pid_VelCtlr, computer, rate_hz)
 
     dt = 1 / rate_hz
 
@@ -103,7 +103,7 @@ function velocity_controller(strategy::Pid_VelController, computer, rate_hz)
 end
 
 
-function acceleration_controller(strategy::Linear_AccController, computer, rate_hz)
+function acceleration_controller(strategy::Linear_AccCtlr, computer, rate_hz)
 
     g = 9.81
     dt = 1 / rate_hz
