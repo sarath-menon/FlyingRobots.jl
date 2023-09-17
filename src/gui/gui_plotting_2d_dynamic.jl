@@ -22,7 +22,7 @@ function plot_position_dynamic(elements, df)
         plots_2d_data.state[i][] = df[!, "(quad1.rb.r(t), $i)"]
 
         # set reference 
-        plots_2d_data.reference[i][] = df[!, "(controller.R(t), $i)"]
+        plots_2d_data.reference[i][] = df[!, "(controller.r_ref(t), $i)"]
     end
 
     # 3d animation
