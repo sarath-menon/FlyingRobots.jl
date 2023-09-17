@@ -52,6 +52,7 @@ struct Linear_AccController <: VelController end
 
 # attitude controllers
 struct SimplePid_AttitudeController <: AttitudeController end
+struct SimpleP_AttitudeController <: AttitudeController end
 
 # attitude rate controllers
 struct SimplePid_AttitudeRateController <: AttitudeRateController end
