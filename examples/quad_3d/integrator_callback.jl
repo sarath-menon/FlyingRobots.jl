@@ -54,20 +54,36 @@ function computer_cycle(int)
     flight_controller.ram_memory[:vehicle_pose] = vehicle_pose
 
     # # run the scheduler ------------------------------------------------
-    motor_thrusts, trajectory_reference = scheduler(flight_controller)
+    ctrl_cmd, ref = scheduler(flight_controller)
 
     # set the control input
     c_index = 18
 
-    int.u[c_index] = motor_thrusts[1]
-    int.u[c_index+1] = motor_thrusts[2]
-    int.u[c_index+2] = motor_thrusts[3]
-    int.u[c_index+3] = motor_thrusts[4]
+    int.u[c_index] = ctrl_cmd.motor_thrusts[1]
+    int.u[c_index+1] = ctrl_cmd.motor_thrusts[2]
+    int.u[c_index+2] = ctrl_cmd.motor_thrusts[3]
+    int.u[c_index+3] = ctrl_cmd.motor_thrusts[4]
 
 
     # set the reference
-    r_index = 22
-    int.u[r_index] = trajectory_reference.pos.x
-    int.u[r_index+1] = trajectory_reference.pos.y
-    int.u[r_index+2] = trajectory_reference.pos.z
+    r_ref_id = 22
+    int.u[r_ref_id] = ref.pos.x
+    int.u[r_ref_id+1] = ref.pos.y
+    int.u[r_ref_id+2] = ref.pos.z
+
+    ṙ_ref_id = 25
+    int.u[ṙ_ref_id] = ref.vel.x
+    int.u[ṙ_ref_id+1] = ref.vel.y
+    int.u[ṙ_ref_id+2] = ref.vel.z
+
+    # q_ref_id = 28
+    # int.u[q_ref_id] = ref.pos.x
+    # int.u[q_ref_id+1] = ref.pos.y
+    # int.u[q_ref_id+2] = ref.pos.z
+    # int.u[q_ref_id+3] = ref.pos.z
+
+    ω_ref_id = 32
+    int.u[ω_ref_id] = ctrl_cmd.angular_vel.x
+    int.u[ω_ref_id+1] = ctrl_cmd.angular_vel.x
+    int.u[ω_ref_id+2] = ctrl_cmd.angular_vel.x
 end
