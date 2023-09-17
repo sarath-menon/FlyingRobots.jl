@@ -20,7 +20,7 @@ function initialize_task_stack!(computer::OnboardComputer, params_dict)
     task_mem = computer.ram_memory[:task_mem]
 
     # iterate over tasks
-    for task in flight_controller.tasks
+    for task in computer.tasks
 
         # empty stack for task
         task_stack = task_mem[Symbol(task.name)] = Dict{Symbol,Any}()
