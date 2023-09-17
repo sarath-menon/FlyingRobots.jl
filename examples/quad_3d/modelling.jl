@@ -1,22 +1,26 @@
 
 
-# function build_system_model()
 
-#     ## initialize subsystems
-#     @named quadcopter = Quadcopter(; name=:quad1)
-#     @named controller = Controller_Zero_Order_Hold()
+function find_var_pos(var::String, df::DataFrame)
+    df_index = findfirst(x -> x == var, names(df))
 
-#     # motor thrusts
-#     eqn1 = controller.U .~ quadcopter.f_cmd
+    # subtract 1 account for timestamp column in df
+    state_index = df_index - 1
 
-#     # connect the subsystems
-#     eqns = vcat(eqn1)
-#     @named sys_unsimplified = ODESystem(eqns,
-#         systems=[quadcopter, controller])
+    return state_index
+end
 
-#     sys = structural_simplify(sys_unsimplified)
 
-#     subsystems = (; plant=quadcopter, controller=controller)
+function get_ref_indices(df)
 
-#     return sys, subsystems
-# end
+    start_elements_vec = ["(controller.r_ref(t), 1)",
+        "(controller.ṙ_ref(t), 1)",
+        "(controller.q_ref(t), 1)",
+        "(controller.ω_ref(t), 1)"]
+
+    for i in start_elements_vec
+        id = find_var_pos(i, df)
+        @show i, id
+    end
+
+end
