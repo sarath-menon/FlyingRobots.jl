@@ -29,36 +29,41 @@ TrajectoryReference = TrajectoryReference5
 
 ## For strategy pattern
 
-abstract type TrajectoryGen end
-abstract type PosController end
-abstract type VelController end
-abstract type AttitudeController end
-abstract type AttitudeRateController end
-abstract type ControlAllocator end
+abstract type TrajGen end
+abstract type PosCtlr end
+abstract type VelCtlr end
+abstract type AccCtlr end
+
+abstract type AttCtlr end
+abstract type AttRateCtlr end
+
+abstract type CtrlAlloc end
 
 # trajectory generators
-struct Circle_TrajectoryGen <: TrajectoryGen end
+struct Circle_TrajGen <: TrajGen end
 
 # position controllers
-struct SimplePid_PosController <: PosController end
-struct P_PosController <: PosController end
-struct ConvexMpc_PosController <: PosController end
+struct SimplePid_PosCtlr <: PosCtlr end
+struct P_PosCtlr <: PosCtlr end
+struct ConvexMpc_PosCtlr <: PosCtlr end
 
 # velocity controllers
-struct Pid_VelController <: VelController end
+struct Pid_VelCtlr <: VelCtlr end
 
 # acceleration controllers
-struct Linear_AccController <: VelController end
+struct Linear_AccCtlr <: VelCtlr end
 
 # attitude controllers
-struct SimplePid_AttitudeController <: AttitudeController end
-struct SimpleP_AttitudeController <: AttitudeController end
+struct SimplePid_AttCtlr <: AttCtlr end
+struct SimpleP_AttCtlr <: AttCtlr end
+struct QuatPid_AttCtlr <: AttCtlr end
+struct QuatP_AttCtlr <: AttCtlr end
 
 # attitude rate controllers
-struct SimplePid_AttitudeRateController <: AttitudeRateController end
+struct SimplePid_AttRateCtlr <: AttRateCtlr end
 
 # control allocators
-struct SimpleClipping_ControlAllocator <: ControlAllocator end
+struct SimpleClipping_CtrlAlloc <: CtrlAlloc end
 
 
 function load_type_name_from_yaml(name::String)

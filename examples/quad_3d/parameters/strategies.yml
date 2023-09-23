@@ -1,6 +1,6 @@
 
 position_controller:
-  P_PosController:
+  P_PosCtlr:
     name: P Position Controller
     init:
       - type: PID
@@ -13,7 +13,7 @@ position_controller:
 
 velocity_controller:
 
-  Pid_VelController:
+  Pid_VelCtlr:
     name: PID velocity controller
     init:
       - type: PID
@@ -26,14 +26,14 @@ velocity_controller:
 # -------------------------------------------------------
 acceleration_controller:
 
-  Linear_AccController: 
+  Linear_AccCtlr: 
     name: Linear Acceleration controller
     init:
 # -------------------------------------------------------
 
 attitude_controller:
 
-  SimplePid_AttitudeController:
+  SimplePid_AttCtlr:
     name: Simple PID attitude controller
     init:
       - type: PID
@@ -41,7 +41,7 @@ attitude_controller:
           roll: {kp: 0.01 , ki: 0 , kd: 0.005, k_aw: 0 }  
           pitch: {kp: 0.01 , ki: 0 , kd: 0.005, k_aw: 0 }  
 
-  SimpleP_AttitudeController:
+  SimpleP_AttCtlr:
     name: Simple P attitude controller
     init:
       - type: PID
@@ -53,7 +53,7 @@ attitude_controller:
 
 attitude_rate_controller:
 
-  SimplePid_AttitudeRateController:
+  SimplePid_AttRateCtlr:
     name: Simple PID attitude rate controller
     init:
       - type: PID
@@ -65,12 +65,12 @@ attitude_rate_controller:
 
 control_allocator:
   
-  SimpleClipping_ControlAllocator:
+  SimpleClipping_CtrlAlloc:
     name: Simple clipping control allocator
     init:
 
 reference_generator:
   
-  Circle_TrajectoryGen:
+  Circle_TrajGen:
     name: Circle trajectory generator
     init:

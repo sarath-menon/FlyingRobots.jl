@@ -1,6 +1,6 @@
 
 
-function attitude_controller(strategy::SimplePid_AttitudeController, computer, rate_hz)
+function attitude_controller(strategy::SimplePid_AttCtlr, computer, rate_hz)
 
     dt = 1 / rate_hz
 
@@ -32,7 +32,7 @@ function attitude_controller(strategy::SimplePid_AttitudeController, computer, r
 end
 
 
-function attitude_controller(strategy::SimpleP_AttitudeController, computer, rate_hz)
+function attitude_controller(strategy::SimpleP_AttCtlr, computer, rate_hz)
 
     dt = 1 / rate_hz
 

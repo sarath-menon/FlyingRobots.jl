@@ -39,27 +39,35 @@ computer:
   clock_speed: 100 #Hz
   tasks:
     - name: reference_generator
-      strategy: Circle_TrajectoryGen
+      strategy: Circle_TrajGen
       rate: 100 #Hz
 
     - name: position_controller
-      strategy: P_PosController
+      strategy: P_PosCtlr
       rate: 50 #Hz
 
     - name: velocity_controller
-      strategy: Pid_VelController
+      strategy: Pid_VelCtlr
       rate: 50 #Hz
 
     - name: acceleration_controller
-      strategy: Linear_AccController
+      strategy: Linear_AccCtlr
       rate: 50 #Hz
 
     - name: attitude_controller
-      strategy: SimplePid_AttitudeController
+      strategy: SimplePid_AttCtlr
       rate: 100 #Hz
 
+    # - name: attitude_controller
+    #   strategy: SimpleP_AttCtlr
+    #   rate: 100 #Hz
+
+    # - name: attitude_rate_controller
+    #   strategy: SimplePid_AttRateCtlr
+    #   rate: 100 #Hz
+
     - name: control_allocator
-      strategy: SimpleClipping_ControlAllocator
+      strategy: SimpleClipping_CtrlAlloc
       rate: 100 #Hz
 
 

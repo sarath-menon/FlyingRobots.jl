@@ -1,7 +1,7 @@
 
 using FlyingRobots.Computer: get_elapsed_time
 
-function reference_generator(strategy::Circle_TrajectoryGen, computer::OnboardComputer, rate_hz::Int)
+function reference_generator(strategy::Circle_TrajGen, computer::OnboardComputer, rate_hz::Int)
 
     t = get_elapsed_time(computer)
 
