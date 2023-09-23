@@ -27,7 +27,6 @@ import FlyingRobots.Simulation: RealtimeSim, AcceleratedSim
 import FlyingRobots.Models: QuadcopterSystem
 import FlyingRobots: update!
 
-include("mtk_models.jl")
 include("types.jl")
 include("logging.jl")
 
@@ -42,7 +41,6 @@ include("paths.jl")
 include("integrator_callback.jl")
 include("gui_helper.jl")
 include("joystick.jl")
-
 
 import .Joystick
 
@@ -64,8 +62,6 @@ sys, subsystems = fetch(system_build_task)
 # create computer 
 flight_controller = create_computer("stm32", params_dict)
 
-# @code_warntype create_computer("stm32", folder_path * vehicle_params_path)
-
 # gui, sim setup ----------------------------------------------------
 df_empty = get_empty_df(sys, subsystems)
 sim_gui_ch = Channel{ODESolution}(10)
@@ -81,18 +77,27 @@ start_accelerated_sim(plot_elements, sim_gui_ch)
 js = Joystick.connect_joystick()
 js_state = Joystick.get_joystick_state(js)
 
-position_controller(P_PosController(), flight_controller, 20)
-velocity_controller(Pid_VelController(), flight_controller, 20)
-attitude_controller(SimplePid_AttitudeController(), flight_controller, 20)
-
+position_controller(P_PosCtlr(), flight_controller, 20)
+velocity_controller(Pid_VelCtlr(), flight_controller, 20)
+attitude_controller(SimplePid_AttCtlr(), flight_controller, 20)
+attitude_rate_controller(SimplePid_AttRateCtlr(), flight_controller, 20)
+control_allocator(SimpleClipping_CtrlAlloc(), flight_controller, 20)
 
 FlyingRobots.reset!(flight_controller, params_dict)
 
-flight_controller.ram_memory[:task_mem][:position_controller]
+glfw_window = plot_elements[:second_window][:glfw_window]
+GLMakie.GLFW.SetWindowShouldClose(glfw_window, true)
 
+flight_controller.ram_memory[:task_mem]
+
+params_dict[:vehicle][:computer][:tasks]
+
+initialize_task_stack!(flight_controller, params_dict)
+
+flight_controller.tasks
 
 # plotting ----------------------------------------------------
-FlyingRobots.Gui.plot_reset(plot_elements)
+# FlyingRobots.Gui.plot_reset(plot_elements)
 
 FlyingRobots.Gui.open_second_window()
 
@@ -103,12 +108,13 @@ FlyingRobots.Gui.open_second_window()
 # FlyingRobots.Gui.set_sim_instance(plot_elements, df)
 # FlyingRobots.Gui.set_sim_flag(plot_elements, sim_cmd)
 
-
-# FlyingRobots.Gui.plot_position(plot_elements)
-# FlyingRobots.Gui.plot_orientation(plot_elements)
+FlyingRobots.Gui.plot_position(plot_elements)
+FlyingRobots.Gui.plot_orientation(plot_elements)
+FlyingRobots.Gui.plot_angular_velocity(plot_elements)
 # FlyingRobots.Gui.plot_control_input(plot_elements, motor_thrust_to_body_thrust)
 
 @time sim_cmd = FlyingRobots.Gui.start_3d_animation(plot_elements)
 
-end
 
+
+end

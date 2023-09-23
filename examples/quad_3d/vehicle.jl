@@ -14,6 +14,8 @@ function load_vehicle_params(path::String)
 
         # add task name
         task[:func] = getfield(Main, Symbol(task[:name]))
+
+        @show task[:strategy]
     end
 
     vehicle_params = recursive_dict_to_namedtuple(vehicle_yaml)

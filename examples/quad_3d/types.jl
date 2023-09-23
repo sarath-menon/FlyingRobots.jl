@@ -56,8 +56,6 @@ struct Linear_AccCtlr <: VelCtlr end
 # attitude controllers
 struct SimplePid_AttCtlr <: AttCtlr end
 struct SimpleP_AttCtlr <: AttCtlr end
-struct QuatPid_AttCtlr <: AttCtlr end
-struct QuatP_AttCtlr <: AttCtlr end
 
 # attitude rate controllers
 struct SimplePid_AttRateCtlr <: AttRateCtlr end
