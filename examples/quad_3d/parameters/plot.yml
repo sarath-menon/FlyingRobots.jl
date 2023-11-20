@@ -48,7 +48,7 @@ fullscene_visualizer:
     label_offset: 60
     grid_width: 0.8
   mesh:
-    scale: 1.0
+    scale: 20.0
     initial_translation: [0.0, 0.0, 0.0]
 
 graph:
