@@ -19,8 +19,8 @@ end
 
 function get_circle_trajectory(t)
 
-    r = 0.5    # circle radius 
-    ω = 0.5    # angular velocity
+    r = 10.0    # circle radius 
+    ω = 0.3    # angular velocity
 
     z_0 = 1
 
