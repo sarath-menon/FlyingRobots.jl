@@ -114,6 +114,20 @@ function add_titles(elements, g_top, title)
     elements[:titles] = titles
 end
 
+function hide_plots(elements)
+    fig = elements[:fig]
+
+    # increase 3d visualizer size 
+    colsize!(fig.layout, 1, Aspect(1, 2.5))
+end
+
+function unhide_plots(elements)
+    fig = elements[:fig]
+
+    # increase 3d visualizer size 
+    colsize!(fig.layout, 1, Aspect(1, 1.1))
+end
+
 function add_closeup_visualizer_attitude(elements, g_left, g_left_plots)
 
     fig = elements[:fig]
