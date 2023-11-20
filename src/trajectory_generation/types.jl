@@ -15,6 +15,10 @@ abstract type FixedWingPlane <: Aircraft end
 # motion primitive types
 abstract type MotionPrimitive end
 
+# trajectory generation methods
+abstract type Trajectory end
+struct MinimumJerk <: Trajectory end
+
 struct V3 <: FieldVector{3,Float64}
     x::Float64
     y::Float64

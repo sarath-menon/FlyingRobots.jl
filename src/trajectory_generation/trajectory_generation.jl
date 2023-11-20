@@ -8,6 +8,8 @@ using Distributions
 using Rotations
 using GLMakie
 
+GLMakie.activate!(inline=false)
+
 include("types.jl")
 include("math.jl")
 include("visualization.jl")

@@ -4,7 +4,7 @@ function collision_checker(trajec, obstacle; t_min, ax=nothing)
 
     # check if trajec start,end lie inside obstacle
     pos_0 = mp.p_0
-    pos_T, _, _ = get_trajectory(trajec, trajec.T)
+    pos_T, _, _ = get_state(MinimumJerk(), trajec, trajec.T)
 
     if check_if_inside(pos_0, obstacle) || check_if_inside(pos_T, obstacle)
         return Infeasible
@@ -21,7 +21,7 @@ function checksection(trajec, obstacle; t_s, t_f, t_min, ax=nothing)
     t_split = (t_s + t_f) / 2
 
     # check if position at time t_split lies inside obstacle
-    pos, _, _ = get_trajectory(trajec, t_split)
+    pos, _, _ = get_state(MinimumJerk(), trajec, t_split)
 
     if check_if_inside(pos, obstacle)
         return Infeasible
@@ -78,7 +78,7 @@ function checksection(trajec, obstacle; t_s, t_f, t_min, ax=nothing)
     for t in crit_points_first
 
         # pos at critical point 
-        pos, _, _ = get_trajectory(trajec, t)
+        pos, _, _ = get_state(MinimumJerk(), trajec, t)
 
         # check if pos at critical lies on obstacle side of the plane ,ie, if dist is negative
         dist = n' * (pos - boundary_point)
@@ -106,7 +106,7 @@ function checksection(trajec, obstacle; t_s, t_f, t_min, ax=nothing)
     for t in crit_points_second
 
         # pos at critical point 
-        pos, _, _ = get_trajectory(trajec, t)
+        pos, _, _ = get_state(MinimumJerk(), trajec, t)
 
         # check if pos at critical lies on obstacle side of the plane ,ie, if dist is negative
         dist = n' * (pos - boundary_point)

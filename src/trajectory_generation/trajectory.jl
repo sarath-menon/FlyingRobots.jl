@@ -15,7 +15,20 @@ function get_trajectory_single_axis(trajec_ax, t)
     return p, v, a
 end
 
-function get_trajectory(trajec, t)
+function generate_trajectory(::MinimumJerk, mp::MotionPrimitive, T)
+
+    #single axis trajectories
+    x_axis = SingleAxisTrajectory(mp, T; id=1)
+    y_axis = SingleAxisTrajectory(mp, T; id=2)
+    z_axis = SingleAxisTrajectory(mp, T; id=3)
+
+    # 3 axis (x,y,z) trajactory
+    return XYZTrajectory(x_axis, y_axis, z_axis, mp)
+end
+
+function get_state(::MinimumJerk, trajec::XYZTrajectory, t)
+
+    # get state at time instant along each axis
     p_x, v_x, a_x = get_trajectory_single_axis(trajec.x, t)
     p_y, v_y, a_y = get_trajectory_single_axis(trajec.y, t)
     p_z, v_z, a_z = get_trajectory_single_axis(trajec.z, t)
@@ -25,4 +38,8 @@ function get_trajectory(trajec, t)
     a = V3(a_x, a_y, a_z)
 
     return p, v, a
+end
+
+function feasibility_check(trajec)
+
 end

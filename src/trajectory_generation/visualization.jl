@@ -3,13 +3,13 @@
 # Trajectory plotting
 # ---------------------------------------------------------------------------------------------------------------------
 
-function plot_trajectory(ax, trajactory; res=Feasible)
+function plot_trajectory(::MinimumJerk, trajactory::XYZTrajectory; ax, res=Feasible, dt=0.1)
     pos_vec = Vector{Float64}[]
     # vel_vec = Vector{Float64}[]
     # acc_vec = Vector{Float64}[]
 
-    for t = 0:0.1:trajactory.T
-        pos, vel, acc = get_trajectory(trajactory, t)
+    for t = 0:dt:trajactory.T
+        pos, vel, acc = get_state(MinimumJerk(), trajactory, t)
 
         push!(pos_vec, pos)
         # push!(vel_vec, vel)
@@ -25,7 +25,7 @@ function plot_trajectory(ax, trajactory; res=Feasible)
     end
 
     # plot position trajectory
-    lines!(ax, hcat(pos_vec...), linewidth=2, color=color)
+    lines!(ax, hcat(pos_vec...), linewidth=5, color=color)
 end
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -33,12 +33,12 @@ end
 # ---------------------------------------------------------------------------------------------------------------------
 
 # spherical obstacle
-function plot_obstacle(ax, obstacle::SphericalObstacle)
+function plot_obstacle(obstacle::SphericalObstacle; ax)
     mesh!(ax, Sphere(Point3f(obstacle.pos), obstacle.radius), color=:gray80)
 end
 
 # prism obstacle
-function plot_obstacle(ax, obstacle::PrismObstacle)
+function plot_obstacle(obstacle::PrismObstacle; ax)
     mesh = meshcube(Vec3f(obstacle.pos.x, obstacle.pos.y, obstacle.pos.z - (obstacle.dims.z / 2)), Vec3f(obstacle.dims.x, obstacle.dims.y, obstacle.dims.z), obstacle.dims.x, obstacle.dims.y)
     plane = mesh!(ax, mesh; interpolate=false, color=RGBAf(1, 0, 0, 0.9), transparency=true)
 end
