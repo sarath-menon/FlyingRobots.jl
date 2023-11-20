@@ -284,7 +284,7 @@ function add_floor(vis_ax)
     # add floor
     floor_width = 50
     # floor_mesh = meshcube(Vec3f(0, 0, 0), Vec3f(floor_width, floor_width, 0.01))
-    floor_mesh = meshcube(Vec3f(0, 0, 0), Vec3f(floor_width, floor_width, 0.01), floor_width, floor_width)
+    floor_mesh = meshcube(Vec3f(0, 0, -0.25), Vec3f(floor_width, floor_width, 0.01), floor_width, floor_width)
     floor = mesh!(vis_ax, floor_mesh; color=floor_img, interpolate=false, diffuse=Vec3f(0.4), specular=Vec3f(0.1))
 end
 
