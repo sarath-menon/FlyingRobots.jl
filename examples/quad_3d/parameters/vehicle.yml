@@ -8,7 +8,7 @@ I_zz: 0.02
 arm_length: 0.7
 
 initial_state:
-  pos: [0., 0., 0.] #(x,y,z) position [m]
+  pos: [10., 0., 0.] #(x,y,z) position [m]
   vel: [0., 0., 0.] #(x,y,z) velocity [m/s]
   orientation: # orientation as Z-Y-X euler angle (degrees)
     roll: 0.
@@ -54,17 +54,17 @@ computer:
       strategy: Linear_AccCtlr
       rate: 50 #Hz
 
-    - name: attitude_controller
-      strategy: SimplePid_AttCtlr
-      rate: 100 #Hz
-  
     # - name: attitude_controller
-    #   strategy: SimpleP_AttCtlr
+    #   strategy: SimplePid_AttCtlr
     #   rate: 100 #Hz
+  
+    - name: attitude_controller
+      strategy: SimpleP_AttCtlr
+      rate: 100 #Hz
 
-    # - name: attitude_rate_controller
-    #   strategy: SimplePid_AttRateCtlr
-    #   rate: 100 #Hz
+    - name: attitude_rate_controller
+      strategy: SimplePid_AttRateCtlr
+      rate: 100 #Hz
 
     - name: control_allocator
       strategy: SimpleClipping_CtrlAlloc
