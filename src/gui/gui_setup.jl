@@ -72,7 +72,7 @@ function show_visualizer()
     # add_closeup_visualizer(elements, g_left, g_left_plots)
     add_closeup_visualizer_attitude(elements, g_left, g_left_plots)
 
-    add_fullscene_visualizer(elements, g_left, g_left_plots)
+    add_fullscene_visualizer(elements, g_left_plots)
 
     add_3d_model_closeup_visualizer(elements, crazyflie_stl)
 
@@ -97,6 +97,56 @@ function show_visualizer()
 end
 
 
+function show_visualizer_only()
+
+    set_theme!(backgroundcolor=:black, textcolor=:white)
+
+    sim_time = Observable{Float64}(0.0)
+
+    anim_state = Observable{Bool}(false)
+    sim_cmd = Observable{SimState}(SimIdle())
+    sim_acc_mode = Observable{SimAccMode}(AcceleratedSim())
+
+    # to store plot elements
+    elements = Dict()
+
+    elements[:anim_state] = anim_state
+    elements[:sim_cmd] = sim_cmd
+    elements[:sim_acc_mode] = sim_acc_mode
+
+    elements[:locks] = Dict{Symbol,Base.AbstractLock}()
+    elements[:locks][:sim_channel] = Threads.SpinLock()
+    elements[:locks][:recv_buffer] = Threads.SpinLock()
+
+    elements[:sim_time] = sim_time
+
+    plot_yaml = YAML.load_file(folder_path * "/parameters/plot.yml"; dicttype=Dict{Symbol,Any})
+    plot_params = recursive_dict_to_namedtuple(plot_yaml)
+
+    elements[:configs_vec] = get_configs_vec(plot_params.graph.axis.configs)
+
+    params = Dict(:closeup_visualizer => plot_params.closeup_visualizer,
+        :fullscene_visualizer => plot_params.fullscene_visualizer,
+        :plot_2d => plot_params.graph)
+
+    elements[:params] = params
+
+    fig = plot_empty_figure()
+    elements[:fig] = fig
+
+    # add grids
+    # Top level
+    g_vis = fig[1, 1] = GridLayout()
+
+    add_fullscene_visualizer(elements, g_vis; full_height=true)
+
+    # add_3d_model_fullscene_visualizer(elements, crazyflie_stl)
+    return elements
+end
+
+
+
+
 function plot_empty_figure()
     fig = Figure(resolution=get_primary_resolution(1))
     display(fig)
@@ -116,6 +166,8 @@ end
 
 function hide_plots(elements)
     fig = elements[:fig]
+
+    hiddenlayout_left = GridLayout(bbox=BBox(-1000, -1000, 0, 0))
 
     # increase 3d visualizer size 
     colsize!(fig.layout, 1, Aspect(1, 2.5))
@@ -165,66 +217,79 @@ function add_closeup_visualizer_attitude(elements, g_left, g_left_plots)
     elements[:closeup_visualizer] = Dict{Symbol,Any}(:axis => vis_ax)
 end
 
-function add_fullscene_visualizer(elements, g_left, g_left_plots)
+function add_fullscene_visualizer(elements, g_vis; full_height=false)
 
-    fig = elements[:fig]
     # params = elements[:params]
     params = elements[:params][:fullscene_visualizer]
 
-    # 3d axis for airplane visualization
-    vis_ax = Axis3(g_left_plots[2, 1],
-        # title=params.title,
-        limits=(params.axis.x_low, params.axis.x_high,
-            params.axis.y_low, params.axis.y_high,
-            params.axis.z_low, params.axis.z_high),
-        aspect=(params.axis.aspect_x, params.axis.aspect_y, params.axis.aspect_z),
-        elevation=params.axis.elevation * pi,
-        azimuth=params.axis.azimuth * pi,
-        xlabel=params.axis.labels.x, xlabelsize=params.axis.label_size,
-        ylabel=params.axis.labels.y, ylabelsize=params.axis.label_size,
-        zlabel=params.axis.labels.z, zlabelsize=params.axis.label_size,
-        halign=:left,
-        xspinesvisible=:false,
-        yspinesvisible=:false,
-        zspinesvisible=:false,
-        xlabeloffset=params.axis.label_offset,
-        ylabeloffset=params.axis.label_offset,
-        zlabeloffset=params.axis.label_offset,
-        xgridwidth=params.axis.grid_width,
-        ygridwidth=params.axis.grid_width,
-        zgridwidth=params.axis.grid_width,
-        xticklabelsvisible=:false,
-        yticklabelsvisible=:false,
-        zticklabelsvisible=:false,
-        alignmode=Outside(-50)
-    )
+    # # 3d axis for airplane visualization
+    # vis_ax = Axis3(g_left_plots[2, 1],
+    #     # title=params.title,
+    #     limits=(params.axis.x_low, params.axis.x_high,
+    #         params.axis.y_low, params.axis.y_high,
+    #         params.axis.z_low, params.axis.z_high),
+    #     aspect=(params.axis.aspect_x, params.axis.aspect_y, params.axis.aspect_z),
+    #     elevation=params.axis.elevation * pi,
+    #     azimuth=params.axis.azimuth * pi,
+    #     xlabel=params.axis.labels.x, xlabelsize=params.axis.label_size,
+    #     ylabel=params.axis.labels.y, ylabelsize=params.axis.label_size,
+    #     zlabel=params.axis.labels.z, zlabelsize=params.axis.label_size,
+    #     halign=:left,
+    #     xspinesvisible=:false,
+    #     yspinesvisible=:false,
+    #     zspinesvisible=:false,
+    #     xlabeloffset=params.axis.label_offset,
+    #     ylabeloffset=params.axis.label_offset,
+    #     zlabeloffset=params.axis.label_offset,
+    #     xgridwidth=params.axis.grid_width,
+    #     ygridwidth=params.axis.grid_width,
+    #     zgridwidth=params.axis.grid_width,
+    #     xticklabelsvisible=:false,
+    #     yticklabelsvisible=:false,
+    #     zticklabelsvisible=:false,
+    #     alignmode=Outside(-50)
+    # )
+
+    if full_height == true
+        grid_ = g_vis[1, 1]
+    else
+        grid_ = g_vis[2, 1]
+    end
+
+    lscene = LScene(grid_, show_axis=false, scenekw=(backgroundcolor=:black, clear=true))
+
+    # now you can plot into lscene like you're used to
+    root_scene = lscene.scene
+    cam3d!(root_scene)
+
+    camc = cameracontrols(root_scene)
+    update_cam!(root_scene, camc, Vec3f(40, 0, 15), Vec3f(0, 0, 0))
+
+    # g_vis[1, 1] = lscene
+    vis_ax = lscene.scene
 
     # plot cube volume 
     bbox_length = params.axis.x_high - params.axis.x_low
     bbox_width = params.axis.y_high - params.axis.y_low
     bbox_height = params.axis.z_high - params.axis.z_low
 
-    # mr = Rect3f(Vec3f(0), Vec3f(bbox_length, bbox_width, bbox_height))
-    # bbox_volume = mesh!(vis_ax, mr; color=(:yellow, 0.1), transparency=true)
-    # translate!(bbox_volume, Vec3f(-bbox_length / 2, -bbox_width / 2, 0))
-
-    # # plot cube wireframe
-    # bbox_wireframe = wireframe!(vis_ax, mr; color=:black, linewidth=0.4)
-    # translate!(bbox_wireframe, Vec3f(-bbox_length / 2, -bbox_width / 2, 0))
-
-    # add floor
-    floor_width = 50
-    floor_mesh = meshcube(Vec3f(0.5, 0.5, 0.46), Vec3f(bbox_length, bbox_width, 0.01))
-    # floor = mesh!(vis_ax, floor_mesh; color=:grey, interpolate=false, diffuse=Vec3f(0.4), specular=Vec3f(0.4))
-    floor = mesh!(vis_ax, floor_mesh; color=:green, interpolate=false)
-
-    translate!(floor, Vec3f(-bbox_length / 2, -bbox_width / 2, 0))
+    add_floor(vis_ax)
 
     elements[:fullscene_visualizer] = Dict{Symbol,Any}(:axis => vis_ax)
 end
 
-function meshcube(o=Vec3f(0), sizexyz=Vec3f(1))
-    uvs = map(v -> v ./ (3, 2), Vec2f[
+function add_floor(vis_ax)
+
+    # add floor
+    floor_width = 50
+    # floor_mesh = meshcube(Vec3f(0, 0, 0), Vec3f(floor_width, floor_width, 0.01))
+    floor_mesh = meshcube(Vec3f(0, 0, 0), Vec3f(floor_width, floor_width, 0.01), floor_width, floor_width)
+    floor = mesh!(vis_ax, floor_mesh; color=floor_img, interpolate=false, diffuse=Vec3f(0.4), specular=Vec3f(0.4))
+end
+
+
+function meshcube(pos, sizexyz, length, width)
+    uvs = map(v -> v ./ (2, 2), Vec2f[
         (0, 0), (0, 1), (1, 1), (1, 0),
         (1, 0), (1, 1), (2, 1), (2, 0),
         (2, 0), (2, 1), (3, 1), (3, 0),
@@ -232,10 +297,11 @@ function meshcube(o=Vec3f(0), sizexyz=Vec3f(1))
         (1, 1), (1, 2), (2, 2), (2, 1),
         (2, 1), (2, 2), (3, 2), (3, 1),
     ])
-    m = normal_mesh(Rect3f(Vec3f(-0.5) .+ o, sizexyz))
+    m = normal_mesh(Rect3f(Vec3f(-length / 2, -width / 2, 0) + pos, sizexyz))
     m = GeometryBasics.Mesh(meta(coordinates(m);
             uv=uvs, normals=normals(m)), faces(m))
 end
+
 
 function add_3d_model_closeup_visualizer(elements, stl_file)
 
