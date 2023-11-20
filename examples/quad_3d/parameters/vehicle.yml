@@ -57,7 +57,7 @@ computer:
     - name: attitude_controller
       strategy: SimplePid_AttCtlr
       rate: 100 #Hz
-
+  
     # - name: attitude_controller
     #   strategy: SimpleP_AttCtlr
     #   rate: 100 #Hz

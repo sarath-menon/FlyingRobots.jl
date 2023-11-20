@@ -33,10 +33,12 @@ include("control/control.jl")
 include("computer/computer.jl")
 include("dynamics/dynamics.jl")
 include("models/models.jl")
+include("trajectory_generation/trajectory_generation.jl")
 
 using .Dynamics
 using .Computer
 using .Models
+using .TrajectoryGeneration
 
 PrecompileTools.@setup_workload begin
 
