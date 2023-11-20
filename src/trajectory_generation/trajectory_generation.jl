@@ -6,6 +6,7 @@ using GeometryBasics
 using Polynomials
 using Distributions
 using Rotations
+using GLMakie
 
 include("types.jl")
 include("math.jl")
