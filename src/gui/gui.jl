@@ -11,6 +11,8 @@ using DataFrames
 using DataStructures
 using OrdinaryDiffEq
 
+GLMakie.activate!(inline=false)
+
 include("../common/types.jl")
 include("../common/utilities/utilities.jl")
 include("../simulation/simulation.jl")
