@@ -60,7 +60,7 @@ function show_visualizer()
     # Box(g_left_plots[1, 1], color=(:green, 0.2), strokewidth=0)
 
     # # Column size adjust
-    colsize!(g_right_plots, 1, Auto(0.5))
+    colsize!(fig.layout, 1, Aspect(1, 1.0))
 
     # how much to shrink control plots grid
     rowsize!(g_right_plots, 2, Auto(0.6))
@@ -140,7 +140,8 @@ function show_visualizer_only()
 
     add_fullscene_visualizer(elements, g_vis; full_height=true)
 
-    # add_3d_model_fullscene_visualizer(elements, crazyflie_stl)
+    add_3d_model_fullscene_visualizer(elements, crazyflie_stl)
+
     return elements
 end
 
@@ -284,7 +285,7 @@ function add_floor(vis_ax)
     floor_width = 50
     # floor_mesh = meshcube(Vec3f(0, 0, 0), Vec3f(floor_width, floor_width, 0.01))
     floor_mesh = meshcube(Vec3f(0, 0, 0), Vec3f(floor_width, floor_width, 0.01), floor_width, floor_width)
-    floor = mesh!(vis_ax, floor_mesh; color=floor_img, interpolate=false, diffuse=Vec3f(0.4), specular=Vec3f(0.4))
+    floor = mesh!(vis_ax, floor_mesh; color=floor_img, interpolate=false, diffuse=Vec3f(0.4), specular=Vec3f(0.1))
 end
 
 
@@ -342,7 +343,7 @@ function add_3d_model_fullscene_visualizer(elements, stl_file)
 
     vis_ax = elements[:fullscene_visualizer][:axis]
 
-    model = mesh!(vis_ax, stl_file, color=:white, shading=false)
+    model = mesh!(vis_ax, stl_file, color=:blue, shading=false)
 
     scale!(model, params.mesh.scale, params.mesh.scale, params.mesh.scale)
 
