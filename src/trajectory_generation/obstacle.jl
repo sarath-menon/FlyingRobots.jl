@@ -28,7 +28,6 @@ function checksection(trajec, obstacle; t_s, t_f, t_min, ax=nothing)
 
         # t_min limits recursive depth of checker 
     elseif t_f - t_s < t_min
-        @show t_f - t_s
         return Indeterminable
     end
 

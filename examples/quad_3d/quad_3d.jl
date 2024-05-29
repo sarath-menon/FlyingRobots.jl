@@ -62,7 +62,7 @@ sys, subsystems = fetch(system_build_task)
 # create computer 
 flight_controller = create_computer("stm32", params_dict)
 
-# gui, sim setup ----------------------------------------------------
+#  gui, sim setup ----------------------------------------------------
 df_empty = get_empty_df(sys, subsystems)
 sim_gui_ch = Channel{ODESolution}(10)
 
@@ -74,8 +74,8 @@ start_realtime_sim(plot_elements, sim_gui_ch, df_empty)
 start_accelerated_sim(plot_elements, sim_gui_ch)
 
 # Joystick
-js = Joystick.connect_joystick()
-js_state = Joystick.get_joystick_state(js)
+# js = Joystick.connect_joystick()
+# js_state = Joystick.get_joystick_state(js)
 
 position_controller(P_PosCtlr(), flight_controller, 20)
 velocity_controller(Pid_VelCtlr(), flight_controller, 20)
